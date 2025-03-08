@@ -12,8 +12,8 @@ export type IconProps = IconBaseProps & {
 
 export function Icon({ name, ...props }: IconProps) {
   const element = match(name)
-    .with(P.string.startsWith("Lu"), (icon) => LuIcon[icon])
-    .with(P.string.startsWith("Pi"), (icon) => PiIcon[icon])
+    .with(P.string.startsWith("Lu"), (icon: keyof typeof LuIcon) => LuIcon[icon]) // Garantindo que o nome seja uma chave válida
+    .with(P.string.startsWith("Pi"), (icon: keyof typeof PiIcon) => PiIcon[icon]) // Garantindo que o nome seja uma chave válida
     .otherwise(() => React.Fragment);
 
   return React.createElement(element, props);

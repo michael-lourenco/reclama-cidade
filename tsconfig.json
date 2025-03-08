@@ -17,10 +17,11 @@
         "name": "next"
       }
     ],
-    "typeRoots": ["./types", "./node_modules/@types", "./node_modules/@types/react-leaflet"],
+    "typeRoots": ["./node_modules/@types", "./types"],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["node", "react", "react-dom", "leaflet"]
   },
   "include": [
     "next-env.d.ts",
