@@ -36,7 +36,6 @@ const MapContent = ({
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Importar dinamicamente o Leaflet
     import("leaflet").then((L) => {
       // Corrigir os ícones
       //delete L.Icon.Default.prototype._getIconUrl;
