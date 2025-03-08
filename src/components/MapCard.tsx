@@ -39,7 +39,8 @@ const MapContent = ({
     // Importar dinamicamente o Leaflet
     import("leaflet").then((L) => {
       // Corrigir os ícones
-      delete L.Icon.Default.prototype._getIconUrl;
+      //delete L.Icon.Default.prototype._getIconUrl;
+      
       L.Icon.Default.mergeOptions({
         iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
         iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -51,7 +52,8 @@ const MapContent = ({
 
       // Inicializar o mapa
       console.log("Inicializando mapa Leaflet");
-      const mapInstance = L.map(mapRef.current).setView(defaultLocation, defaultZoom);
+      
+      const mapInstance = L.map(mapRef.current!).setView(defaultLocation, defaultZoom);
 
       // Adicionar o tile layer
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -119,7 +121,7 @@ const MapContent = ({
           marker.setLatLng(newLatLng);
         } else {
           const L = await import("leaflet");
-          const newMarker = L.marker(newLatLng).addTo(map);
+          const newMarker = L.marker(lat,lon).addTo(map);
           newMarker.bindPopup("Localização pesquisada").openPopup();
           setMarker(newMarker);
         }
