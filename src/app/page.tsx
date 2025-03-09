@@ -1,10 +1,9 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Search, Locate, Menu, AlertTriangle, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import type { Map, Marker, LatLng, Icon, LeafletMouseEvent } from "leaflet";
-
+import { LeafletMouseEvent } from 'leaflet';
 export default function MinhaRota() {
   return (
     <div className="relative w-full h-screen">
@@ -34,6 +33,7 @@ const MapFullScreen = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportMenuOpen, setReportMenuOpen] = useState(false);
   const [selectedProblemType, setSelectedProblemType] = useState<string | null>(null);
+  const [userConfirmedProblem, setUserConfirmedProblem] = useState(false);
   
   useEffect(() => {
     setIsClient(true);
@@ -50,8 +50,23 @@ const MapFullScreen = () => {
 
   const handleProblemSelect = (problemType: string) => {
     setSelectedProblemType(problemType);
-    // Mantemos o menu aberto até que o usuário confirme a localização
   };
+
+  const handleConfirmProblem = () => {
+    setUserConfirmedProblem(true);
+    setReportMenuOpen(false);
+  };
+
+  // Reset confirmation state after it's been processed
+  useEffect(() => {
+    if (userConfirmedProblem) {
+      // This will be reset by the child component after processing
+      const timer = setTimeout(() => {
+        setUserConfirmedProblem(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [userConfirmedProblem]);
 
   return (
     <>
@@ -65,7 +80,8 @@ const MapFullScreen = () => {
         <MapContent 
           setIsLoading={setIsLoading}
           selectedProblemType={selectedProblemType}
-          setReportMenuOpen={setReportMenuOpen}
+          userConfirmedProblem={userConfirmedProblem}
+          resetConfirmation={() => setUserConfirmedProblem(false)}
         />
       )}
       
@@ -177,11 +193,7 @@ const MapFullScreen = () => {
           <Button 
             className="w-full"
             disabled={!selectedProblemType}
-            onClick={() => {
-              // Isso fechará o menu e salvará o marcador com o problema selecionado
-              setReportMenuOpen(false);
-              // O salvamento acontecerá no MapContent
-            }}
+            onClick={handleConfirmProblem}
           >
             Confirmar Problema
           </Button>
@@ -201,62 +213,25 @@ const MapFullScreen = () => {
 const MapContent = ({
   setIsLoading,
   selectedProblemType,
-  setReportMenuOpen,
+  userConfirmedProblem,
+  resetConfirmation,
 }: {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   selectedProblemType: string | null;
-  setReportMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  userConfirmedProblem: boolean;
+  resetConfirmation: () => void;
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<Map | null>(null);
-  const [currentMarker, setCurrentMarker] = useState<Marker | null>(null);
-  const [markers, setMarkers] = useState<Marker[]>([]);
-  const [customIcons, setCustomIcons] = useState<Record<string, Icon>>({});
+  const mapInstanceRef = useRef<any>(null);
+  const currentMarkerRef = useRef<any>(null);
+  const leafletRef = useRef<any>(null);
+  const iconsRef = useRef<Record<string, any>>({});
   const defaultLocation: [number, number] = [-23.5902, -48.0338];
   const defaultZoom = 15;
   const LOCAL_STORAGE_KEY = 'mapProblems';
 
-  // Efeito para lidar com a seleção de tipo de problema
-  useEffect(() => {
-    if (!map || !currentMarker || !selectedProblemType) return;
-    
-    // Importar Leaflet para usar dentro do useEffect
-    import("leaflet").then((L) => {
-      // Atualizar e salvar o marcador atual com o tipo de problema selecionado
-      const markerPosition = currentMarker.getLatLng();
-      
-      // Remover o marcador atual
-      map.removeLayer(currentMarker);
-      
-      // Adicionar novo marcador com o ícone personalizado
-      if (customIcons[selectedProblemType]) {
-        const newMarker = L.marker([markerPosition.lat, markerPosition.lng], { 
-          icon: customIcons[selectedProblemType] 
-        }).addTo(map);
-        
-        newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup();
-        
-        // Salvar no localStorage
-        const markerData: SavedMarker = {
-          lat: markerPosition.lat,
-          lng: markerPosition.lng,
-          type: selectedProblemType,
-          createdAt: Date.now()
-        };
-        
-        saveMarkerToLocalStorage(markerData);
-        
-        // Atualizar o marcador atual
-        setCurrentMarker(newMarker);
-      }
-      
-      // Fechar o menu após salvar
-      setReportMenuOpen(false);
-    });
-  }, [selectedProblemType, map, currentMarker]);
-
-  // Função para obter o rótulo do problema baseado no tipo
-  const getProblemLabel = (type: string): string => {
+  // Memoize functions that don't need to be recreated on every render
+  const getProblemLabel = useCallback((type: string): string => {
     switch (type) {
       case PROBLEM_TYPES.BURACO:
         return 'Buraco';
@@ -267,10 +242,9 @@ const MapContent = ({
       default:
         return 'Desconhecido';
     }
-  };
+  }, []);
 
-  // Função para salvar marcador no localStorage
-  const saveMarkerToLocalStorage = (markerData: SavedMarker) => {
+  const saveMarkerToLocalStorage = useCallback((markerData: SavedMarker) => {
     try {
       // Obter marcadores existentes
       const existingMarkers = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -286,10 +260,9 @@ const MapContent = ({
     } catch (error) {
       console.error('Erro ao salvar marcador no localStorage:', error);
     }
-  };
+  }, []);
 
-  // Função para carregar marcadores do localStorage
-  const loadMarkersFromLocalStorage = (): SavedMarker[] => {
+  const loadMarkersFromLocalStorage = useCallback((): SavedMarker[] => {
     try {
       const savedMarkers = localStorage.getItem(LOCAL_STORAGE_KEY);
       return savedMarkers ? JSON.parse(savedMarkers) : [];
@@ -297,11 +270,52 @@ const MapContent = ({
       console.error('Erro ao carregar marcadores do localStorage:', error);
       return [];
     }
-  };
+  }, []);
 
+  // Handle confirmed problem selection and marker update
   useEffect(() => {
-    // Adicionar os estilos do Leaflet ao documento
+    if (!userConfirmedProblem || !selectedProblemType || !mapInstanceRef.current || !currentMarkerRef.current || !leafletRef.current) {
+      return;
+    }
+    
+    // Get current position
+    const markerPosition = currentMarkerRef.current.getLatLng();
+    
+    // Remove current marker
+    mapInstanceRef.current.removeLayer(currentMarkerRef.current);
+    
+    // Add new marker with custom icon
+    const L = leafletRef.current;
+    const newMarker = L.marker([markerPosition.lat, markerPosition.lng], { 
+      icon: iconsRef.current[selectedProblemType] 
+    }).addTo(mapInstanceRef.current);
+    
+    newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup();
+    
+    // Save to localStorage
+    const markerData: SavedMarker = {
+      lat: markerPosition.lat,
+      lng: markerPosition.lng,
+      type: selectedProblemType,
+      createdAt: Date.now()
+    };
+    
+    saveMarkerToLocalStorage(markerData);
+    
+    // Update current marker reference
+    currentMarkerRef.current = newMarker;
+    
+    // Reset confirmation flag
+    resetConfirmation();
+    
+  }, [userConfirmedProblem, selectedProblemType, getProblemLabel, saveMarkerToLocalStorage, resetConfirmation]);
+
+  // Initialize map only once
+  useEffect(() => {
+    // Add Leaflet CSS
     const addLeafletCSS = () => {
+      if (document.querySelector('link[href*="leaflet.css"]')) return;
+      
       const link = document.createElement('link');
       link.rel = 'stylesheet';
       link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
@@ -310,74 +324,12 @@ const MapContent = ({
       document.head.appendChild(link);
     };
     
-    addLeafletCSS();
-    
-    if (!mapRef.current) return;
-
-    // Importar dinamicamente o Leaflet
-    import("leaflet").then((L) => {
-      // Se já temos um mapa, não faça nada
-      if (map) return;
-
-      // Criar ícones personalizados para cada tipo de problema
-      const defaultIcon = new L.Icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-      });
+    // Add CSS for marker icons
+    const addMarkerStyles = () => {
+      if (document.querySelector('style[data-id="marker-styles"]')) return;
       
-      // Ícones personalizados para cada tipo de problema
-      // Nota: Em um ambiente real, você usaria imagens hospedadas no seu servidor
-      // Aqui estamos apenas alterando a cor do ícone padrão
-      const buracoIcon = new L.Icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-        className: 'buraco-icon' // Aplicaremos CSS para colorir
-      });
-      
-      const alagamentoIcon = new L.Icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-        className: 'alagamento-icon' // Aplicaremos CSS para colorir
-      });
-      
-      const iluminacaoIcon = new L.Icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-        className: 'iluminacao-icon' // Aplicaremos CSS para colorir
-      });
-      
-      // Armazenar ícones para uso posterior
-      const icons: Record<string, Icon> = {
-        [PROBLEM_TYPES.BURACO]: buracoIcon,
-        [PROBLEM_TYPES.ALAGAMENTO]: alagamentoIcon,
-        [PROBLEM_TYPES.ILUMINACAO]: iluminacaoIcon,
-        default: defaultIcon
-      };
-      
-      setCustomIcons(icons);
-      
-      // Adicionar CSS para colorir os ícones
       const style = document.createElement('style');
+      style.dataset.id = "marker-styles";
       style.textContent = `
         .buraco-icon {
           filter: hue-rotate(320deg); /* Vermelho */
@@ -390,153 +342,197 @@ const MapContent = ({
         }
       `;
       document.head.appendChild(style);
-
-      // Inicializar o mapa
-      console.log("Inicializando mapa Leaflet");
+    };
+    
+    async function initMap() {
+      if (!mapRef.current || mapInstanceRef.current) return;
       
-      const mapInstance = L.map(mapRef.current!, {
-        zoomControl: false, // Remove zoom controls
-        attributionControl: false // Remove attribution
-      }).setView(defaultLocation, defaultZoom);
-
-      // Adicionar o tile layer
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-      }).addTo(mapInstance);
-      
-      // Adicionar marcador temporário (será ocultado se houver marcadores salvos)
-      const tempMarker = L.marker(defaultLocation, { icon: defaultIcon });
-      setCurrentMarker(tempMarker);
-      
-      // Carregar marcadores salvos do localStorage
-      const savedMarkers = loadMarkersFromLocalStorage();
-      
-      if (savedMarkers.length > 0) {
-        // Não adicionar o marcador temporário se temos marcadores salvos
-        const markersArray: Marker[] = [];
+      try {
+        // Add required styles
+        addLeafletCSS();
+        addMarkerStyles();
         
-        // Adicionar todos os marcadores salvos ao mapa
-        savedMarkers.forEach((marker: SavedMarker) => {
-          const icon = icons[marker.type] || icons.default;
-          const mapMarker = L.marker([marker.lat, marker.lng], { icon }).addTo(mapInstance);
-          
-          // Adicionar popup com informações
-          const date = new Date(marker.createdAt);
-          mapMarker.bindPopup(`
-            <strong>Problema: ${getProblemLabel(marker.type)}</strong><br>
-            Reportado em: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
-          `);
-          
-          markersArray.push(mapMarker);
-        });
+        // Load Leaflet library only once
+        if (!leafletRef.current) {
+          const L = await import("leaflet");
+          leafletRef.current = L;
+        }
         
-        // Centralizar o mapa no marcador mais recente
+        const L = leafletRef.current;
+        console.log("Inicializando mapa Leaflet");
+        
+        // Create custom icons once
+        if (Object.keys(iconsRef.current).length === 0) {
+          const defaultIcon = new L.Icon({
+            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+          });
+          
+          const buracoIcon = new L.Icon({
+            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+            className: 'buraco-icon'
+          });
+          
+          const alagamentoIcon = new L.Icon({
+            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+            className: 'alagamento-icon'
+          });
+          
+          const iluminacaoIcon = new L.Icon({
+            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+            className: 'iluminacao-icon'
+          });
+          
+          iconsRef.current = {
+            [PROBLEM_TYPES.BURACO]: buracoIcon,
+            [PROBLEM_TYPES.ALAGAMENTO]: alagamentoIcon,
+            [PROBLEM_TYPES.ILUMINACAO]: iluminacaoIcon,
+            default: defaultIcon
+          };
+        }
+        
+        // Initialize map
+        const mapInstance = L.map(mapRef.current, {
+          zoomControl: false,
+          attributionControl: false,
+        }).setView(defaultLocation, defaultZoom);
+        
+        // Add tile layer
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+        }).addTo(mapInstance);
+        
+        // Store map instance
+        mapInstanceRef.current = mapInstance;
+        
+        // Load saved markers
+        const savedMarkers = loadMarkersFromLocalStorage();
+        
         if (savedMarkers.length > 0) {
+          // Add all saved markers to the map
+          savedMarkers.forEach((marker: SavedMarker) => {
+            const icon = iconsRef.current[marker.type] || iconsRef.current.default;
+            const mapMarker = L.marker([marker.lat, marker.lng], { icon }).addTo(mapInstance);
+            
+            // Add popup with information
+            const date = new Date(marker.createdAt);
+            mapMarker.bindPopup(`
+              <strong>Problema: ${getProblemLabel(marker.type)}</strong><br>
+              Reportado em: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
+            `);
+          });
+          
+          // Center map on most recent marker
           const mostRecent = savedMarkers.reduce((a, b) => a.createdAt > b.createdAt ? a : b);
           mapInstance.setView([mostRecent.lat, mostRecent.lng], defaultZoom);
+        } else {
+          // Add default marker if no saved markers
+          const tempMarker = L.marker(defaultLocation, { icon: iconsRef.current.default })
+            .addTo(mapInstance)
+            .bindPopup("Clique para reportar um problema")
+            .openPopup();
+            
+          currentMarkerRef.current = tempMarker;
         }
         
-        setMarkers(markersArray);
-      } else {
-        // Adicionar marcador padrão somente se não temos marcadores salvos
-        tempMarker.addTo(mapInstance);
-        tempMarker.bindPopup("Clique para reportar um problema").openPopup();
-      }
-
-      // Permitir clicar no mapa para adicionar/mover o marcador
-      mapInstance.on("click", (e: LeafletMouseEvent) => {
-        const { lat, lng } = e.latlng;
-        
-        if (currentMarker) {
-          // Se já existe um marcador temporário, vamos removê-lo
-          mapInstance.removeLayer(currentMarker);
-        }
-        
-        // Criar novo marcador temporário
-        const newMarker = L.marker([lat, lng], { icon: defaultIcon }).addTo(mapInstance);
-        newMarker.bindPopup("Clique em 'Reportar problema' para identificar o tipo").openPopup();
-        setCurrentMarker(newMarker);
-      });
-      
-      // Atualizar estado
-      setMap(mapInstance);
-      setIsLoading(false);
-      
-      // Obter localização do usuário se não temos marcadores salvos
-      if (savedMarkers.length === 0 && "geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            
-            // Atualizar o mapa
-            mapInstance.setView([latitude, longitude], defaultZoom);
-            
-            // Mover o marcador existente
-            if (tempMarker) {
-              tempMarker.setLatLng([latitude, longitude]);
-              tempMarker.bindPopup("Sua localização").openPopup();
-            }
-          },
-          (error) => {
-            console.error("Erro ao obter localização do usuário:", error);
-            // Já temos o marcador padrão, então não precisamos fazer nada aqui
+        // Allow clicking on map to add/move marker
+        mapInstance.on("click", (e: LeafletMouseEvent) => {
+          const { lat, lng } = e.latlng;
+          
+          if (currentMarkerRef.current) {
+            mapInstance.removeLayer(currentMarkerRef.current);
           }
-        );
+          
+          // Create new temporary marker
+          const newMarker = L.marker([lat, lng], { icon: iconsRef.current.default })
+            .addTo(mapInstance)
+            .bindPopup("Clique em 'Reportar problema' para identificar o tipo")
+            .openPopup();
+            
+          currentMarkerRef.current = newMarker;
+        });
+        
+        // Get user location if no saved markers
+        if (savedMarkers.length === 0 && "geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const { latitude, longitude } = position.coords;
+              
+              // Update map view
+              mapInstance.setView([latitude, longitude], defaultZoom);
+              
+              // Move existing marker
+              if (currentMarkerRef.current) {
+                currentMarkerRef.current.setLatLng([latitude, longitude]);
+                currentMarkerRef.current.bindPopup("Sua localização").openPopup();
+              }
+            },
+            (error) => {
+              console.error("Erro ao obter localização do usuário:", error);
+            }
+          );
+        }
+        
+        // Force size recalculation
+        setTimeout(() => {
+          mapInstance.invalidateSize();
+        }, 100);
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Erro ao inicializar o mapa:", error);
+        setIsLoading(false);
       }
-
-      // Forçar recálculo de tamanho após a renderização completa
-      setTimeout(() => {
-        mapInstance.invalidateSize();
-      }, 100);
-    });
-
-    // Limpeza
+    }
+    
+    initMap();
+    
     return () => {
-      if (map) {
+      if (mapInstanceRef.current) {
         console.log("Limpando mapa");
-        map.remove();
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
       }
     };
-  }, [mapRef.current]);
+  }, [loadMarkersFromLocalStorage, getProblemLabel]);
 
-  // Função para centralizar na localização do usuário
-  const getUserLocation = () => {
-    if (!map) return;
-    
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          
-          // Atualizar o mapa
-          map.setView([latitude, longitude], defaultZoom);
-          
-          // Mover o marcador existente se não estiver reportando problema
-          if (currentMarker && !selectedProblemType) {
-            currentMarker.setLatLng([latitude, longitude]);
-            currentMarker.bindPopup("Sua localização").openPopup();
-          }
-        },
-        (error) => {
-          console.error("Erro ao obter localização do usuário:", error);
-        }
-      );
-    }
-  };
-
-  // Evento de redimensionamento
+  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      if (map) {
-        map.invalidateSize();
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
       }
     };
     
     window.addEventListener('resize', handleResize);
+    
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [map]);
+  }, []);
 
   return (
     <div ref={mapRef} className="absolute inset-0 w-full h-full z-0" />
