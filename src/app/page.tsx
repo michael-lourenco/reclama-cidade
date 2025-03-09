@@ -1,9 +1,8 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, Locate, Menu, Plus, AlertTriangle, X } from "lucide-react";
+import { Search, Locate, Menu, AlertTriangle, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import dynamic from "next/dynamic";
 
 export default function MinhaRota() {
   return (
@@ -168,19 +167,35 @@ const MapContent = ({
   const defaultZoom = 15;
 
   useEffect(() => {
+    // Adicionar os estilos do Leaflet ao documento
+    const addLeafletCSS = () => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+      link.crossOrigin = '';
+      document.head.appendChild(link);
+    };
+    
+    addLeafletCSS();
+    
     if (!mapRef.current) return;
 
     // Importar dinamicamente o Leaflet
     import("leaflet").then((L) => {
-      // Corrigir os ícones
-      L.Icon.Default.mergeOptions({
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-      });
-
       // Se já temos um mapa, não faça nada
       if (map) return;
+
+      // Criar ícones personalizados para garantir que apareçam
+      const customIcon = new L.Icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
 
       // Inicializar o mapa
       console.log("Inicializando mapa Leaflet");
@@ -195,14 +210,20 @@ const MapContent = ({
         maxZoom: 19,
       }).addTo(mapInstance);
 
+      // Adicionar marcador padrão
+      const defaultMarker = L.marker(defaultLocation, { icon: customIcon }).addTo(mapInstance);
+      defaultMarker.bindPopup("Localização padrão").openPopup();
+      setMarker(defaultMarker);
+
       // Permitir clicar no mapa para adicionar/mover o marcador
       mapInstance.on("click", (e: any) => {
         const { lat, lng } = e.latlng;
         
         if (marker) {
           marker.setLatLng([lat, lng]);
+          marker.openPopup();
         } else {
-          const newMarker = L.marker([lat, lng]).addTo(mapInstance);
+          const newMarker = L.marker([lat, lng], { icon: customIcon }).addTo(mapInstance);
           newMarker.bindPopup("Localização selecionada").openPopup();
           setMarker(newMarker);
         }
@@ -221,24 +242,17 @@ const MapContent = ({
             // Atualizar o mapa
             mapInstance.setView([latitude, longitude], defaultZoom);
             
-            // Adicionar marcador
-            const userMarker = L.marker([latitude, longitude]).addTo(mapInstance);
-            userMarker.bindPopup("Sua localização").openPopup();
-            setMarker(userMarker);
+            // Mover o marcador existente
+            if (defaultMarker) {
+              defaultMarker.setLatLng([latitude, longitude]);
+              defaultMarker.bindPopup("Sua localização").openPopup();
+            }
           },
           (error) => {
             console.error("Erro ao obter localização do usuário:", error);
-            // Adicionar marcador na posição padrão
-            const defaultMarker = L.marker(defaultLocation).addTo(mapInstance);
-            defaultMarker.bindPopup("Localização padrão").openPopup();
-            setMarker(defaultMarker);
+            // Já temos o marcador padrão, então não precisamos fazer nada aqui
           }
         );
-      } else {
-        // Adicionar marcador na posição padrão
-        const defaultMarker = L.marker(defaultLocation).addTo(mapInstance);
-        defaultMarker.bindPopup("Localização padrão").openPopup();
-        setMarker(defaultMarker);
       }
 
       // Forçar recálculo de tamanho após a renderização completa
@@ -255,6 +269,31 @@ const MapContent = ({
       }
     };
   }, [mapRef.current]);
+
+  // Função para centralizar na localização do usuário
+  const getUserLocation = () => {
+    if (!map) return;
+    
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          // Atualizar o mapa
+          map.setView([latitude, longitude], defaultZoom);
+          
+          // Mover o marcador existente
+          if (marker) {
+            marker.setLatLng([latitude, longitude]);
+            marker.bindPopup("Sua localização").openPopup();
+          }
+        },
+        (error) => {
+          console.error("Erro ao obter localização do usuário:", error);
+        }
+      );
+    }
+  };
 
   // Evento de redimensionamento
   useEffect(() => {

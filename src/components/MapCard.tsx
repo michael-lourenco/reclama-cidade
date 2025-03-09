@@ -39,7 +39,9 @@ const MapContent = ({
     // Importar dinamicamente o Leaflet
     import("leaflet").then((L) => {
       // Corrigir os ícones
+
       //delete L.Icon.Default.prototype._getIconUrl;
+
       
       L.Icon.Default.mergeOptions({
         iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
