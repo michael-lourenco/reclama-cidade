@@ -12,11 +12,27 @@ export default function MinhaRota() {
   );
 }
 
+// Define tipos para os problemas
+const PROBLEM_TYPES = {
+  BURACO: 'buraco',
+  ALAGAMENTO: 'alagamento',
+  ILUMINACAO: 'iluminacao'
+};
+
+// Interface para os marcadores salvos
+interface SavedMarker {
+  lat: number;
+  lng: number;
+  type: string;
+  createdAt: number;
+}
+
 const MapFullScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportMenuOpen, setReportMenuOpen] = useState(false);
+  const [selectedProblemType, setSelectedProblemType] = useState<string | null>(null);
   
   useEffect(() => {
     setIsClient(true);
@@ -31,6 +47,11 @@ const MapFullScreen = () => {
     setReportMenuOpen(!reportMenuOpen);
   };
 
+  const handleProblemSelect = (problemType: string) => {
+    setSelectedProblemType(problemType);
+    // Mantemos o menu aberto até que o usuário confirme a localização
+  };
+
   return (
     <>
       {!isClient || isLoading ? (
@@ -42,6 +63,8 @@ const MapFullScreen = () => {
       {isClient && (
         <MapContent 
           setIsLoading={setIsLoading}
+          selectedProblemType={selectedProblemType}
+          setReportMenuOpen={setReportMenuOpen}
         />
       )}
       
@@ -122,26 +145,45 @@ const MapFullScreen = () => {
             </Button>
           </div>
           <div className="grid grid-cols-3 gap-4 mb-4">
-            <div className="flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer">
+            <div 
+              className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer ${selectedProblemType === PROBLEM_TYPES.BURACO ? 'bg-gray-100' : ''}`}
+              onClick={() => handleProblemSelect(PROBLEM_TYPES.BURACO)}
+            >
               <div className="bg-red-100 p-2 rounded-full mb-2">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
               </div>
               <span className="text-xs">Buraco</span>
             </div>
-            <div className="flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer">
+            <div 
+              className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer ${selectedProblemType === PROBLEM_TYPES.ALAGAMENTO ? 'bg-gray-100' : ''}`}
+              onClick={() => handleProblemSelect(PROBLEM_TYPES.ALAGAMENTO)}
+            >
               <div className="bg-yellow-100 p-2 rounded-full mb-2">
                 <AlertTriangle className="h-5 w-5 text-yellow-500" />
               </div>
               <span className="text-xs">Alagamento</span>
             </div>
-            <div className="flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer">
+            <div 
+              className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer ${selectedProblemType === PROBLEM_TYPES.ILUMINACAO ? 'bg-gray-100' : ''}`}
+              onClick={() => handleProblemSelect(PROBLEM_TYPES.ILUMINACAO)}
+            >
               <div className="bg-blue-100 p-2 rounded-full mb-2">
                 <AlertTriangle className="h-5 w-5 text-blue-500" />
               </div>
               <span className="text-xs">Iluminação</span>
             </div>
           </div>
-          <Button className="w-full">Confirmar Localização</Button>
+          <Button 
+            className="w-full"
+            disabled={!selectedProblemType}
+            onClick={() => {
+              // Isso fechará o menu e salvará o marcador com o problema selecionado
+              setReportMenuOpen(false);
+              // O salvamento acontecerá no MapContent
+            }}
+          >
+            Confirmar Problema
+          </Button>
         </div>
       )}
       
@@ -157,14 +199,101 @@ const MapFullScreen = () => {
 // Componente interno que será carregado apenas no cliente
 const MapContent = ({
   setIsLoading,
+  selectedProblemType,
+  setReportMenuOpen,
 }: {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedProblemType: string | null;
+  setReportMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<any>(null);
-  const [marker, setMarker] = useState<any>(null);
+  const [currentMarker, setCurrentMarker] = useState<any>(null);
+  const [markers, setMarkers] = useState<any[]>([]);
+  const [customIcons, setCustomIcons] = useState<Record<string, any>>({});
   const defaultLocation: [number, number] = [-23.5902, -48.0338];
   const defaultZoom = 15;
+  const LOCAL_STORAGE_KEY = 'mapProblems';
+
+  // Efeito para lidar com a seleção de tipo de problema
+  useEffect(() => {
+    if (!map || !currentMarker || !selectedProblemType) return;
+    
+    // Atualizar e salvar o marcador atual com o tipo de problema selecionado
+    const markerPosition = currentMarker.getLatLng();
+    
+    // Remover o marcador atual
+    map.removeLayer(currentMarker);
+    
+    // Adicionar novo marcador com o ícone personalizado
+    if (customIcons[selectedProblemType]) {
+      const newMarker = L.marker([markerPosition.lat, markerPosition.lng], { 
+        icon: customIcons[selectedProblemType] 
+      }).addTo(map);
+      
+      newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup();
+      
+      // Salvar no localStorage
+      const markerData: SavedMarker = {
+        lat: markerPosition.lat,
+        lng: markerPosition.lng,
+        type: selectedProblemType,
+        createdAt: Date.now()
+      };
+      
+      saveMarkerToLocalStorage(markerData);
+      
+      // Atualizar o marcador atual
+      setCurrentMarker(newMarker);
+    }
+    
+    // Fechar o menu após salvar
+    setReportMenuOpen(false);
+  }, [selectedProblemType, map, currentMarker]);
+
+  // Função para obter o rótulo do problema baseado no tipo
+  const getProblemLabel = (type: string): string => {
+    switch (type) {
+      case PROBLEM_TYPES.BURACO:
+        return 'Buraco';
+      case PROBLEM_TYPES.ALAGAMENTO:
+        return 'Alagamento';
+      case PROBLEM_TYPES.ILUMINACAO:
+        return 'Iluminação';
+      default:
+        return 'Desconhecido';
+    }
+  };
+
+  // Função para salvar marcador no localStorage
+  const saveMarkerToLocalStorage = (markerData: SavedMarker) => {
+    try {
+      // Obter marcadores existentes
+      const existingMarkers = localStorage.getItem(LOCAL_STORAGE_KEY);
+      let markers: SavedMarker[] = existingMarkers ? JSON.parse(existingMarkers) : [];
+      
+      // Adicionar novo marcador
+      markers.push(markerData);
+      
+      // Salvar de volta no localStorage
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(markers));
+      
+      console.log('Marcador salvo com sucesso:', markerData);
+    } catch (error) {
+      console.error('Erro ao salvar marcador no localStorage:', error);
+    }
+  };
+
+  // Função para carregar marcadores do localStorage
+  const loadMarkersFromLocalStorage = (): SavedMarker[] => {
+    try {
+      const savedMarkers = localStorage.getItem(LOCAL_STORAGE_KEY);
+      return savedMarkers ? JSON.parse(savedMarkers) : [];
+    } catch (error) {
+      console.error('Erro ao carregar marcadores do localStorage:', error);
+      return [];
+    }
+  };
 
   useEffect(() => {
     // Adicionar os estilos do Leaflet ao documento
@@ -186,8 +315,8 @@ const MapContent = ({
       // Se já temos um mapa, não faça nada
       if (map) return;
 
-      // Criar ícones personalizados para garantir que apareçam
-      const customIcon = new L.Icon({
+      // Criar ícones personalizados para cada tipo de problema
+      const defaultIcon = new L.Icon({
         iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -196,6 +325,67 @@ const MapContent = ({
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
       });
+      
+      // Ícones personalizados para cada tipo de problema
+      // Nota: Em um ambiente real, você usaria imagens hospedadas no seu servidor
+      // Aqui estamos apenas alterando a cor do ícone padrão
+      const buracoIcon = new L.Icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+        className: 'buraco-icon' // Aplicaremos CSS para colorir
+      });
+      
+      const alagamentoIcon = new L.Icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+        className: 'alagamento-icon' // Aplicaremos CSS para colorir
+      });
+      
+      const iluminacaoIcon = new L.Icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+        className: 'iluminacao-icon' // Aplicaremos CSS para colorir
+      });
+      
+      // Armazenar ícones para uso posterior
+      const icons = {
+        [PROBLEM_TYPES.BURACO]: buracoIcon,
+        [PROBLEM_TYPES.ALAGAMENTO]: alagamentoIcon,
+        [PROBLEM_TYPES.ILUMINACAO]: iluminacaoIcon,
+        default: defaultIcon
+      };
+      
+      setCustomIcons(icons);
+      
+      // Adicionar CSS para colorir os ícones
+      const style = document.createElement('style');
+      style.textContent = `
+        .buraco-icon {
+          filter: hue-rotate(320deg); /* Vermelho */
+        }
+        .alagamento-icon {
+          filter: hue-rotate(60deg); /* Amarelo */
+        }
+        .iluminacao-icon {
+          filter: hue-rotate(240deg); /* Azul */
+        }
+      `;
+      document.head.appendChild(style);
 
       // Inicializar o mapa
       console.log("Inicializando mapa Leaflet");
@@ -209,32 +399,67 @@ const MapContent = ({
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
       }).addTo(mapInstance);
-
-      // Adicionar marcador padrão
-      const defaultMarker = L.marker(defaultLocation, { icon: customIcon }).addTo(mapInstance);
-      defaultMarker.bindPopup("Localização padrão").openPopup();
-      setMarker(defaultMarker);
+      
+      // Adicionar marcador temporário (será ocultado se houver marcadores salvos)
+      const tempMarker = L.marker(defaultLocation, { icon: defaultIcon });
+      setCurrentMarker(tempMarker);
+      
+      // Carregar marcadores salvos do localStorage
+      const savedMarkers = loadMarkersFromLocalStorage();
+      
+      if (savedMarkers.length > 0) {
+        // Não adicionar o marcador temporário se temos marcadores salvos
+        const markersArray: any[] = [];
+        
+        // Adicionar todos os marcadores salvos ao mapa
+        savedMarkers.forEach((marker: SavedMarker) => {
+          const icon = icons[marker.type] || icons.default;
+          const mapMarker = L.marker([marker.lat, marker.lng], { icon }).addTo(mapInstance);
+          
+          // Adicionar popup com informações
+          const date = new Date(marker.createdAt);
+          mapMarker.bindPopup(`
+            <strong>Problema: ${getProblemLabel(marker.type)}</strong><br>
+            Reportado em: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
+          `);
+          
+          markersArray.push(mapMarker);
+        });
+        
+        // Centralizar o mapa no marcador mais recente
+        if (savedMarkers.length > 0) {
+          const mostRecent = savedMarkers.reduce((a, b) => a.createdAt > b.createdAt ? a : b);
+          mapInstance.setView([mostRecent.lat, mostRecent.lng], defaultZoom);
+        }
+        
+        setMarkers(markersArray);
+      } else {
+        // Adicionar marcador padrão somente se não temos marcadores salvos
+        tempMarker.addTo(mapInstance);
+        tempMarker.bindPopup("Clique para reportar um problema").openPopup();
+      }
 
       // Permitir clicar no mapa para adicionar/mover o marcador
       mapInstance.on("click", (e: any) => {
         const { lat, lng } = e.latlng;
         
-        if (marker) {
-          marker.setLatLng([lat, lng]);
-          marker.openPopup();
-        } else {
-          const newMarker = L.marker([lat, lng], { icon: customIcon }).addTo(mapInstance);
-          newMarker.bindPopup("Localização selecionada").openPopup();
-          setMarker(newMarker);
+        if (currentMarker) {
+          // Se já existe um marcador temporário, vamos removê-lo
+          mapInstance.removeLayer(currentMarker);
         }
+        
+        // Criar novo marcador temporário
+        const newMarker = L.marker([lat, lng], { icon: defaultIcon }).addTo(mapInstance);
+        newMarker.bindPopup("Clique em 'Reportar problema' para identificar o tipo").openPopup();
+        setCurrentMarker(newMarker);
       });
       
       // Atualizar estado
       setMap(mapInstance);
       setIsLoading(false);
       
-      // Obter localização do usuário
-      if ("geolocation" in navigator) {
+      // Obter localização do usuário se não temos marcadores salvos
+      if (savedMarkers.length === 0 && "geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude } = position.coords;
@@ -243,9 +468,9 @@ const MapContent = ({
             mapInstance.setView([latitude, longitude], defaultZoom);
             
             // Mover o marcador existente
-            if (defaultMarker) {
-              defaultMarker.setLatLng([latitude, longitude]);
-              defaultMarker.bindPopup("Sua localização").openPopup();
+            if (tempMarker) {
+              tempMarker.setLatLng([latitude, longitude]);
+              tempMarker.bindPopup("Sua localização").openPopup();
             }
           },
           (error) => {
@@ -282,10 +507,10 @@ const MapContent = ({
           // Atualizar o mapa
           map.setView([latitude, longitude], defaultZoom);
           
-          // Mover o marcador existente
-          if (marker) {
-            marker.setLatLng([latitude, longitude]);
-            marker.bindPopup("Sua localização").openPopup();
+          // Mover o marcador existente se não estiver reportando problema
+          if (currentMarker && !selectedProblemType) {
+            currentMarker.setLatLng([latitude, longitude]);
+            currentMarker.bindPopup("Sua localização").openPopup();
           }
         },
         (error) => {
