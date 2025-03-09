@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Search, Locate, Menu, AlertTriangle, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import type { Map, Marker, LatLng, Icon, LeafletMouseEvent } from "leaflet";
 
 export default function MinhaRota() {
   return (
@@ -207,10 +208,10 @@ const MapContent = ({
   setReportMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<any>(null);
-  const [currentMarker, setCurrentMarker] = useState<any>(null);
-  const [markers, setMarkers] = useState<any[]>([]);
-  const [customIcons, setCustomIcons] = useState<Record<string, any>>({});
+  const [map, setMap] = useState<Map | null>(null);
+  const [currentMarker, setCurrentMarker] = useState<Marker | null>(null);
+  const [markers, setMarkers] = useState<Marker[]>([]);
+  const [customIcons, setCustomIcons] = useState<Record<string, Icon>>({});
   const defaultLocation: [number, number] = [-23.5902, -48.0338];
   const defaultZoom = 15;
   const LOCAL_STORAGE_KEY = 'mapProblems';
@@ -219,36 +220,39 @@ const MapContent = ({
   useEffect(() => {
     if (!map || !currentMarker || !selectedProblemType) return;
     
-    // Atualizar e salvar o marcador atual com o tipo de problema selecionado
-    const markerPosition = currentMarker.getLatLng();
-    
-    // Remover o marcador atual
-    map.removeLayer(currentMarker);
-    
-    // Adicionar novo marcador com o ícone personalizado
-    if (customIcons[selectedProblemType]) {
-      const newMarker = L.marker([markerPosition.lat, markerPosition.lng], { 
-        icon: customIcons[selectedProblemType] 
-      }).addTo(map);
+    // Importar Leaflet para usar dentro do useEffect
+    import("leaflet").then((L) => {
+      // Atualizar e salvar o marcador atual com o tipo de problema selecionado
+      const markerPosition = currentMarker.getLatLng();
       
-      newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup();
+      // Remover o marcador atual
+      map.removeLayer(currentMarker);
       
-      // Salvar no localStorage
-      const markerData: SavedMarker = {
-        lat: markerPosition.lat,
-        lng: markerPosition.lng,
-        type: selectedProblemType,
-        createdAt: Date.now()
-      };
+      // Adicionar novo marcador com o ícone personalizado
+      if (customIcons[selectedProblemType]) {
+        const newMarker = L.marker([markerPosition.lat, markerPosition.lng], { 
+          icon: customIcons[selectedProblemType] 
+        }).addTo(map);
+        
+        newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup();
+        
+        // Salvar no localStorage
+        const markerData: SavedMarker = {
+          lat: markerPosition.lat,
+          lng: markerPosition.lng,
+          type: selectedProblemType,
+          createdAt: Date.now()
+        };
+        
+        saveMarkerToLocalStorage(markerData);
+        
+        // Atualizar o marcador atual
+        setCurrentMarker(newMarker);
+      }
       
-      saveMarkerToLocalStorage(markerData);
-      
-      // Atualizar o marcador atual
-      setCurrentMarker(newMarker);
-    }
-    
-    // Fechar o menu após salvar
-    setReportMenuOpen(false);
+      // Fechar o menu após salvar
+      setReportMenuOpen(false);
+    });
   }, [selectedProblemType, map, currentMarker]);
 
   // Função para obter o rótulo do problema baseado no tipo
@@ -363,7 +367,7 @@ const MapContent = ({
       });
       
       // Armazenar ícones para uso posterior
-      const icons = {
+      const icons: Record<string, Icon> = {
         [PROBLEM_TYPES.BURACO]: buracoIcon,
         [PROBLEM_TYPES.ALAGAMENTO]: alagamentoIcon,
         [PROBLEM_TYPES.ILUMINACAO]: iluminacaoIcon,
@@ -409,7 +413,7 @@ const MapContent = ({
       
       if (savedMarkers.length > 0) {
         // Não adicionar o marcador temporário se temos marcadores salvos
-        const markersArray: any[] = [];
+        const markersArray: Marker[] = [];
         
         // Adicionar todos os marcadores salvos ao mapa
         savedMarkers.forEach((marker: SavedMarker) => {
@@ -440,7 +444,7 @@ const MapContent = ({
       }
 
       // Permitir clicar no mapa para adicionar/mover o marcador
-      mapInstance.on("click", (e: any) => {
+      mapInstance.on("click", (e: LeafletMouseEvent) => {
         const { lat, lng } = e.latlng;
         
         if (currentMarker) {
