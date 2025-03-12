@@ -54,7 +54,7 @@ let globalUser: UserData | null = null;
 
 async function signInWithGoogle(): Promise<void> {
   try {
-    await signIn("google", { callbackUrl: "/player" });
+    await signIn("google", { callbackUrl: "/user" });
   } catch (error) {
     console.error("Error during sign in:", error);
     throw error;

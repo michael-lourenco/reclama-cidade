@@ -70,6 +70,14 @@ interface Votes {
   [key: string]: string;
 }
 
+export interface UserMarker {
+  id: string;
+  lat: number;
+  lng: number;
+  type: string;
+  createdAt: Date;
+}
+
 export interface UserData {
   displayName: string;
   best_score: BestScoreData;
@@ -81,4 +89,5 @@ export interface UserData {
   match_history?: MatchHistoryEntry[];
   photoURL: string;
   votes?: Votes;
+  userMarkers?: UserMarker[];
 }

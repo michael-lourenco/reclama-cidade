@@ -1,14 +1,51 @@
 "use client";
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Search, Locate, Menu, AlertTriangle, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { LeafletMouseEvent } from 'leaflet';
+import { UserMarker } from "@/application/entities/User";
+import { Marker } from "@/application/entities/Marker";
+import { v4 as uuidv4 } from 'uuid';
+
+import {
+  addMarker,
+  addUserMarker,
+  dbFirestore,
+  UserData,
+} from "@/services/firebase/FirebaseService";
 export default function MinhaRota() {
+  const { user, loading, status, handleLogin, handleLogout } = useAuth();
+
+  const localStorageUser =
+    typeof window !== "undefined" && localStorage.getItem("user") !== null
+      ? JSON.parse(localStorage.getItem("user") || "{}")
+      : null;
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p>Logando...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative w-full h-screen">
-      <MapFullScreen />
-    </div>
+    <>
+      {user || (localStorageUser && localStorage.getItem("user") != null)  ? (
+        <div className="relative w-full h-screen">
+          <MapFullScreen />
+        </div>):( 
+          <div className="flex flex-col text-primary mb-4 p-4 bg-baclkground rounded-lg">
+            <div className="grid grid-cols-[1fr,auto] items-center gap-2">
+              <Button onClick={handleLogin} variant="default">
+                Sign in with Google
+              </Button>
+            </div>
+          </div>        
+        )}
+    </>
   );
 }
 
@@ -20,14 +57,15 @@ const PROBLEM_TYPES = {
 };
 
 // Interface para os marcadores salvos
-interface SavedMarker {
-  lat: number;
-  lng: number;
-  type: string;
-  createdAt: number;
-}
+// interface SavedMarker {
+//   lat: number;
+//   lng: number;
+//   type: string;
+//   createdAt: number;
+// }
 
 const MapFullScreen = () => {
+
   const [isLoading, setIsLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -191,7 +229,7 @@ const MapFullScreen = () => {
             </div>
           </div>
           <Button 
-            className="w-full"
+            className="w-full text-black"
             disabled={!selectedProblemType}
             onClick={handleConfirmProblem}
           >
@@ -221,6 +259,7 @@ const MapContent = ({
   userConfirmedProblem: boolean;
   resetConfirmation: () => void;
 }) => {
+  const { user, loading, status, handleLogin, handleLogout } = useAuth();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const currentMarkerRef = useRef<any>(null);
@@ -244,11 +283,11 @@ const MapContent = ({
     }
   }, []);
 
-  const saveMarkerToLocalStorage = useCallback((markerData: SavedMarker) => {
+  const saveMarkerToLocalStorage = useCallback((markerData: UserMarker) => {
     try {
       // Obter marcadores existentes
       const existingMarkers = localStorage.getItem(LOCAL_STORAGE_KEY);
-      let markers: SavedMarker[] = existingMarkers ? JSON.parse(existingMarkers) : [];
+      let markers: UserMarker[] = existingMarkers ? JSON.parse(existingMarkers) : [];
       
       // Adicionar novo marcador
       markers.push(markerData);
@@ -262,7 +301,7 @@ const MapContent = ({
     }
   }, []);
 
-  const loadMarkersFromLocalStorage = useCallback((): SavedMarker[] => {
+  const loadMarkersFromLocalStorage = useCallback((): UserMarker[] => {
     try {
       const savedMarkers = localStorage.getItem(LOCAL_STORAGE_KEY);
       return savedMarkers ? JSON.parse(savedMarkers) : [];
@@ -292,15 +331,32 @@ const MapContent = ({
     
     newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup();
     
+    if(user && user.email) {
     // Save to localStorage
-    const markerData: SavedMarker = {
-      lat: markerPosition.lat,
-      lng: markerPosition.lng,
-      type: selectedProblemType,
-      createdAt: Date.now()
-    };
+      const userMarkerData: UserMarker = {
+        id: uuidv4(),
+        lat: markerPosition.lat,
+        lng: markerPosition.lng,
+        type: selectedProblemType,
+        createdAt: new Date()
+      };
+      
+
+
+      const markerData: Marker = {
+        id: uuidv4(),
+        lat: markerPosition.lat,
+        lng: markerPosition.lng,
+        type: selectedProblemType,
+        userEmail: user.email!,
+        createdAt: new Date()
+      };
+
+      saveMarkerToLocalStorage(userMarkerData);
     
-    saveMarkerToLocalStorage(markerData);
+      addUserMarker(dbFirestore, user.email!, userMarkerData );
+      addMarker(dbFirestore, markerData );
+    }
     
     // Update current marker reference
     currentMarkerRef.current = newMarker;
@@ -433,7 +489,7 @@ const MapContent = ({
         
         if (savedMarkers.length > 0) {
           // Add all saved markers to the map
-          savedMarkers.forEach((marker: SavedMarker) => {
+          savedMarkers.forEach((marker: UserMarker) => {
             const icon = iconsRef.current[marker.type] || iconsRef.current.default;
             const mapMarker = L.marker([marker.lat, marker.lng], { icon }).addTo(mapInstance);
             

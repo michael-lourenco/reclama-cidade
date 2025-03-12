@@ -25,7 +25,7 @@ export function useAuth() {
   const [user, setUser] = useState<UserData | null>(
     (localStorageUser as UserData) || null
   );
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [db, setDb] = useState<any>(null);
 
   const handleLogin = async () => {

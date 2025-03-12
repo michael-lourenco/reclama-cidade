@@ -1,4 +1,4 @@
-import { collection, getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, Firestore, DocumentSnapshot, DocumentData } from "firebase/firestore";
+import { collection, getFirestore, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc, Firestore, DocumentSnapshot, DocumentData } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, Auth } from "firebase/auth";
 import axios from "axios";
@@ -79,7 +79,13 @@ interface TotalGamesData {
 interface Votes {
   [key: string]: string;
 }
-
+export interface UserMarker {
+  id: string;
+  lat: number;
+  lng: number;
+  type: string;
+  createdAt: Date;
+}
 interface UserData {
   displayName: string;
   best_score: BestScoreData;
@@ -90,6 +96,7 @@ interface UserData {
   story?: StoryEntry[];
   match_history?: MatchHistoryEntry[];
   photoURL: string;
+  userMarkers?: UserMarker[];
   votes?: Votes;
 }
 
@@ -97,6 +104,15 @@ interface VotesData {
   userId: string;
   votes: Record<string, string>;
   timestamp: Date;
+}
+
+export interface Marker {
+  id: string;
+  lat: number;
+  lng: number;
+  type: string;
+  userEmail: string;
+  createdAt: Date;
 }
 
 let globalUser: UserData | null = null;
@@ -157,6 +173,65 @@ async function fetchUserData(db: Firestore, email: string): Promise<UserData | n
   }
 }
 
+
+// Função para atualizar um marcador na coleção "markers"
+async function updateMarkers(db: Firestore, markerId: string, updatedData: Partial<Marker>): Promise<void> {
+  const markerRef = doc(db, "markers", markerId);
+  await updateDoc(markerRef, updatedData);
+}
+
+// Função para atualizar um marcador na coleção "users/{email}/markers"
+async function updateUserMarker(db: Firestore, email: string, markerId: string, updatedData: Partial<UserMarker>): Promise<void> {
+  const markerRef = doc(db, `users/${email}/markers`, markerId);
+  await updateDoc(markerRef, updatedData);
+}
+
+// Função para adicionar um novo marcador na coleção "markers"
+async function addMarker(db: Firestore, marker: Marker): Promise<void> {
+  const markerRef = doc(db, "markers", marker.id);
+  await setDoc(markerRef, marker);
+}
+
+// Função para adicionar um novo marcador na coleção "users/{email}/markers"
+async function addUserMarker(db: Firestore, email: string, marker: UserMarker): Promise<void> {
+  const markerRef = doc(db, `users/${email}/markers`, marker.id);
+  await setDoc(markerRef, marker);
+}
+
+// Função para remover um marcador da coleção "markers"
+async function removeMarker(db: Firestore, markerId: string): Promise<void> {
+  const markerRef = doc(db, "markers", markerId);
+  await deleteDoc(markerRef);
+}
+
+// Função para remover um marcador da coleção "users/{email}/markers"
+async function removeUserMarker(db: Firestore, email: string, markerId: string): Promise<void> {
+  const markerRef = doc(db, `users/${email}/markers`, markerId);
+  await deleteDoc(markerRef);
+}
+
+async function getMarkers(db: Firestore) {
+  const markersRef = collection(db, "markers");
+  const querySnapshot = await getDocs(markersRef);
+
+  return querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...(doc.data()),
+  }));
+}
+
+// Função para obter os marcadores de um usuário específico
+async function getUserMarkers(db: Firestore, email: string) {
+  const userMarkersRef = collection(db, `users/${email}/markers`);
+  const querySnapshot = await getDocs(userMarkersRef);
+
+  return querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...(doc.data()),
+  }));
+}
+
+export { getMarkers, getUserMarkers };
 async function updateUserBestScore(email: string, newBestScore: number, db: Firestore): Promise<void> {
   const userRef = doc(db, process.env.NEXT_PUBLIC_USERS_COLLECTION!, email);
 
@@ -478,6 +553,12 @@ export {
   updateMatchHistory,
   updateUserTotalGames,
   updateUserVotes,
+  updateMarkers,
+  updateUserMarker,
+  addMarker,
+  addUserMarker,
+  removeMarker,
+  removeUserMarker,
 };
 
 export type { UserData, MatchHistoryEntry };
