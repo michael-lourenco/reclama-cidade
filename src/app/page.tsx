@@ -66,21 +66,34 @@ const MapFullScreen = () => {
   const [selectedProblemType, setSelectedProblemType] = useState<string | null>(null);
   const [userConfirmedProblem, setUserConfirmedProblem] = useState(false);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  
+  const watchIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     setIsClient(true);
-    // Obter localização do usuário ao montar o componente
+    // Iniciar monitoramento da localização
     if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
+      watchIdRef.current = navigator.geolocation.watchPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           setUserLocation([latitude, longitude]);
         },
         (error) => {
           console.error("Erro ao obter localização do usuário:", error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
         }
       );
     }
+
+    // Limpar o watch quando o componente for desmontado
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
   }, []);
 
   const toggleMenu = () => {
@@ -278,6 +291,7 @@ const MapContent = ({
   const defaultLocation: [number, number] = [-23.5902, -48.0338];
   const defaultZoom = 15;
   const LOCAL_STORAGE_KEY = 'mapProblems';
+  const watchIdRef = useRef<number | null>(null);
 
   const getProblemLabel = useCallback((type: string): string => {
     switch (type) {
@@ -331,10 +345,12 @@ const MapContent = ({
           `);
         });
 
-        // Adicionar marcador de localização atual apenas se não houver um problema reportado na mesma localização
+        // Sempre atualizar o marcador de localização atual com a posição mais recente
         if (userLocation) {
           const hasMarkerAtLocation = loadedMarkers.some(
-            marker => marker.lat === userLocation[0] && marker.lng === userLocation[1]
+            marker => 
+              Math.abs(marker.lat - userLocation[0]) < 0.0001 && 
+              Math.abs(marker.lng - userLocation[1]) < 0.0001
           );
 
           if (!hasMarkerAtLocation) {
@@ -346,6 +362,9 @@ const MapContent = ({
               .bindPopup("Sua localização atual")
               .openPopup();
             currentMarkerRef.current = newMarker;
+            
+            // Centralizar o mapa na nova localização
+            mapInstanceRef.current.setView(userLocation, mapInstanceRef.current.getZoom());
           }
         }
       }
@@ -353,6 +372,7 @@ const MapContent = ({
       console.error('Erro ao carregar marcadores:', error);
     }
   }, [showOnlyUserMarkers, user?.email, getProblemLabel, userLocation]);
+
   const saveMarkerToLocalStorage = useCallback(async (markerData: UserMarker) => {
     try {
       // Salvar no localStorage
@@ -385,10 +405,10 @@ const MapContent = ({
 
     // Carregar marcadores quando o componente montar ou quando mudar o filtro
     useEffect(() => {
-      if (mapInstanceRef.current) {
+      if (userLocation && mapInstanceRef.current) {
         loadMarkers();
       }
-    }, [loadMarkers, showOnlyUserMarkers]);
+    }, [userLocation, loadMarkers]);
   
     // Effect para atualizar o menu com o toggle de marcadores
     useEffect(() => {
