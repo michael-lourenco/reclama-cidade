@@ -309,18 +309,17 @@ const MapContent = ({
       
       setMarkers(loadedMarkers);
       
-      // Atualizar marcadores no mapa
       if (mapInstanceRef.current && leafletRef.current) {
         const L = leafletRef.current;
         
-        // Limpar marcadores existentes
+        // Limpar todos os marcadores existentes
         mapInstanceRef.current.eachLayer((layer: any) => {
           if (layer instanceof L.Marker) {
             mapInstanceRef.current.removeLayer(layer);
           }
         });
         
-        // Adicionar novos marcadores
+        // Adicionar marcadores de problemas
         loadedMarkers.forEach((marker) => {
           const icon = iconsRef.current[marker.type] || iconsRef.current.default;
           const mapMarker = L.marker([marker.lat, marker.lng], { icon }).addTo(mapInstanceRef.current);
@@ -332,23 +331,28 @@ const MapContent = ({
           `);
         });
 
-        // Adicionar marcador da localização atual do usuário se disponível
+        // Adicionar marcador de localização atual apenas se não houver um problema reportado na mesma localização
         if (userLocation) {
-          if (currentMarkerRef.current) {
-            mapInstanceRef.current.removeLayer(currentMarkerRef.current);
+          const hasMarkerAtLocation = loadedMarkers.some(
+            marker => marker.lat === userLocation[0] && marker.lng === userLocation[1]
+          );
+
+          if (!hasMarkerAtLocation) {
+            if (currentMarkerRef.current) {
+              mapInstanceRef.current.removeLayer(currentMarkerRef.current);
+            }
+            const newMarker = L.marker(userLocation, { icon: iconsRef.current.default })
+              .addTo(mapInstanceRef.current)
+              .bindPopup("Sua localização atual")
+              .openPopup();
+            currentMarkerRef.current = newMarker;
           }
-          const newMarker = L.marker(userLocation, { icon: iconsRef.current.default })
-            .addTo(mapInstanceRef.current)
-            .bindPopup("Sua localização atual")
-            .openPopup();
-          currentMarkerRef.current = newMarker;
         }
       }
     } catch (error) {
       console.error('Erro ao carregar marcadores:', error);
     }
   }, [showOnlyUserMarkers, user?.email, getProblemLabel, userLocation]);
-
   const saveMarkerToLocalStorage = useCallback(async (markerData: UserMarker) => {
     try {
       // Salvar no localStorage
@@ -518,9 +522,10 @@ const MapContent = ({
     // Remover marcador atual se existir
     if (currentMarkerRef.current) {
       mapInstanceRef.current.removeLayer(currentMarkerRef.current);
+      currentMarkerRef.current = null; // Limpar a referência
     }
     
-    // Criar novo marcador na localização do usuário
+    // Criar novo marcador na localização do usuário com o tipo do problema
     const newMarker = L.marker(userLocation, { 
       icon: iconsRef.current[selectedProblemType] 
     }).addTo(mapInstanceRef.current);
@@ -539,10 +544,11 @@ const MapContent = ({
       saveMarkerToLocalStorage(userMarkerData);
     }
     
-    currentMarkerRef.current = newMarker;
+    // Não atualizar currentMarkerRef aqui para evitar que o marcador de localização seja recriado
     resetConfirmation();
     
   }, [userConfirmedProblem, selectedProblemType, getProblemLabel, saveMarkerToLocalStorage, resetConfirmation, user, userLocation]);
+
 
   // Handle window resize
   useEffect(() => {
