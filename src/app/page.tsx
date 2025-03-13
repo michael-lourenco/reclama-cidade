@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Search, Locate, Menu, AlertTriangle, X } from "lucide-react";
+import { Search, Menu, AlertTriangle, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { LeafletMouseEvent } from 'leaflet';
 import { UserMarker } from "@/application/entities/User";
@@ -65,9 +65,22 @@ const MapFullScreen = () => {
   const [reportMenuOpen, setReportMenuOpen] = useState(false);
   const [selectedProblemType, setSelectedProblemType] = useState<string | null>(null);
   const [userConfirmedProblem, setUserConfirmedProblem] = useState(false);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   
   useEffect(() => {
     setIsClient(true);
+    // Obter localização do usuário ao montar o componente
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation([latitude, longitude]);
+        },
+        (error) => {
+          console.error("Erro ao obter localização do usuário:", error);
+        }
+      );
+    }
   }, []);
 
   const toggleMenu = () => {
@@ -76,6 +89,10 @@ const MapFullScreen = () => {
   };
 
   const toggleReportMenu = () => {
+    if (!userLocation) {
+      alert("É necessário permitir o acesso à sua localização para reportar um problema.");
+      return;
+    }
     setReportMenuOpen(!reportMenuOpen);
   };
 
@@ -84,6 +101,10 @@ const MapFullScreen = () => {
   };
 
   const handleConfirmProblem = () => {
+    if (!userLocation) {
+      alert("É necessário permitir o acesso à sua localização para reportar um problema.");
+      return;
+    }
     setUserConfirmedProblem(true);
     setReportMenuOpen(false);
   };
@@ -111,6 +132,7 @@ const MapFullScreen = () => {
           selectedProblemType={selectedProblemType}
           userConfirmedProblem={userConfirmedProblem}
           resetConfirmation={() => setUserConfirmedProblem(false)}
+          userLocation={userLocation}
         />
       )}
       
@@ -141,16 +163,8 @@ const MapFullScreen = () => {
         </div>
       </div>
       
-      {/* Bottom Right - Location Controls */}
+      {/* Bottom Right - Report Problem Button */}
       <div className="absolute bottom-24 right-4 flex flex-col gap-2 z-10">
-        <Button 
-          variant="default" 
-          size="icon" 
-          className="bg-white text-black hover:bg-gray-100 shadow-md rounded-full h-12 w-12" 
-          title="Usar minha localização"
-        >
-          <Locate className="h-5 w-5" />
-        </Button>
         <Button 
           variant="default" 
           size="icon" 
@@ -161,7 +175,7 @@ const MapFullScreen = () => {
           <AlertTriangle className="h-5 w-5" />
         </Button>
       </div>
-      
+
       {/* Side Menu */}
       {menuOpen && (
         <div className="absolute top-0 left-0 h-full w-64 bg-white shadow-lg z-20 transition-all">
@@ -229,11 +243,13 @@ const MapFullScreen = () => {
         </div>
       )}
       
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
-        <div className="bg-white px-4 py-2 rounded-full shadow-md text-sm">
-          Clique no mapa para selecionar uma localização
+      {!userLocation && (
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
+          <div className="bg-white px-4 py-2 rounded-full shadow-md text-sm text-red-500">
+            Ative a localização para reportar problemas
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 };
@@ -243,11 +259,13 @@ const MapContent = ({
   selectedProblemType,
   userConfirmedProblem,
   resetConfirmation,
+  userLocation,
 }: {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   selectedProblemType: string | null;
   userConfirmedProblem: boolean;
   resetConfirmation: () => void;
+  userLocation: [number, number] | null;
 }) => {
   const { user } = useAuth();
   const mapRef = useRef<HTMLDivElement>(null);
@@ -313,11 +331,23 @@ const MapContent = ({
             Reportado em: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
           `);
         });
+
+        // Adicionar marcador da localização atual do usuário se disponível
+        if (userLocation) {
+          if (currentMarkerRef.current) {
+            mapInstanceRef.current.removeLayer(currentMarkerRef.current);
+          }
+          const newMarker = L.marker(userLocation, { icon: iconsRef.current.default })
+            .addTo(mapInstanceRef.current)
+            .bindPopup("Sua localização atual")
+            .openPopup();
+          currentMarkerRef.current = newMarker;
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar marcadores:', error);
     }
-  }, [showOnlyUserMarkers, user?.email, getProblemLabel]);
+  }, [showOnlyUserMarkers, user?.email, getProblemLabel, userLocation]);
 
   const saveMarkerToLocalStorage = useCallback(async (markerData: UserMarker) => {
     try {
@@ -348,32 +378,33 @@ const MapContent = ({
     }
   }, [user?.email, loadMarkers]);
 
-  // Carregar marcadores quando o componente montar ou quando mudar o filtro
-  useEffect(() => {
-    if (mapInstanceRef.current) {
-      loadMarkers();
-    }
-  }, [loadMarkers, showOnlyUserMarkers]);
 
-  // Effect para atualizar o menu com o toggle de marcadores
-  useEffect(() => {
-    const menuContent = document.querySelector('.p-4 ul');
-    if (menuContent) {
-      const toggleButton = document.createElement('li');
-      toggleButton.className = 'p-2 hover:bg-gray-100 rounded cursor-pointer';
-      toggleButton.textContent = showOnlyUserMarkers 
-        ? 'Mostrar Todos os Marcadores' 
-        : 'Mostrar Apenas Meus Marcadores';
-      toggleButton.onclick = () => setShowOnlyUserMarkers(prev => !prev);
-      
-      // Adicionar após "Meus Reportes"
-      const firstItem = menuContent.firstChild;
-      if (firstItem) {
-        menuContent.insertBefore(toggleButton, firstItem.nextSibling);
+    // Carregar marcadores quando o componente montar ou quando mudar o filtro
+    useEffect(() => {
+      if (mapInstanceRef.current) {
+        loadMarkers();
       }
-    }
-  }, [showOnlyUserMarkers]);
-
+    }, [loadMarkers, showOnlyUserMarkers]);
+  
+    // Effect para atualizar o menu com o toggle de marcadores
+    useEffect(() => {
+      const menuContent = document.querySelector('.p-4 ul');
+      if (menuContent) {
+        const toggleButton = document.createElement('li');
+        toggleButton.className = 'p-2 hover:bg-gray-100 rounded cursor-pointer';
+        toggleButton.textContent = showOnlyUserMarkers 
+          ? 'Mostrar Todos os Marcadores' 
+          : 'Mostrar Apenas Meus Marcadores';
+        toggleButton.onclick = () => setShowOnlyUserMarkers(prev => !prev);
+        
+        // Adicionar após "Meus Reportes"
+        const firstItem = menuContent.firstChild;
+        if (firstItem) {
+          menuContent.insertBefore(toggleButton, firstItem.nextSibling);
+        }
+      }
+    }, [showOnlyUserMarkers]);
+  
     // Initialize map
     useEffect(() => {
       const addLeafletCSS = () => {
@@ -434,123 +465,98 @@ const MapContent = ({
               default: createIcon()
             };
           }
-          
-          // Initialize map
-          const mapInstance = L.map(mapRef.current, {
-            zoomControl: false,
-            attributionControl: false,
-          }).setView(defaultLocation, defaultZoom);
-          
-          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            maxZoom: 19,
-          }).addTo(mapInstance);
-          
-          mapInstanceRef.current = mapInstance;
-          
-          // Carregar marcadores iniciais
-          await loadMarkers();
-          
-          // Allow clicking on map to add/move marker
-          mapInstance.on("click", (e: LeafletMouseEvent) => {
-            const { lat, lng } = e.latlng;
-            
-            if (currentMarkerRef.current) {
-              mapInstance.removeLayer(currentMarkerRef.current);
-            }
-            
-            const newMarker = L.marker([lat, lng], { icon: iconsRef.current.default })
-              .addTo(mapInstance)
-              .bindPopup("Clique em 'Reportar problema' para identificar o tipo")
-              .openPopup();
-              
-            currentMarkerRef.current = newMarker;
-          });
-          
-          // Get user location if available
-          if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                const { latitude, longitude } = position.coords;
-                mapInstance.setView([latitude, longitude], defaultZoom);
-                
-                if (currentMarkerRef.current) {
-                  currentMarkerRef.current.setLatLng([latitude, longitude]);
-                  currentMarkerRef.current.bindPopup("Sua localização").openPopup();
-                }
-              },
-              (error) => {
-                console.error("Erro ao obter localização do usuário:", error);
-              }
-            );
-          }
-          
-          setTimeout(() => {
-            mapInstance.invalidateSize();
-          }, 100);
-          
-          setIsLoading(false);
-        } catch (error) {
-          console.error("Erro ao inicializar o mapa:", error);
-          setIsLoading(false);
+        // Initialize map with user location or default location
+        const initialLocation = userLocation || defaultLocation;
+        const mapInstance = L.map(mapRef.current, {
+          zoomControl: false,
+          attributionControl: false,
+        }).setView(initialLocation, defaultZoom);
+        
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+        }).addTo(mapInstance);
+        
+        mapInstanceRef.current = mapInstance;
+        
+        // Carregar marcadores iniciais
+        await loadMarkers();
+        
+        // Atualizar visualização quando a localização do usuário mudar
+        if (userLocation) {
+          mapInstance.setView(userLocation, defaultZoom);
         }
+        
+        setTimeout(() => {
+          mapInstance.invalidateSize();
+        }, 100);
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Erro ao inicializar o mapa:", error);
+        setIsLoading(false);
       }
-      
-      initMap();
-      
-      return () => {
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.remove();
-          mapInstanceRef.current = null;
-        }
-      };
-    }, [loadMarkers]);
-  
-    // Handle confirmed problem selection and marker update
-    useEffect(() => {
-      if (!userConfirmedProblem || !selectedProblemType || !mapInstanceRef.current || !currentMarkerRef.current || !leafletRef.current) {
-        return;
+    }
+    
+    initMap();
+    
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
       }
-      
-      const markerPosition = currentMarkerRef.current.getLatLng();
+    };
+  }, [loadMarkers, userLocation]);
+
+  // Handle confirmed problem selection and marker update
+  useEffect(() => {
+    if (!userConfirmedProblem || !selectedProblemType || !mapInstanceRef.current || !userLocation || !leafletRef.current) {
+      return;
+    }
+    
+    const L = leafletRef.current;
+    
+    // Remover marcador atual se existir
+    if (currentMarkerRef.current) {
       mapInstanceRef.current.removeLayer(currentMarkerRef.current);
-      
-      const L = leafletRef.current;
-      const newMarker = L.marker([markerPosition.lat, markerPosition.lng], { 
-        icon: iconsRef.current[selectedProblemType] 
-      }).addTo(mapInstanceRef.current);
-      
-      newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup();
-      
-      if(user && user.email) {
-        const userMarkerData: UserMarker = {
-          id: uuidv4(),
-          lat: markerPosition.lat,
-          lng: markerPosition.lng,
-          type: selectedProblemType,
-          createdAt: new Date()
-        };
-  
-        saveMarkerToLocalStorage(userMarkerData);
-      }
-      
-      currentMarkerRef.current = newMarker;
-      resetConfirmation();
-      
-    }, [userConfirmedProblem, selectedProblemType, getProblemLabel, saveMarkerToLocalStorage, resetConfirmation, user]);
-  
-    // Handle window resize
-    useEffect(() => {
-      const handleResize = () => {
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.invalidateSize();
-        }
+    }
+    
+    // Criar novo marcador na localização do usuário
+    const newMarker = L.marker(userLocation, { 
+      icon: iconsRef.current[selectedProblemType] 
+    }).addTo(mapInstanceRef.current);
+    
+    newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup();
+    
+    if(user && user.email) {
+      const userMarkerData: UserMarker = {
+        id: uuidv4(),
+        lat: userLocation[0],
+        lng: userLocation[1],
+        type: selectedProblemType,
+        createdAt: new Date()
       };
-      
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }, []);
-  
-    return (
-      <div ref={mapRef} className="absolute inset-0 w-full h-full z-0" />
-    );
-  };
+
+      saveMarkerToLocalStorage(userMarkerData);
+    }
+    
+    currentMarkerRef.current = newMarker;
+    resetConfirmation();
+    
+  }, [userConfirmedProblem, selectedProblemType, getProblemLabel, saveMarkerToLocalStorage, resetConfirmation, user, userLocation]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return (
+    <div ref={mapRef} className="absolute inset-0 w-full h-full z-0" />
+  );
+};
