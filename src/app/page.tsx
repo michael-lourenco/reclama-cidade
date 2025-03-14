@@ -17,6 +17,13 @@ import {
   UserData,
 } from "@/services/firebase/FirebaseService";
 
+// Define tipos para os problemas
+const PROBLEM_TYPES = {
+  BURACO: 'buraco',
+  ALAGAMENTO: 'alagamento',
+  ILUMINACAO: 'iluminacao'
+};
+
 export default function MinhaRota() {
   const { user, loading, status, handleLogin, handleLogout } = useAuth();
 
@@ -35,28 +42,22 @@ export default function MinhaRota() {
 
   return (
     <>
-      {user || (localStorageUser && localStorage.getItem("user") != null)  ? (
+      {user || (localStorageUser && localStorage.getItem("user") != null) ? (
         <div className="relative w-full h-screen">
           <MapFullScreen />
-        </div>):( 
-          <div className="flex flex-col text-primary mb-4 p-4 bg-baclkground rounded-lg">
-            <div className="grid grid-cols-[1fr,auto] items-center gap-2">
-              <Button onClick={handleLogin} variant="default">
-                Sign in with Google
-              </Button>
-            </div>
-          </div>        
-        )}
+        </div>
+      ) : (
+        <div className="flex flex-col text-primary mb-4 p-4 bg-baclkground rounded-lg">
+          <div className="grid grid-cols-[1fr,auto] items-center gap-2">
+            <Button onClick={handleLogin} variant="default">
+              Sign in with Google
+            </Button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
-
-// Define tipos para os problemas
-const PROBLEM_TYPES = {
-  BURACO: 'buraco',
-  ALAGAMENTO: 'alagamento',
-  ILUMINACAO: 'iluminacao'
-};
 
 const MapFullScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -66,19 +67,20 @@ const MapFullScreen = () => {
   const [selectedProblemType, setSelectedProblemType] = useState<string | null>(null);
   const [userConfirmedProblem, setUserConfirmedProblem] = useState(false);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const watchIdRef = useRef<number | null>(null);
+  const locationWatchId = useRef<number | null>(null);
 
   useEffect(() => {
     setIsClient(true);
-    // Iniciar monitoramento da localização
+
+    // Iniciar monitoramento da localização com alta precisão
     if ("geolocation" in navigator) {
-      watchIdRef.current = navigator.geolocation.watchPosition(
+      locationWatchId.current = navigator.geolocation.watchPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           setUserLocation([latitude, longitude]);
         },
         (error) => {
-          console.error("Erro ao obter localização do usuário:", error);
+          console.error("Erro ao obter localização:", error);
         },
         {
           enableHighAccuracy: true,
@@ -88,10 +90,9 @@ const MapFullScreen = () => {
       );
     }
 
-    // Limpar o watch quando o componente for desmontado
     return () => {
-      if (watchIdRef.current !== null) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
+      if (locationWatchId.current !== null) {
+        navigator.geolocation.clearWatch(locationWatchId.current);
       }
     };
   }, []);
@@ -218,33 +219,19 @@ const MapFullScreen = () => {
             </Button>
           </div>
           <div className="grid grid-cols-3 gap-4 mb-4">
-            <div 
-              className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer ${selectedProblemType === PROBLEM_TYPES.BURACO ? 'bg-gray-100' : ''}`}
-              onClick={() => handleProblemSelect(PROBLEM_TYPES.BURACO)}
-            >
-              <div className="bg-red-100 p-2 rounded-full mb-2">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
+            {/* Problem type buttons */}
+            {Object.entries(PROBLEM_TYPES).map(([key, value]) => (
+              <div 
+                key={key}
+                className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer ${selectedProblemType === value ? 'bg-gray-100' : ''}`}
+                onClick={() => handleProblemSelect(value)}
+              >
+                <div className={`bg-${value === PROBLEM_TYPES.BURACO ? 'red' : value === PROBLEM_TYPES.ALAGAMENTO ? 'yellow' : 'blue'}-100 p-2 rounded-full mb-2`}>
+                  <AlertTriangle className={`h-5 w-5 text-${value === PROBLEM_TYPES.BURACO ? 'red' : value === PROBLEM_TYPES.ALAGAMENTO ? 'yellow' : 'blue'}-500`} />
+                </div>
+                <span className="text-xs">{value.charAt(0).toUpperCase() + value.slice(1)}</span>
               </div>
-              <span className="text-xs">Buraco</span>
-            </div>
-            <div 
-              className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer ${selectedProblemType === PROBLEM_TYPES.ALAGAMENTO ? 'bg-gray-100' : ''}`}
-              onClick={() => handleProblemSelect(PROBLEM_TYPES.ALAGAMENTO)}
-            >
-              <div className="bg-yellow-100 p-2 rounded-full mb-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-500" />
-              </div>
-              <span className="text-xs">Alagamento</span>
-            </div>
-            <div 
-              className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer ${selectedProblemType === PROBLEM_TYPES.ILUMINACAO ? 'bg-gray-100' : ''}`}
-              onClick={() => handleProblemSelect(PROBLEM_TYPES.ILUMINACAO)}
-            >
-              <div className="bg-blue-100 p-2 rounded-full mb-2">
-                <AlertTriangle className="h-5 w-5 text-blue-500" />
-              </div>
-              <span className="text-xs">Iluminação</span>
-            </div>
+            ))}
           </div>
           <Button 
             className="w-full text-black"
@@ -255,7 +242,7 @@ const MapFullScreen = () => {
           </Button>
         </div>
       )}
-      
+
       {!userLocation && (
         <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
           <div className="bg-white px-4 py-2 rounded-full shadow-md text-sm text-red-500">
@@ -286,12 +273,12 @@ const MapContent = ({
   const currentMarkerRef = useRef<any>(null);
   const leafletRef = useRef<any>(null);
   const iconsRef = useRef<Record<string, any>>({});
+  const markersLayerRef = useRef<any>(null);
   const [showOnlyUserMarkers, setShowOnlyUserMarkers] = useState(false);
   const [markers, setMarkers] = useState<Marker[]>([]);
   const defaultLocation: [number, number] = [-23.5902, -48.0338];
   const defaultZoom = 15;
   const LOCAL_STORAGE_KEY = 'mapProblems';
-  const watchIdRef = useRef<number | null>(null);
 
   const getProblemLabel = useCallback((type: string): string => {
     switch (type) {
@@ -306,194 +293,203 @@ const MapContent = ({
     }
   }, []);
 
-  // Função para carregar marcadores do Firebase
-  const loadMarkers = useCallback(async () => {
-    try {
-      const markersRef = collection(dbFirestore, 'markers');
-      const q = showOnlyUserMarkers && user?.email 
-        ? query(markersRef, where('userEmail', '==', user.email))
-        : query(markersRef);
+  // Nova função para atualizar suavemente a posição do marcador
+  const updateUserLocationMarker = useCallback(() => {
+    if (!mapInstanceRef.current || !leafletRef.current || !userLocation) return;
+
+    const L = leafletRef.current;
+    
+    if (!currentMarkerRef.current) {
+      // Criar marcador apenas se não existir
+      currentMarkerRef.current = L.marker(userLocation, { 
+        icon: iconsRef.current.default,
+        // Adicionar animação suave ao marcador
+        smoothFactor: 1
+      }).addTo(mapInstanceRef.current);
       
-      const querySnapshot = await getDocs(q);
-      const loadedMarkers: Marker[] = [];
-      
-      querySnapshot.forEach((doc) => {
-        loadedMarkers.push({ id: doc.id, ...doc.data() } as Marker);
+      currentMarkerRef.current.bindPopup("Sua localização atual");
+    } else {
+      // Atualizar posição do marcador existente com animação
+      currentMarkerRef.current.setLatLng(userLocation);
+    }
+
+    // Atualizar o centro do mapa suavemente apenas se o marcador estiver fora da vista
+    if (!mapInstanceRef.current.getBounds().contains(userLocation)) {
+      mapInstanceRef.current.panTo(userLocation, {
+        animate: true,
+        duration: 1,
+        easeLinearity: 0.25
       });
-      
-      setMarkers(loadedMarkers);
-      
-      if (mapInstanceRef.current && leafletRef.current) {
+    }
+  }, [userLocation]);
+
+    // Função otimizada para carregar marcadores sem causar piscadas
+    const loadMarkers = useCallback(async () => {
+      try {
+        if (!mapInstanceRef.current || !leafletRef.current) return;
+        
         const L = leafletRef.current;
         
-        // Limpar todos os marcadores existentes
-        mapInstanceRef.current.eachLayer((layer: any) => {
-          if (layer instanceof L.Marker) {
-            mapInstanceRef.current.removeLayer(layer);
-          }
-        });
+        // Criar uma nova camada de marcadores se não existir
+        if (!markersLayerRef.current) {
+          markersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
+        }
+  
+        const markersRef = collection(dbFirestore, 'markers');
+        const q = showOnlyUserMarkers && user?.email 
+          ? query(markersRef, where('userEmail', '==', user.email))
+          : query(markersRef);
         
-        // Adicionar marcadores de problemas
-        loadedMarkers.forEach((marker) => {
-          const icon = iconsRef.current[marker.type] || iconsRef.current.default;
-          const mapMarker = L.marker([marker.lat, marker.lng], { icon }).addTo(mapInstanceRef.current);
+        const querySnapshot = await getDocs(q);
+        const loadedMarkers: Marker[] = [];
+        
+        // Limpar marcadores antigos da camada sem afetar o marcador de localização
+        markersLayerRef.current.clearLayers();
+        
+        querySnapshot.forEach((doc) => {
+          const markerData = { id: doc.id, ...doc.data() } as Marker;
+          loadedMarkers.push(markerData);
           
-          const date = new Date(marker.createdAt);
+          // Adicionar marcador à camada de marcadores
+          const icon = iconsRef.current[markerData.type] || iconsRef.current.default;
+          const mapMarker = L.marker([markerData.lat, markerData.lng], { 
+            icon,
+            // Adicionar animação suave aos marcadores
+            smoothFactor: 1
+          });
+          
+          const date = new Date(markerData.createdAt);
           mapMarker.bindPopup(`
-            <strong>Problema: ${getProblemLabel(marker.type)}</strong><br>
+            <strong>Problema: ${getProblemLabel(markerData.type)}</strong><br>
             Reportado em: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
           `);
+          
+          markersLayerRef.current.addLayer(mapMarker);
         });
-
-        // Sempre atualizar o marcador de localização atual com a posição mais recente
-        if (userLocation) {
-          const hasMarkerAtLocation = loadedMarkers.some(
-            marker => 
-              Math.abs(marker.lat - userLocation[0]) < 0.0001 && 
-              Math.abs(marker.lng - userLocation[1]) < 0.0001
-          );
-
-          if (!hasMarkerAtLocation) {
-            if (currentMarkerRef.current) {
-              mapInstanceRef.current.removeLayer(currentMarkerRef.current);
-            }
-            const newMarker = L.marker(userLocation, { icon: iconsRef.current.default })
-              .addTo(mapInstanceRef.current)
-              .bindPopup("Sua localização atual")
-              .openPopup();
-            currentMarkerRef.current = newMarker;
-            
-            // Centralizar o mapa na nova localização
-            mapInstanceRef.current.setView(userLocation, mapInstanceRef.current.getZoom());
-          }
+        
+        setMarkers(loadedMarkers);
+        
+      } catch (error) {
+        console.error('Erro ao carregar marcadores:', error);
+      }
+    }, [showOnlyUserMarkers, user?.email, getProblemLabel]);
+  
+    const saveMarkerToLocalStorage = useCallback(async (markerData: UserMarker) => {
+      try {
+        // Salvar no localStorage
+        const existingMarkers = localStorage.getItem(LOCAL_STORAGE_KEY);
+        let markers: UserMarker[] = existingMarkers ? JSON.parse(existingMarkers) : [];
+        markers.push(markerData);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(markers));
+        
+        // Salvar no Firebase
+        if (user?.email) {
+          const markerDataForFirebase: Marker = {
+            id: markerData.id,
+            lat: markerData.lat,
+            lng: markerData.lng,
+            type: markerData.type,
+            userEmail: user.email,
+            createdAt: markerData.createdAt
+          };
+          
+          await addMarker(dbFirestore, markerDataForFirebase);
+          await loadMarkers(); // Recarregar marcadores após adicionar novo
         }
+      } catch (error) {
+        console.error('Erro ao salvar marcador:', error);
       }
-    } catch (error) {
-      console.error('Erro ao carregar marcadores:', error);
-    }
-  }, [showOnlyUserMarkers, user?.email, getProblemLabel, userLocation]);
+    }, [user?.email, loadMarkers]);
 
-  const saveMarkerToLocalStorage = useCallback(async (markerData: UserMarker) => {
-    try {
-      // Salvar no localStorage
-      const existingMarkers = localStorage.getItem(LOCAL_STORAGE_KEY);
-      let markers: UserMarker[] = existingMarkers ? JSON.parse(existingMarkers) : [];
-      markers.push(markerData);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(markers));
+  // Effect para atualizar o menu com o toggle de marcadores
+  useEffect(() => {
+    const menuContent = document.querySelector('.p-4 ul');
+    if (menuContent) {
+      const toggleButton = document.createElement('li');
+      toggleButton.className = 'p-2 hover:bg-gray-100 rounded cursor-pointer';
+      toggleButton.textContent = showOnlyUserMarkers 
+        ? 'Mostrar Todos os Marcadores' 
+        : 'Mostrar Apenas Meus Marcadores';
+      toggleButton.onclick = () => setShowOnlyUserMarkers(prev => !prev);
       
-      // Salvar no Firebase
-      if (user?.email) {
-        const markerDataForFirebase: Marker = {
-          id: markerData.id,
-          lat: markerData.lat,
-          lng: markerData.lng,
-          type: markerData.type,
-          userEmail: user.email,
-          createdAt: markerData.createdAt
-        };
-        
-        await addMarker(dbFirestore, markerDataForFirebase);
-        await loadMarkers(); // Recarregar marcadores após adicionar novo
+      // Adicionar após "Meus Reportes"
+      const firstItem = menuContent.firstChild;
+      if (firstItem) {
+        menuContent.insertBefore(toggleButton, firstItem.nextSibling);
       }
-      
-      console.log('Marcador salvo com sucesso:', markerData);
-    } catch (error) {
-      console.error('Erro ao salvar marcador:', error);
     }
-  }, [user?.email, loadMarkers]);
+  }, [showOnlyUserMarkers]);
 
-
-    // Carregar marcadores quando o componente montar ou quando mudar o filtro
-    useEffect(() => {
-      if (userLocation && mapInstanceRef.current) {
-        loadMarkers();
-      }
-    }, [userLocation, loadMarkers]);
-  
-    // Effect para atualizar o menu com o toggle de marcadores
-    useEffect(() => {
-      const menuContent = document.querySelector('.p-4 ul');
-      if (menuContent) {
-        const toggleButton = document.createElement('li');
-        toggleButton.className = 'p-2 hover:bg-gray-100 rounded cursor-pointer';
-        toggleButton.textContent = showOnlyUserMarkers 
-          ? 'Mostrar Todos os Marcadores' 
-          : 'Mostrar Apenas Meus Marcadores';
-        toggleButton.onclick = () => setShowOnlyUserMarkers(prev => !prev);
+  // Initialize map
+  useEffect(() => {
+    const addLeafletCSS = () => {
+      if (document.querySelector('link[href*="leaflet.css"]')) return;
+      
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+      link.crossOrigin = '';
+      document.head.appendChild(link);
+    };
+    
+    const addMarkerStyles = () => {
+      if (document.querySelector('style[data-id="marker-styles"]')) return;
+      
+      const style = document.createElement('style');
+      style.dataset.id = "marker-styles";
+      style.textContent = `
+        .buraco-icon { filter: hue-rotate(320deg); }
+        .alagamento-icon { filter: hue-rotate(60deg); }
+        .iluminacao-icon { filter: hue-rotate(240deg); }
+      `;
+      document.head.appendChild(style);
+    };
+    
+    async function initMap() {
+      if (!mapRef.current || mapInstanceRef.current) return;
+      
+      try {
+        addLeafletCSS();
+        addMarkerStyles();
         
-        // Adicionar após "Meus Reportes"
-        const firstItem = menuContent.firstChild;
-        if (firstItem) {
-          menuContent.insertBefore(toggleButton, firstItem.nextSibling);
+        if (!leafletRef.current) {
+          const L = await import("leaflet");
+          leafletRef.current = L;
         }
-      }
-    }, [showOnlyUserMarkers]);
-  
-    // Initialize map
-    useEffect(() => {
-      const addLeafletCSS = () => {
-        if (document.querySelector('link[href*="leaflet.css"]')) return;
         
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-        link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-        link.crossOrigin = '';
-        document.head.appendChild(link);
-      };
-      
-      const addMarkerStyles = () => {
-        if (document.querySelector('style[data-id="marker-styles"]')) return;
+        const L = leafletRef.current;
         
-        const style = document.createElement('style');
-        style.dataset.id = "marker-styles";
-        style.textContent = `
-          .buraco-icon { filter: hue-rotate(320deg); }
-          .alagamento-icon { filter: hue-rotate(60deg); }
-          .iluminacao-icon { filter: hue-rotate(240deg); }
-        `;
-        document.head.appendChild(style);
-      };
-      
-      async function initMap() {
-        if (!mapRef.current || mapInstanceRef.current) return;
-        
-        try {
-          addLeafletCSS();
-          addMarkerStyles();
-          
-          if (!leafletRef.current) {
-            const L = await import("leaflet");
-            leafletRef.current = L;
-          }
-          
-          const L = leafletRef.current;
-          
-          // Create custom icons
-          if (Object.keys(iconsRef.current).length === 0) {
-            const createIcon = (className = '') => new L.Icon({
-              iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-              iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-              shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-              iconSize: [25, 41],
-              iconAnchor: [12, 41],
-              popupAnchor: [1, -34],
-              shadowSize: [41, 41],
-              className
-            });
-  
-            iconsRef.current = {
-              [PROBLEM_TYPES.BURACO]: createIcon('buraco-icon'),
-              [PROBLEM_TYPES.ALAGAMENTO]: createIcon('alagamento-icon'),
-              [PROBLEM_TYPES.ILUMINACAO]: createIcon('iluminacao-icon'),
-              default: createIcon()
-            };
-          }
+        // Create custom icons
+        if (Object.keys(iconsRef.current).length === 0) {
+          const createIcon = (className = '') => new L.Icon({
+            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+            className
+          });
+
+          iconsRef.current = {
+            [PROBLEM_TYPES.BURACO]: createIcon('buraco-icon'),
+            [PROBLEM_TYPES.ALAGAMENTO]: createIcon('alagamento-icon'),
+            [PROBLEM_TYPES.ILUMINACAO]: createIcon('iluminacao-icon'),
+            default: createIcon()
+          };
+        }
+
         // Initialize map with user location or default location
         const initialLocation = userLocation || defaultLocation;
         const mapInstance = L.map(mapRef.current, {
           zoomControl: false,
           attributionControl: false,
+          // Adicionar opções para tornar o movimento mais suave
+          fadeAnimation: true,
+          zoomAnimation: true,
+          markerZoomAnimation: true
         }).setView(initialLocation, defaultZoom);
         
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -502,17 +498,16 @@ const MapContent = ({
         
         mapInstanceRef.current = mapInstance;
         
+        // Criar camada de marcadores
+        markersLayerRef.current = L.layerGroup().addTo(mapInstance);
+        
         // Carregar marcadores iniciais
         await loadMarkers();
         
-        // Atualizar visualização quando a localização do usuário mudar
+        // Atualizar marcador de localização inicial
         if (userLocation) {
-          mapInstance.setView(userLocation, defaultZoom);
+          updateUserLocationMarker();
         }
-        
-        setTimeout(() => {
-          mapInstance.invalidateSize();
-        }, 100);
         
         setIsLoading(false);
       } catch (error) {
@@ -529,7 +524,21 @@ const MapContent = ({
         mapInstanceRef.current = null;
       }
     };
-  }, [loadMarkers, userLocation]);
+  }, [loadMarkers, userLocation, updateUserLocationMarker]);
+
+  // Atualizar apenas o marcador de localização quando a posição mudar
+  useEffect(() => {
+    if (userLocation) {
+      updateUserLocationMarker();
+    }
+  }, [userLocation, updateUserLocationMarker]);
+
+  // Carregar marcadores apenas quando necessário
+  useEffect(() => {
+    if (mapInstanceRef.current) {
+      loadMarkers();
+    }
+  }, [loadMarkers, showOnlyUserMarkers]);
 
   // Handle confirmed problem selection and marker update
   useEffect(() => {
@@ -539,16 +548,17 @@ const MapContent = ({
     
     const L = leafletRef.current;
     
-    // Remover marcador atual se existir
+    // Remover marcador de localização atual
     if (currentMarkerRef.current) {
       mapInstanceRef.current.removeLayer(currentMarkerRef.current);
-      currentMarkerRef.current = null; // Limpar a referência
+      currentMarkerRef.current = null;
     }
     
-    // Criar novo marcador na localização do usuário com o tipo do problema
+    // Criar marcador de problema com animação suave
     const newMarker = L.marker(userLocation, { 
-      icon: iconsRef.current[selectedProblemType] 
-    }).addTo(mapInstanceRef.current);
+      icon: iconsRef.current[selectedProblemType],
+      smoothFactor: 1
+    }).addTo(markersLayerRef.current);
     
     newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup();
     
@@ -564,11 +574,9 @@ const MapContent = ({
       saveMarkerToLocalStorage(userMarkerData);
     }
     
-    // Não atualizar currentMarkerRef aqui para evitar que o marcador de localização seja recriado
     resetConfirmation();
     
   }, [userConfirmedProblem, selectedProblemType, getProblemLabel, saveMarkerToLocalStorage, resetConfirmation, user, userLocation]);
-
 
   // Handle window resize
   useEffect(() => {
