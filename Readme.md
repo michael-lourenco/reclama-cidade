@@ -89,7 +89,7 @@ Para parcerias e demonstrações:
 
 # Regras de negocio para desenvover
 
-- O usuário não seleciona o ponto no mapa, apenas na localizacao de onde está atualmente. Isso será feito automaticamente pelo aplicativo.
+- [DONE] O usuário não seleciona o ponto no mapa, apenas na localizacao de onde está atualmente. Isso será feito automaticamente pelo aplicativo.
 - O usuário pode fazer uma reclamacao no ponto em que está. Ele não consegue gerenciar as reclamacoes que fez.
 - Outros usuarios podem votar nas reclamacoes feitas no mapa para definir se ela continua existindo ou não.
 - Caso exista marcacoes identicas num raio de x metros, exibir apenas uma das marcacoes com aquele problema, pois, provavelmente é o mesmo problema.
