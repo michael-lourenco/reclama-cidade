@@ -521,8 +521,18 @@ const MapContent = ({
               className,
             })
 
+          const greenIcon = L.icon({
+            iconUrl: '3d-map.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        
+            iconSize:     [41, 41],
+            shadowSize:   [41, 41],
+            iconAnchor:   [22, 41],
+            popupAnchor:  [1, -34]
+          });
+
           iconsRef.current = {
-            [PROBLEM_TYPES.BURACO]: createIcon("buraco-icon"),
+            [PROBLEM_TYPES.BURACO]: greenIcon,
             [PROBLEM_TYPES.ALAGAMENTO]: createIcon("alagamento-icon"),
             [PROBLEM_TYPES.ILUMINACAO]: createIcon("iluminacao-icon"),
             default: createIcon("user-location-marker"), // Adicionar classe para o marcador do usuário

@@ -94,3 +94,7 @@ Para parcerias e demonstrações:
 - Outros usuarios podem votar nas reclamacoes feitas no mapa para definir se ela continua existindo ou não.
 - Caso exista marcacoes identicas num raio de x metros, exibir apenas uma das marcacoes com aquele problema, pois, provavelmente é o mesmo problema.
 - O usuario tem limite de fazer uma reclamacao por dia.
+
+# Icones
+<a href="https://www.flaticon.com/free-icons/maps-and-location" title="maps and location icons">Maps and location icons created by afif fudin - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/3d-map" title="3d map icons">3d map icons created by Freepik - Flaticon</a>
