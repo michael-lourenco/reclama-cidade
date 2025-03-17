@@ -201,14 +201,14 @@ const MapFullScreen = () => {
 
       {/* Report Problem Menu */}
       {reportMenuOpen && (
-        <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg z-20 p-4">
+        <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg z-20 p-4 pb-8 max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold">Reportar Problema</h3>
             <Button variant="ghost" size="icon" onClick={toggleReportMenu}>
               <X className="h-5 w-5" />
             </Button>
           </div>
-          <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-3 gap-4 mb-6">
             {/* Problem type buttons */}
             {Object.entries(PROBLEM_TYPES).map(([key, value]) => (
               <div
@@ -227,9 +227,11 @@ const MapFullScreen = () => {
               </div>
             ))}
           </div>
-          <Button className="w-full text-black" disabled={!selectedProblemType} onClick={handleConfirmProblem}>
-            Confirmar Problema
-          </Button>
+          <div className="sticky bottom-0 pt-2 pb-4 bg-white">
+            <Button className="w-full text-black" disabled={!selectedProblemType} onClick={handleConfirmProblem}>
+              Confirmar Problema
+            </Button>
+          </div>
         </div>
       )}
 
