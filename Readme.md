@@ -98,3 +98,6 @@ Para parcerias e demonstrações:
 # Icones
 <a href="https://www.flaticon.com/free-icons/maps-and-location" title="maps and location icons">Maps and location icons created by afif fudin - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/3d-map" title="3d map icons">3d map icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/hole" title="hole icons">Hole icons created by Paul J. - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/flood" title="flood icons">Flood icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/lighting" title="lighting icons">Lighting icons created by Freepik - Flaticon</a>
