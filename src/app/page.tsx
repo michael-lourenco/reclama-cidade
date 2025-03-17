@@ -146,7 +146,7 @@ const MapFullScreen = () => {
       )}
 
       {/* Top Bar - Search */}
-      <div className="absolute top-4 left-4 right-4 flex gap-2 z-10">
+      {/* <div className="absolute top-4 left-4 right-4 flex gap-2 z-10">
         <Button
           variant="default"
           size="icon"
@@ -155,7 +155,7 @@ const MapFullScreen = () => {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        {/* <div className="relative flex-1">
+        <div className="relative flex-1">
           <Input
             type="text"
             placeholder="Pesquisar localização..."
@@ -165,8 +165,8 @@ const MapFullScreen = () => {
           <Button variant="ghost" size="icon" className="absolute right-0 top-0 h-full">
             <Search className="h-4 w-4" />
           </Button>
-        </div> */}
-      </div>
+        </div>
+      </div> */}
 
       {/* Bottom Right - Report Problem Button */}
       <div className="absolute bottom-24 right-4 flex flex-col gap-2 z-10">
