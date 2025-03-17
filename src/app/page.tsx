@@ -192,7 +192,6 @@ const MapFullScreen = () => {
           </div>
           <div className="p-4">
             <ul className="space-y-2">
-              <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">Meus Reportes</li>
               <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">Configurações</li>
               <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">Ajuda</li>
             </ul>
