@@ -9,6 +9,7 @@ import type { UserMarker } from "@/application/entities/User"
 import type { Marker } from "@/application/entities/Marker"
 import { v4 as uuidv4 } from "uuid"
 import { collection, query, where, getDocs } from "firebase/firestore"
+
 import { addMarker, dbFirestore } from "@/services/firebase/FirebaseService"
 
 // Define tipos para os problemas
@@ -61,7 +62,6 @@ const MapFullScreen = () => {
   const [selectedProblemType, setSelectedProblemType] = useState<string | null>(null)
   const [userConfirmedProblem, setUserConfirmedProblem] = useState(false)
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
-  const [initialUserLocation, setInitialUserLocation] = useState<[number, number] | null>(null) // Nova variável para armazenar a posição inicial
   const locationWatchId = useRef<number | null>(null)
 
   useEffect(() => {
@@ -142,11 +142,106 @@ const MapFullScreen = () => {
           userConfirmedProblem={userConfirmedProblem}
           resetConfirmation={() => setUserConfirmedProblem(false)}
           userLocation={userLocation}
-          setInitialUserLocation={setInitialUserLocation} // Passar a função para atualizar a posição inicial
         />
       )}
 
-      {/* ... código existente ... */}
+      {/* Top Bar - Search */}
+      {/* <div className="absolute top-4 left-4 right-4 flex gap-2 z-10">
+        <Button
+          variant="default"
+          size="icon"
+          className="bg-white text-black hover:bg-gray-100 shadow-md"
+          onClick={toggleMenu}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+        <div className="relative flex-1">
+          <Input
+            type="text"
+            placeholder="Pesquisar localização..."
+            className="w-full bg-white shadow-md pr-10"
+            onKeyDown={(e) => e.key === "Enter" && console.log("search")}
+          />
+          <Button variant="ghost" size="icon" className="absolute right-0 top-0 h-full">
+            <Search className="h-4 w-4" />
+          </Button>
+        </div>
+      </div> */}
+
+      {/* Bottom Right - Report Problem Button */}
+      <div className="absolute bottom-24 right-4 flex flex-col gap-2 z-10">
+        <Button
+          variant="default"
+          size="icon"
+          className="bg-white text-black hover:bg-gray-100 shadow-md rounded-full h-12 w-12"
+          title="Reportar problema"
+          onClick={toggleReportMenu}
+        >
+          <AlertTriangle className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Side Menu */}
+      {menuOpen && (
+        <div className="absolute top-0 left-0 h-full w-64 bg-white shadow-lg z-20 transition-all">
+          <div className="p-4 border-b flex items-center justify-between">
+            <h2 className="font-bold text-lg">Mapa de Problemas</h2>
+            <Button variant="ghost" size="icon" onClick={toggleMenu}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="p-4">
+            <ul className="space-y-2">
+              <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">Configurações</li>
+              <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">Ajuda</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Report Problem Menu */}
+      {reportMenuOpen && (
+        <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg z-20 p-4 pb-8 max-h-[90vh] overflow-y-auto">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold">Reportar Problema</h3>
+            <Button variant="ghost" size="icon" onClick={toggleReportMenu}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            {/* Problem type buttons */}
+            {Object.entries(PROBLEM_TYPES).map(([key, value]) => (
+              <div
+                key={key}
+                className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer ${selectedProblemType === value ? "bg-gray-100" : ""}`}
+                onClick={() => handleProblemSelect(value)}
+              >
+                <div
+                  className={`bg-${value === PROBLEM_TYPES.BURACO ? "red" : value === PROBLEM_TYPES.ALAGAMENTO ? "yellow" : "blue"}-100 p-2 rounded-full mb-2`}
+                >
+                  <AlertTriangle
+                    className={`h-5 w-5 text-${value === PROBLEM_TYPES.BURACO ? "red" : value === PROBLEM_TYPES.ALAGAMENTO ? "yellow" : "blue"}-500`}
+                  />
+                </div>
+                <span className="text-xs">{value.charAt(0).toUpperCase() + value.slice(1)}</span>
+              </div>
+            ))}
+          </div>
+          <div className="sticky bottom-0 pt-2 pb-4 bg-white">
+            <Button className="w-full text-black" disabled={!selectedProblemType} onClick={handleConfirmProblem}>
+              Confirmar Problema
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {!userLocation && (
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
+          <div className="bg-white px-4 py-2 rounded-full shadow-md text-sm text-red-500">
+            Ative a localização para reportar problemas
+          </div>
+        </div>
+      )}
     </>
   )
 }
@@ -157,14 +252,12 @@ const MapContent = ({
   userConfirmedProblem,
   resetConfirmation,
   userLocation,
-  setInitialUserLocation, // Receber a função para atualizar a posição inicial
 }: {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
   selectedProblemType: string | null
   userConfirmedProblem: boolean
   resetConfirmation: () => void
   userLocation: [number, number] | null
-  setInitialUserLocation: React.Dispatch<React.SetStateAction<[number, number] | null>> // Tipo da função
 }) => {
   const { user } = useAuth()
   const mapRef = useRef<HTMLDivElement>(null)
@@ -198,6 +291,12 @@ const MapContent = ({
   const updateUserLocationMarker = useCallback(() => {
     if (!mapInstanceRef.current || !leafletRef.current || !userLocation) return
 
+    // Cancelar qualquer animação anterior
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = null
+    }
+
     const L = leafletRef.current
 
     // Se o marcador não existir, crie-o
@@ -208,21 +307,13 @@ const MapContent = ({
 
       currentMarkerRef.current.bindPopup("Sua localização atual")
       lastUserLocation.current = userLocation
-      setInitialUserLocation(userLocation) // Armazenar a posição inicial
       return
     }
 
-    // Calcular a distância entre a posição inicial e a nova posição
-    const distance = mapInstanceRef.current.distance(
-      lastUserLocation.current,
-      userLocation
-    );
-
-    // Se a localização mudou e está fora do raio de 50 metros, anime o marcador
+    // Se a localização mudou, anime apenas o marcador do usuário
     if (
       lastUserLocation.current &&
-      (lastUserLocation.current[0] !== userLocation[0] || lastUserLocation.current[1] !== userLocation[1]) &&
-      distance > 50
+      (lastUserLocation.current[0] !== userLocation[0] || lastUserLocation.current[1] !== userLocation[1])
     ) {
       const startLat = lastUserLocation.current[0]
       const startLng = lastUserLocation.current[1]
@@ -249,9 +340,9 @@ const MapContent = ({
         } else {
           // Animação completa, atualizar a última posição conhecida
           lastUserLocation.current = userLocation
-          setInitialUserLocation(userLocation) // Atualizar a posição inicial após a animação
 
           // Verificar se o marcador está fora da vista e centralizar o mapa se necessário
+          // Isso é feito apenas no final da animação para evitar movimentos constantes do mapa
           if (!mapInstanceRef.current.getBounds().contains(userLocation)) {
             mapInstanceRef.current.panTo(userLocation, {
               animate: true,
@@ -268,9 +359,8 @@ const MapContent = ({
       // Primeira atualização ou mesma posição, apenas definir a posição
       currentMarkerRef.current.setLatLng(userLocation)
       lastUserLocation.current = userLocation
-      setInitialUserLocation(userLocation) // Atualizar a posição inicial
     }
-  }, [userLocation, setInitialUserLocation])
+  }, [userLocation])
 
   // Função otimizada para carregar marcadores sem causar piscadas
   const loadMarkers = useCallback(async () => {
@@ -440,6 +530,8 @@ const MapContent = ({
             iconAnchor:   [22, 41],
             popupAnchor:  [1, -34]
           });
+
+          
 
           const floodIcon = L.icon({
             iconUrl: 'flood.png',
