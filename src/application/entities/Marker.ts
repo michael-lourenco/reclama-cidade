@@ -6,4 +6,5 @@ export interface Marker {
     type: string;
     userEmail: string;
     createdAt: Date;
+    likedBy?: string[] 
 }

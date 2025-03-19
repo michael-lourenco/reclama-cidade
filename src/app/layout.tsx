@@ -6,6 +6,7 @@ import { Providers } from "./providers"
 import { AuthProvider } from "./auth-provider"
 import { Toaster } from "sonner"
 import CookieConsent from "@/components/CookieConsent"
+import { SonnerProvider } from "@/components/sonner-provider"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -48,7 +49,8 @@ export default function RootLayout({
           <Providers>
             {children}
             <CookieConsent />
-            <Toaster richColors position="top-right" theme="dark" />
+            <Toaster richColors position="top-right" theme="dark" /> 
+            <SonnerProvider />
           </Providers>
         </AuthProvider>
       </body>

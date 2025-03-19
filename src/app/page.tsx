@@ -3,13 +3,24 @@ import type React from "react"
 import { useEffect, useState, useRef, useCallback } from "react"
 import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
-import { Search, Menu, AlertTriangle, X } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { AlertTriangle, X } from "lucide-react"
 import type { UserMarker } from "@/application/entities/User"
 import type { Marker } from "@/application/entities/Marker"
 import { v4 as uuidv4 } from "uuid"
-import { collection, query, where, getDocs, Timestamp } from "firebase/firestore"
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  Timestamp,
+  doc,
+  updateDoc,
+  getDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore"
 import { addMarker, dbFirestore } from "@/services/firebase/FirebaseService"
+import { toast } from "sonner"
 
 // Define tipos para os problemas
 const PROBLEM_TYPES = {
@@ -273,6 +284,107 @@ const MapContent = ({
   const defaultZoom = 15
   const LOCAL_STORAGE_KEY = "mapProblems"
 
+  // Função para calcular a distância entre dois pontos em metros
+  const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371e3 // raio da Terra em metros
+    const φ1 = (lat1 * Math.PI) / 180
+    const φ2 = (lat2 * Math.PI) / 180
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+    return R * c // em metros
+  }, [])
+
+  // Função para verificar se o usuário pode curtir um marcador
+  const canLikeMarker = useCallback(
+    (marker: Marker): boolean => {
+      if (!user || !user.email || !userLocation) return false
+
+      // Usuário não pode curtir seu próprio marcador
+      if (marker.userEmail === user.email) return false
+
+      // Verificar se o usuário já curtiu este marcador
+      const likedBy = marker.likedBy || []
+      if (likedBy.includes(user.email)) return false
+
+      // Verificar se o usuário está a menos de 100 metros do marcador
+      const distance = calculateDistance(userLocation[0], userLocation[1], marker.lat, marker.lng)
+
+      return distance <= 100 // retorna true se estiver a menos de 100 metros
+    },
+    [user, userLocation, calculateDistance],
+  )
+
+  // Função para curtir um marcador
+  const likeMarker = useCallback(
+    async (markerId: string) => {
+      if (!user || !user.email) {
+        toast.error("Você precisa estar logado para curtir um marcador.")
+        return
+      }
+
+      try {
+        const markerRef = doc(dbFirestore, "markers", markerId)
+        const markerDoc = await getDoc(markerRef)
+
+        if (!markerDoc.exists()) {
+          toast.error("Marcador não encontrado.")
+          return
+        }
+
+        const markerData = markerDoc.data() as Marker
+
+        // Verificar se o usuário pode curtir este marcador
+        if (!canLikeMarker({ ...markerData, id: markerId })) {
+          toast.error("Você precisa estar a menos de 100 metros do marcador ou não pode curtir seu próprio marcador.")
+          return
+        }
+
+        // Adicionar o email do usuário ao array de curtidas
+        await updateDoc(markerRef, {
+          likedBy: arrayUnion(user.email),
+        })
+
+        toast.success("Você curtiu este marcador!")
+
+        // Recarregar marcadores para atualizar a interface
+        await loadMarkers()
+      } catch (error) {
+        console.error("Erro ao curtir marcador:", error)
+        toast.error("Ocorreu um erro ao curtir o marcador.")
+      }
+    },
+    [user, canLikeMarker],
+  )
+
+  // Função para descurtir um marcador
+  const unlikeMarker = useCallback(
+    async (markerId: string) => {
+      if (!user || !user.email) return
+
+      try {
+        const markerRef = doc(dbFirestore, "markers", markerId)
+
+        // Remover o email do usuário do array de curtidas
+        await updateDoc(markerRef, {
+          likedBy: arrayRemove(user.email),
+        })
+
+        toast.success("Você removeu sua curtida deste marcador.")
+
+        // Recarregar marcadores para atualizar a interface
+        await loadMarkers()
+      } catch (error) {
+        console.error("Erro ao descurtir marcador:", error)
+        toast.error("Ocorreu um erro ao remover sua curtida.")
+      }
+    },
+    [user],
+  )
+
   const getProblemLabel = useCallback((type: string): string => {
     switch (type) {
       case PROBLEM_TYPES.BURACO:
@@ -393,12 +505,96 @@ const MapContent = ({
           icon,
         })
 
-        const date = markerData.createdAt instanceof Timestamp ? markerData.createdAt.toDate() : new Date(markerData.createdAt);
+        const date =
+          markerData.createdAt instanceof Timestamp ? markerData.createdAt.toDate() : new Date(markerData.createdAt)
 
-        mapMarker.bindPopup(`
+        // Verificar se o usuário pode curtir este marcador
+        const userCanLike = canLikeMarker(markerData)
+
+        // Verificar se o usuário já curtiu este marcador
+        const likedBy = markerData.likedBy || []
+        const userHasLiked = user?.email && likedBy.includes(user.email)
+
+        // Contar o número de curtidas
+        const likesCount = likedBy.length
+
+        // Criar o conteúdo do popup com botão de curtir
+        let popupContent = `
           <strong>Problema: ${getProblemLabel(markerData.type)}</strong><br>
-          Reportado em: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
-        `)
+          Reportado em: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}<br>
+          <div class="likes-container" style="margin-top: 8px; display: flex; align-items: center;">
+            <span style="margin-right: 5px;">Curtidas: ${likesCount}</span>
+        `
+
+        // Adicionar botão de curtir/descurtir se o usuário estiver logado
+        if (user?.email) {
+          if (userHasLiked) {
+            popupContent += `
+              <button 
+                class="unlike-button" 
+                data-marker-id="${markerData.id}" 
+                style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 4px 8px; display: flex; align-items: center; cursor: pointer;"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#3b82f6" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style="margin-right: 4px;">
+                  <path d="M7 10v12"></path><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"></path>
+                </svg>
+                Curtido
+              </button>
+            `
+          } else if (userCanLike) {
+            popupContent += `
+              <button 
+                class="like-button" 
+                data-marker-id="${markerData.id}" 
+                style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 4px 8px; display: flex; align-items: center; cursor: pointer;"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style="margin-right: 4px;">
+                  <path d="M7 10v12"></path><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"></path>
+                </svg>
+                Curtir
+              </button>
+            `
+          } else if (markerData.userEmail === user.email) {
+            popupContent += `
+              <span style="font-size: 12px; color: #6c757d; margin-left: 5px;">(Seu marcador)</span>
+            `
+          } else {
+            popupContent += `
+              <span style="font-size: 12px; color: #6c757d; margin-left: 5px;">(Aproxime-se para curtir)</span>
+            `
+          }
+        }
+
+        popupContent += `</div>`
+
+        mapMarker.bindPopup(popupContent)
+
+        // Adicionar evento para o botão de curtir
+        mapMarker.on("popupopen", () => {
+          setTimeout(() => {
+            const likeButton = document.querySelector(".like-button")
+            if (likeButton) {
+              likeButton.addEventListener("click", (e) => {
+                e.preventDefault()
+                const markerId = (e.currentTarget as HTMLElement).getAttribute("data-marker-id")
+                if (markerId) {
+                  likeMarker(markerId)
+                }
+              })
+            }
+
+            const unlikeButton = document.querySelector(".unlike-button")
+            if (unlikeButton) {
+              unlikeButton.addEventListener("click", (e) => {
+                e.preventDefault()
+                const markerId = (e.currentTarget as HTMLElement).getAttribute("data-marker-id")
+                if (markerId) {
+                  unlikeMarker(markerId)
+                }
+              })
+            }
+          }, 100)
+        })
 
         markersLayerRef.current.addLayer(mapMarker)
       })
@@ -407,7 +603,7 @@ const MapContent = ({
     } catch (error) {
       console.error("Erro ao carregar marcadores:", error)
     }
-  }, [showOnlyUserMarkers, user?.email, getProblemLabel])
+  }, [showOnlyUserMarkers, user?.email, getProblemLabel, canLikeMarker, likeMarker, unlikeMarker])
 
   const saveMarkerToLocalStorage = useCallback(
     async (markerData: UserMarker) => {
@@ -427,6 +623,7 @@ const MapContent = ({
             type: markerData.type,
             userEmail: user.email,
             createdAt: markerData.createdAt,
+            likedBy: [], // Inicializar o array de curtidas vazio
           }
 
           await addMarker(dbFirestore, markerDataForFirebase)
@@ -489,6 +686,19 @@ const MapContent = ({
         .leaflet-zoom-anim .leaflet-zoom-animated {
           will-change: auto !important;
         }
+        
+        /* Estilos para os botões de curtir */
+        .like-button, .unlike-button {
+          transition: all 0.2s ease;
+        }
+        .like-button:hover, .unlike-button:hover {
+          background-color: #e9ecef !important;
+        }
+        .likes-container {
+          display: flex;
+          align-items: center;
+          margin-top: 8px;
+        }
       `
       document.head.appendChild(style)
     }
@@ -522,36 +732,34 @@ const MapContent = ({
             })
 
           const holeIcon = L.icon({
-            iconUrl: 'hole.png',
-            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        
-            iconSize:     [41, 41],
-            shadowSize:   [70, 40],
-            iconAnchor:   [22, 41],
-            popupAnchor:  [1, -34]
-          });
+            iconUrl: "hole.png",
+            shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 
-          
+            iconSize: [41, 41],
+            shadowSize: [70, 40],
+            iconAnchor: [22, 41],
+            popupAnchor: [1, -34],
+          })
 
           const floodIcon = L.icon({
-            iconUrl: 'flood.png',
-            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        
-            iconSize:     [41, 41],
-            shadowSize:   [70, 40],
-            iconAnchor:   [22, 41],
-            popupAnchor:  [1, -34]
-          });
+            iconUrl: "flood.png",
+            shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+
+            iconSize: [41, 41],
+            shadowSize: [70, 40],
+            iconAnchor: [22, 41],
+            popupAnchor: [1, -34],
+          })
 
           const lightIcon = L.icon({
-            iconUrl: 'spotlight.png',
-            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        
-            iconSize:     [41, 41],
-            shadowSize:   [70, 40],
-            iconAnchor:   [22, 41],
-            popupAnchor:  [1, -34]
-          });
+            iconUrl: "spotlight.png",
+            shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+
+            iconSize: [41, 41],
+            shadowSize: [70, 40],
+            iconAnchor: [22, 41],
+            popupAnchor: [1, -34],
+          })
 
           iconsRef.current = {
             [PROBLEM_TYPES.BURACO]: holeIcon,
