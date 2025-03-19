@@ -3,7 +3,8 @@ import type React from "react"
 import { useEffect, useState, useRef, useCallback } from "react"
 import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
-import { AlertTriangle, X } from "lucide-react"
+import { Search, Menu, AlertTriangle, X } from "lucide-react"
+import { Input } from "@/components/ui/input"
 import type { UserMarker } from "@/application/entities/User"
 import type { Marker } from "@/application/entities/Marker"
 import { v4 as uuidv4 } from "uuid"
@@ -272,7 +273,6 @@ const MapContent = ({
   const defaultLocation: [number, number] = [-23.5902, -48.0338]
   const defaultZoom = 15
   const LOCAL_STORAGE_KEY = "mapProblems"
-  const initialUserLocation = useRef<[number, number] | null>(null)
 
   const getProblemLabel = useCallback((type: string): string => {
     switch (type) {
@@ -287,13 +287,6 @@ const MapContent = ({
     }
   }, [])
 
-  // Função para calcular a distância entre dois pontos em metros
-  const calculateDistance = useCallback((point1: [number, number], point2: [number, number]): number => {
-    if (!leafletRef.current) return 0
-    const L = leafletRef.current
-    return L.latLng(point1[0], point1[1]).distanceTo(L.latLng(point2[0], point2[1]))
-  }, [])
-
   // Nova função para atualizar apenas o marcador de localização do usuário
   const updateUserLocationMarker = useCallback(() => {
     if (!mapInstanceRef.current || !leafletRef.current || !userLocation) return
@@ -306,7 +299,7 @@ const MapContent = ({
 
     const L = leafletRef.current
 
-    // Se o marcador não existir, crie-o e defina a posição inicial
+    // Se o marcador não existir, crie-o
     if (!currentMarkerRef.current) {
       currentMarkerRef.current = L.marker(userLocation, {
         icon: iconsRef.current.default,
@@ -314,49 +307,60 @@ const MapContent = ({
 
       currentMarkerRef.current.bindPopup("Sua localização atual")
       lastUserLocation.current = userLocation
-      initialUserLocation.current = userLocation // Armazenar posição inicial
       return
     }
 
-    // Verificar se a posição atual está a mais de 50 metros da posição de referência
-    if (lastUserLocation.current && calculateDistance(lastUserLocation.current, userLocation) > 50) {
-      // Usar PosAnimation do Leaflet para animar o movimento
-      const posAnimation = new L.PosAnimation()
-      const startPoint = mapInstanceRef.current.latLngToLayerPoint(
-        L.latLng(lastUserLocation.current[0], lastUserLocation.current[1]),
-      )
-      const endPoint = mapInstanceRef.current.latLngToLayerPoint(L.latLng(userLocation[0], userLocation[1]))
-
-      // Configurar a animação
-      posAnimation._el = currentMarkerRef.current._icon
-      posAnimation.run({
-        position: endPoint,
-        duration: 0.5,
-        easeLinearity: 0.25,
-      })
-
-      // Atualizar a posição do marcador após a animação
-      currentMarkerRef.current.setLatLng(userLocation)
-
-      // Atualizar a posição de referência para a posição atual
-      lastUserLocation.current = userLocation
-
-      // Verificar se o marcador está fora da vista e centralizar o mapa se necessário
-      if (!mapInstanceRef.current.getBounds().contains(userLocation)) {
-        mapInstanceRef.current.panTo(userLocation, {
-          animate: true,
-          duration: 0.5,
-          easeLinearity: 0.25,
-        })
-      }
-    } else if (
+    // Se a localização mudou, anime apenas o marcador do usuário
+    if (
       lastUserLocation.current &&
       (lastUserLocation.current[0] !== userLocation[0] || lastUserLocation.current[1] !== userLocation[1])
     ) {
-      // Se a posição mudou mas está dentro do raio de 50m, apenas atualizar a posição sem animação
+      const startLat = lastUserLocation.current[0]
+      const startLng = lastUserLocation.current[1]
+      const endLat = userLocation[0]
+      const endLng = userLocation[1]
+      const startTime = performance.now()
+      const duration = 300 // duração da animação em ms
+
+      // Função de animação que será chamada a cada frame
+      const animateMarker = (currentTime: number) => {
+        const elapsed = currentTime - startTime
+        const progress = Math.min(elapsed / duration, 1)
+
+        // Interpolação linear entre posição inicial e final
+        const currentLat = startLat + (endLat - startLat) * progress
+        const currentLng = startLng + (endLng - startLng) * progress
+
+        // Atualizar apenas o marcador, não o mapa
+        currentMarkerRef.current.setLatLng([currentLat, currentLng])
+
+        // Continuar animação se não estiver completa
+        if (progress < 1) {
+          animationFrameRef.current = requestAnimationFrame(animateMarker)
+        } else {
+          // Animação completa, atualizar a última posição conhecida
+          lastUserLocation.current = userLocation
+
+          // Verificar se o marcador está fora da vista e centralizar o mapa se necessário
+          // Isso é feito apenas no final da animação para evitar movimentos constantes do mapa
+          if (!mapInstanceRef.current.getBounds().contains(userLocation)) {
+            mapInstanceRef.current.panTo(userLocation, {
+              animate: true,
+              duration: 0.5,
+              easeLinearity: 0.25,
+            })
+          }
+        }
+      }
+
+      // Iniciar a animação
+      animationFrameRef.current = requestAnimationFrame(animateMarker)
+    } else {
+      // Primeira atualização ou mesma posição, apenas definir a posição
       currentMarkerRef.current.setLatLng(userLocation)
+      lastUserLocation.current = userLocation
     }
-  }, [userLocation, calculateDistance])
+  }, [userLocation])
 
   // Função otimizada para carregar marcadores sem causar piscadas
   const loadMarkers = useCallback(async () => {
@@ -518,34 +522,36 @@ const MapContent = ({
             })
 
           const holeIcon = L.icon({
-            iconUrl: "hole.png",
-            shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            iconUrl: 'hole.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        
+            iconSize:     [41, 41],
+            shadowSize:   [70, 40],
+            iconAnchor:   [22, 41],
+            popupAnchor:  [1, -34]
+          });
 
-            iconSize: [41, 41],
-            shadowSize: [70, 40],
-            iconAnchor: [22, 41],
-            popupAnchor: [1, -34],
-          })
+          
 
           const floodIcon = L.icon({
-            iconUrl: "flood.png",
-            shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-
-            iconSize: [41, 41],
-            shadowSize: [70, 40],
-            iconAnchor: [22, 41],
-            popupAnchor: [1, -34],
-          })
+            iconUrl: 'flood.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        
+            iconSize:     [41, 41],
+            shadowSize:   [70, 40],
+            iconAnchor:   [22, 41],
+            popupAnchor:  [1, -34]
+          });
 
           const lightIcon = L.icon({
-            iconUrl: "spotlight.png",
-            shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-
-            iconSize: [41, 41],
-            shadowSize: [70, 40],
-            iconAnchor: [22, 41],
-            popupAnchor: [1, -34],
-          })
+            iconUrl: 'spotlight.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        
+            iconSize:     [41, 41],
+            shadowSize:   [70, 40],
+            iconAnchor:   [22, 41],
+            popupAnchor:  [1, -34]
+          });
 
           iconsRef.current = {
             [PROBLEM_TYPES.BURACO]: holeIcon,
@@ -583,7 +589,6 @@ const MapContent = ({
         // Atualizar marcador de localização inicial
         if (userLocation) {
           lastUserLocation.current = userLocation
-          initialUserLocation.current = userLocation // Armazenar posição inicial
           updateUserLocationMarker()
         }
 
