@@ -91,9 +91,16 @@ Para parcerias e demonstrações:
 
 - [DONE] O usuário não seleciona o ponto no mapa, apenas na localizacao de onde está atualmente. Isso será feito automaticamente pelo aplicativo.
 - [DONE] O usuário pode fazer uma reclamacao no ponto em que está. Ele não consegue gerenciar as reclamacoes que fez.
-- Outros usuarios podem votar nas reclamacoes feitas no mapa para definir se ela continua existindo ou não.
+- [DOING] Outros usuarios podem votar nas reclamacoes feitas no mapa para definir se ela continua existindo ou não.
 - Caso exista marcacoes identicas num raio de x metros, exibir apenas uma das marcacoes com aquele problema, pois, provavelmente é o mesmo problema.
 - O usuario tem limite de fazer uma reclamacao por dia.
+
+- Após X likes (no momento 20) no marcador do mapa, ele é considerado verdadeiro
+- Neste momento o botão de like deixa de ser exibido neste marcador e passa a ser exibido o botão de confirmação de solucionado
+- Quando o número de confirmação for maior ou igual ao de likes, o marcador vai para solucionado
+- Caso a administração decisa que um marcador foi solucionado, ela pode marcá-lo como solucionado no sistema
+- Neste caso, vai aparecer para o usuário que o problema foi marcado como solucionado de forma parcial
+- Ainda assim é neccessaria a votação para ir realmente para solucionado
 
 # Icones
 <a href="https://www.flaticon.com/free-icons/maps-and-location" title="maps and location icons">Maps and location icons created by afif fudin - Flaticon</a>
