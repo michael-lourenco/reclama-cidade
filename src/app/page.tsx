@@ -8,8 +8,7 @@ import { Input } from "@/components/ui/input"
 import type { UserMarker } from "@/application/entities/User"
 import type { Marker } from "@/application/entities/Marker"
 import { v4 as uuidv4 } from "uuid"
-import { collection, query, where, getDocs } from "firebase/firestore"
-
+import { collection, query, where, getDocs, Timestamp } from "firebase/firestore"
 import { addMarker, dbFirestore } from "@/services/firebase/FirebaseService"
 
 // Define tipos para os problemas
@@ -394,7 +393,8 @@ const MapContent = ({
           icon,
         })
 
-        const date = new Date(markerData.createdAt)
+        const date = markerData.createdAt instanceof Timestamp ? markerData.createdAt.toDate() : new Date(markerData.createdAt);
+
         mapMarker.bindPopup(`
           <strong>Problema: ${getProblemLabel(markerData.type)}</strong><br>
           Reportado em: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
