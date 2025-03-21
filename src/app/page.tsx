@@ -21,13 +21,13 @@ import {
 } from "firebase/firestore"
 import { addMarker, dbFirestore } from "@/services/firebase/FirebaseService"
 import { toast } from "sonner"
+import {
+  PROBLEM_TYPES,
+  LOCAL_STORAGE_KEY,
+  DEFAULT_LOCATION,
+  DEFAULT_ZOOM
+}from "@/constants/map-constants"
 
-// Define tipos para os problemas
-const PROBLEM_TYPES = {
-  BURACO: "buraco",
-  ALAGAMENTO: "alagamento",
-  ILUMINACAO: "iluminacao",
-}
 
 export default function MinhaRota() {
   const { user, loading, status, handleLogin, handleLogout } = useAuth()
