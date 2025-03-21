@@ -80,14 +80,9 @@ export interface UserMarker {
 
 export interface UserData {
   displayName: string;
-  best_score: BestScoreData;
   credits: Credit;
   currency: CurrencyData;
-  total_games: TotalGamesData;
   email: string;
-  story?: StoryEntry[];
-  match_history?: MatchHistoryEntry[];
   photoURL: string;
-  votes?: Votes;
   userMarkers?: UserMarker[];
 }
