@@ -21,7 +21,13 @@ import {
 } from "firebase/firestore"
 import { addMarker, dbFirestore } from "@/services/firebase/FirebaseService"
 import { toast } from "sonner"
-import { PROBLEM_TYPES } from "@/constants/map-constants"
+import {
+  PROBLEM_TYPES,
+  LOCAL_STORAGE_KEY,
+  DEFAULT_LOCATION,
+  DEFAULT_ZOOM
+}from "@/constants/map-constants"
+
 
 export default function MinhaRota() {
   const { user, loading, status, handleLogin, handleLogout } = useAuth()
@@ -396,6 +402,12 @@ const MapContent = ({
   const updateUserLocationMarker = useCallback(() => {
     if (!mapInstanceRef.current || !leafletRef.current || !userLocation) return
 
+    // Cancelar qualquer animação anterior
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = null
+    }
+
     const L = leafletRef.current
 
     // Se o marcador não existir, crie-o
@@ -409,24 +421,51 @@ const MapContent = ({
       return
     }
 
-    // Se a localização mudou, use flyTo para mover o mapa suavemente
+    // Se a localização mudou, anime apenas o marcador do usuário
     if (
       lastUserLocation.current &&
       (lastUserLocation.current[0] !== userLocation[0] || lastUserLocation.current[1] !== userLocation[1])
     ) {
-      // Atualizar a posição do marcador
-      currentMarkerRef.current.setLatLng(userLocation)
-      
-      // Verificar se o marcador está fora da vista e usar flyTo para centralizar o mapa
-      if (!mapInstanceRef.current.getBounds().contains(userLocation)) {
-        mapInstanceRef.current.flyTo(userLocation, mapInstanceRef.current.getZoom(), {
-          duration: 0.5,
-          easeLinearity: 0.25
-        });
+      const startLat = lastUserLocation.current[0]
+      const startLng = lastUserLocation.current[1]
+      const endLat = userLocation[0]
+      const endLng = userLocation[1]
+      const startTime = performance.now()
+      const duration = 300 // duração da animação em ms
+
+      // Função de animação que será chamada a cada frame
+      const animateMarker = (currentTime: number) => {
+        const elapsed = currentTime - startTime
+        const progress = Math.min(elapsed / duration, 1)
+
+        // Interpolação linear entre posição inicial e final
+        const currentLat = startLat + (endLat - startLat) * progress
+        const currentLng = startLng + (endLng - startLng) * progress
+
+        // Atualizar apenas o marcador, não o mapa
+        currentMarkerRef.current.setLatLng([currentLat, currentLng])
+
+        // Continuar animação se não estiver completa
+        if (progress < 1) {
+          animationFrameRef.current = requestAnimationFrame(animateMarker)
+        } else {
+          // Animação completa, atualizar a última posição conhecida
+          lastUserLocation.current = userLocation
+
+          // Verificar se o marcador está fora da vista e centralizar o mapa se necessário
+          // Isso é feito apenas no final da animação para evitar movimentos constantes do mapa
+          if (!mapInstanceRef.current.getBounds().contains(userLocation)) {
+            mapInstanceRef.current.panTo(userLocation, {
+              animate: true,
+              duration: 0.5,
+              easeLinearity: 0.25,
+            })
+          }
+        }
       }
-      
-      // Atualizar a última posição conhecida
-      lastUserLocation.current = userLocation
+
+      // Iniciar a animação
+      animationFrameRef.current = requestAnimationFrame(animateMarker)
     } else {
       // Primeira atualização ou mesma posição, apenas definir a posição
       currentMarkerRef.current.setLatLng(userLocation)
@@ -771,6 +810,11 @@ const MapContent = ({
     initMap()
 
     return () => {
+      // Limpar animação ao desmontar
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
+
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove()
         mapInstanceRef.current = null
@@ -821,20 +865,12 @@ const MapContent = ({
         type: selectedProblemType,
         createdAt: new Date(),
       }
-    if (user && user.email) {
-      const userMarkerData: UserMarker = {
-        id: uuidv4(),
-        lat: userLocation[0],
-        lng: userLocation[1],
-        type: selectedProblemType,
-        createdAt: new Date(),
-      }
 
       saveMarkerToLocalStorage(userMarkerData)
     }
 
     resetConfirmation()
-  }}, [
+  }, [
     userConfirmedProblem,
     selectedProblemType,
     getProblemLabel,
