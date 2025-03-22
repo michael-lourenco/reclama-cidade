@@ -101,29 +101,6 @@ const MapFullScreen = () => {
             />
         )}
 
-        {/* Top Bar - Search */}
-        {/* <div className="absolute top-4 left-4 right-4 flex gap-2 z-10">
-            <Button
-            variant="default"
-            size="icon"
-            className="bg-white text-black hover:bg-gray-100 shadow-md"
-            onClick={toggleMenu}
-            >
-            <Menu className="h-5 w-5" />
-            </Button>
-            <div className="relative flex-1">
-            <Input
-                type="text"
-                placeholder="Pesquisar localização..."
-                className="w-full bg-white shadow-md pr-10"
-                onKeyDown={(e) => e.key === "Enter" && console.log("search")}
-            />
-            <Button variant="ghost" size="icon" className="absolute right-0 top-0 h-full">
-                <Search className="h-4 w-4" />
-            </Button>
-            </div>
-        </div> */}
-
         {/* Bottom Right - Report Problem Button */}
         <div className="absolute bottom-24 right-4 flex flex-col gap-2 z-10">
             <Button
