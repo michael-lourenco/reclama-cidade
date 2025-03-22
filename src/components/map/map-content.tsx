@@ -266,172 +266,152 @@ const MapContent = ({
   // Função para atualizar apenas o marcador de localização do usuário
   const updateUserLocationMarker = useCallback(() => {
     if (!mapInstanceRef.current || !leafletRef.current || !userLocation) return
-
-    // Cancelar qualquer animação anterior
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current)
-      animationFrameRef.current = null
-    }
-
+  
     const L = leafletRef.current
-
+  
     // Se o marcador não existir, crie-o
     if (!currentMarkerRef.current) {
       currentMarkerRef.current = L.marker(userLocation, {
         icon: iconsRef.current.default,
-        zIndexOffset: 1000, // Garantir que o marcador do usuário fique acima dos outros
+        zIndexOffset: 1000,
       }).addTo(mapInstanceRef.current)
-
+  
       currentMarkerRef.current.bindPopup("Sua localização atual")
       lastUserLocation.current = userLocation
-
+  
       // Centralizar o mapa na primeira vez
       mapInstanceRef.current.setView(userLocation, mapInstanceRef.current.getZoom())
       return
     }
-
-    // Se a localização mudou, anime apenas o marcador do usuário
+  
+    // Se a localização mudou
     if (
       lastUserLocation.current &&
       (lastUserLocation.current[0] !== userLocation[0] || lastUserLocation.current[1] !== userLocation[1])
     ) {
-      const startLat = lastUserLocation.current[0]
-      const startLng = lastUserLocation.current[1]
-      const endLat = userLocation[0]
-      const endLng = userLocation[1]
-      const startTime = performance.now()
-      const duration = 300 // duração da animação em ms
-
-      // Verificar se o marcador está fora da vista e centralizar o mapa se necessário
+      // Verificar se está fora da visão
       const isOutOfBounds = !mapInstanceRef.current.getBounds().contains(userLocation)
-
+      
+      // Usar a animação nativa do Leaflet para o marcador
+      currentMarkerRef.current.setLatLng(userLocation, {
+        animate: true,
+        duration: 0.5
+      });
+      
+      // Se estiver fora da visão, centralizar suavemente
       if (isOutOfBounds) {
-        // Centralizar o mapa na nova posição do usuário
-        mapInstanceRef.current.setView(userLocation, mapInstanceRef.current.getZoom(), {
+        mapInstanceRef.current.panTo(userLocation, {
           animate: true,
           duration: 0.5,
-          easeLinearity: 0.25,
-        })
+          easeLinearity: 0.25
+        });
       }
-
-      // Função de animação que será chamada a cada frame
-      const animateMarker = (currentTime: number) => {
-        const elapsed = currentTime - startTime
-        const progress = Math.min(elapsed / duration, 1)
-
-        // Interpolação linear entre posição inicial e final
-        const currentLat = startLat + (endLat - startLat) * progress
-        const currentLng = startLng + (endLng - startLng) * progress
-
-        // Atualizar apenas o marcador, não o mapa
-        currentMarkerRef.current.setLatLng([currentLat, currentLng])
-
-        // Continuar animação se não estiver completa
-        if (progress < 1) {
-          animationFrameRef.current = requestAnimationFrame(animateMarker)
-        } else {
-          // Animação completa, atualizar a última posição conhecida
-          lastUserLocation.current = userLocation
-        }
-      }
-
-      // Iniciar a animação
-      animationFrameRef.current = requestAnimationFrame(animateMarker)
-    } else {
-      // Primeira atualização ou mesma posição, apenas definir a posição
-      currentMarkerRef.current.setLatLng(userLocation)
-      lastUserLocation.current = userLocation
+      
+      lastUserLocation.current = userLocation;
     }
-  }, [userLocation])
+  }, [userLocation]);
 
   // Função otimizada para carregar marcadores sem causar piscadas
   const loadMarkers = useCallback(async () => {
     try {
       if (!mapInstanceRef.current || !leafletRef.current) return
-
+  
       const L = leafletRef.current
-
-      // Criar uma nova camada de marcadores se não existir
+  
+      // Criar uma camada temporária para novos marcadores (reduz piscadas)
+      const tempLayer = L.layerGroup();
+      
+      // Criar a camada principal se não existir
       if (!markersLayerRef.current) {
         markersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current)
       }
-
+  
       const markersRef = collection(dbFirestore, "markers")
-      const q =
-        showOnlyUserMarkers && user?.email ? query(markersRef, where("userEmail", "==", user.email)) : query(markersRef)
-
+      const q = showOnlyUserMarkers && user?.email 
+        ? query(markersRef, where("userEmail", "==", user.email)) 
+        : query(markersRef)
+  
       const querySnapshot = await getDocs(q)
       const loadedMarkers: Marker[] = []
       const currentMarkerIds = new Set<string>()
-
+  
       // Processar os marcadores do Firestore
       querySnapshot.forEach((doc) => {
         const markerData = { id: doc.id, ...doc.data() } as Marker
         loadedMarkers.push(markerData)
         currentMarkerIds.add(doc.id)
-
-        // Verificar se o marcador já existe no mapa
+  
+        // Verificar se o marcador já existe
         if (markersInstancesRef.current.has(doc.id)) {
-          // O marcador já existe, atualizar apenas o popup se necessário
+          // Atualizar apenas o popup se necessário
           const existingMarker = markersInstancesRef.current.get(doc.id)
           const popupContent = createPopupContent(markerData)
           existingMarker.getPopup().setContent(popupContent)
         } else {
-          // Criar um novo marcador
+          // Criar novo marcador e adicionar à camada temporária
           const icon = iconsRef.current[markerData.type] || iconsRef.current.default
-          const mapMarker = L.marker([markerData.lat, markerData.lng], {
-            icon,
-          })
-
+          const mapMarker = L.marker([markerData.lat, markerData.lng], { icon })
+          
           const popupContent = createPopupContent(markerData)
           mapMarker.bindPopup(popupContent)
-
-          // Adicionar evento para o botão de curtir
-          mapMarker.on("popupopen", () => {
-            setTimeout(() => {
-              const likeButton = document.querySelector(".like-button")
-              if (likeButton) {
-                likeButton.addEventListener("click", (e) => {
-                  e.preventDefault()
-                  const markerId = (e.currentTarget as HTMLElement).getAttribute("data-marker-id")
-                  if (markerId) {
-                    likeMarker(markerId)
-                  }
-                })
-              }
-
-              const unlikeButton = document.querySelector(".unlike-button")
-              if (unlikeButton) {
-                unlikeButton.addEventListener("click", (e) => {
-                  e.preventDefault()
-                  const markerId = (e.currentTarget as HTMLElement).getAttribute("data-marker-id")
-                  if (markerId) {
-                    unlikeMarker(markerId)
-                  }
-                })
-              }
-            }, 100)
-          })
-
-          // Armazenar o marcador na referência e adicionar à camada
+          
+          // Configurar eventos do popup
+          configurePopupEvents(mapMarker);
+          
+          // Armazenar o marcador na referência
           markersInstancesRef.current.set(doc.id, mapMarker)
-          markersLayerRef.current.addLayer(mapMarker)
+          tempLayer.addLayer(mapMarker)
         }
       })
-
-      // Remover marcadores que não existem mais
+  
+      // Remover marcadores que não existem mais (em batch)
+      const toRemove: any[] = [];
       markersInstancesRef.current.forEach((marker, id) => {
         if (!currentMarkerIds.has(id)) {
-          markersLayerRef.current.removeLayer(marker)
-          markersInstancesRef.current.delete(id)
+          toRemove.push(marker);
+          markersInstancesRef.current.delete(id);
         }
-      })
-
+      });
+      
+      if (toRemove.length > 0) {
+        markersLayerRef.current.removeLayers(toRemove);
+      }
+      
+      // Adicionar novos marcadores ao mapa de uma vez só
+      if (tempLayer.getLayers().length > 0) {
+        markersLayerRef.current.addLayer(tempLayer);
+      }
+  
       setMarkers(loadedMarkers)
     } catch (error) {
       console.error("Erro ao carregar marcadores:", error)
     }
-  }, [showOnlyUserMarkers, user?.email, createPopupContent, likeMarker, unlikeMarker])
+  }, [showOnlyUserMarkers, user?.email, createPopupContent]);
+  
+  // Função auxiliar para configurar eventos do popup
+  const configurePopupEvents = useCallback((mapMarker: L.Marker) => {
+    mapMarker.on("popupopen", () => {
+      setTimeout(() => {
+        const likeButton = document.querySelector(".like-button")
+        if (likeButton) {
+          likeButton.addEventListener("click", (e) => {
+            e.preventDefault()
+            const markerId = (e.currentTarget as HTMLElement).getAttribute("data-marker-id")
+            if (markerId) likeMarker(markerId)
+          })
+        }
+  
+        const unlikeButton = document.querySelector(".unlike-button")
+        if (unlikeButton) {
+          unlikeButton.addEventListener("click", (e) => {
+            e.preventDefault()
+            const markerId = (e.currentTarget as HTMLElement).getAttribute("data-marker-id")
+            if (markerId) unlikeMarker(markerId)
+          })
+        }
+      }, 100)
+    })
+  }, [likeMarker, unlikeMarker]);
 
   const saveMarkerToLocalStorage = useCallback(
     async (markerData: UserMarker) => {
@@ -598,11 +578,15 @@ const MapContent = ({
         // Initialize map with user location or default location
         const initialLocation = userLocation || defaultLocation
         const mapInstance = L.map(mapRef.current, {
-          zoomControl: false,
-          attributionControl: false,
-          // Melhorar desempenho
-          preferCanvas: true,
-        }).setView(initialLocation, defaultZoom)
+            zoomControl: false,
+            attributionControl: false,
+            preferCanvas: true,
+            zoomAnimation: true,  // Habilitar animação de zoom
+            fadeAnimation: true,  // Habilitar fade animation
+            markerZoomAnimation: true, // Animar marcadores durante zoom
+            inertia: true,       // Movimento inercial para panning
+            inertiaDeceleration: 3000,  // Desaceleração mais suave
+          }).setView(initialLocation, defaultZoom)
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
