@@ -22,29 +22,29 @@ const MapFullScreen = () => {
 
     useEffect(() => {
         setIsClient(true)
-
-        // Iniciar monitoramento da localização com alta precisão
+    
+        // Configurar monitoramento da geolocalização com parâmetros mais adequados
         if ("geolocation" in navigator) {
-        locationWatchId.current = navigator.geolocation.watchPosition(
+            locationWatchId.current = navigator.geolocation.watchPosition(
             (position) => {
-            const { latitude, longitude } = position.coords
-            setUserLocation([latitude, longitude])
+                const { latitude, longitude } = position.coords
+                setUserLocation([latitude, longitude])
             },
             (error) => {
-            console.error("Erro ao obter localização:", error)
+                console.error("Erro ao obter localização:", error)
             },
             {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0,
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 2000, // Permitir cache por 2 segundos
             },
-        )
+            )
         }
-
+        
         return () => {
-        if (locationWatchId.current !== null) {
+            if (locationWatchId.current !== null) {
             navigator.geolocation.clearWatch(locationWatchId.current)
-        }
+            }
         }
     }, [])
 
