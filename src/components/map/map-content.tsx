@@ -5,6 +5,7 @@ import type { LeafletMouseEvent } from "leaflet"
 import { PROBLEM_TYPES } from "@/constants/map-constants"
 import { dbFirestore, getMarkers, addMarker } from "@/services/firebase/FirebaseService"
 import type { Marker } from "@/application/entities/Marker"
+import { useMarkers } from "@/hooks/use-markers"
 
 // Componente interno que será carregado apenas no cliente
 const MapContent = ({
@@ -18,6 +19,7 @@ const MapContent = ({
   userConfirmedProblem: boolean
   resetConfirmation: () => void
 }) => {
+  const { markers, setMarkers, loadMarkersFromFirebase, saveMarkerToFirebase } = useMarkers()
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
   const currentMarkerRef = useRef<any>(null)
@@ -26,7 +28,6 @@ const MapContent = ({
   const mapInitializedRef = useRef<boolean>(false) // Nova ref para controlar a inicialização
   const defaultLocation: [number, number] = [-23.5902, -48.0338]
   const defaultZoom = 15
-  const [markers, setMarkers] = useState<Marker[]>([])
 
   // Memoize functions that don't need to be recreated on every render
   const getProblemLabel = useCallback((type: string): string => {
@@ -39,25 +40,6 @@ const MapContent = ({
         return "Iluminação"
       default:
         return "Desconhecido"
-    }
-  }, [])
-
-  // Função para carregar marcadores do Firebase
-  const loadMarkersFromFirebase = useCallback(async () => {
-    try {
-      const fetchedMarkers = await getMarkers(dbFirestore)
-      // Garantir que todos os marcadores tenham as propriedades necessárias
-      const validMarkers = fetchedMarkers.filter((marker: any) => 
-        marker && marker.lat !== undefined && 
-        marker.lng !== undefined && 
-        marker.type !== undefined
-      ) as Marker[]
-      
-      setMarkers(validMarkers)
-      return validMarkers
-    } catch (error) {
-      console.error("Erro ao carregar marcadores do Firebase:", error)
-      return [] as Marker[]
     }
   }, [])
 
