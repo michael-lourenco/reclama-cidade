@@ -2,11 +2,11 @@
 import type React from "react"
 import { useEffect, useState, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Search, Locate, Menu, AlertTriangle, X } from "lucide-react"
+import { Search, Menu, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { MapContent } from "./map-content"
-import { PROBLEM_TYPES } from "@/constants/map-constants"
 import { ReportMenu } from "@/components/report/report-menu"
+import { LocationControls } from "../location-controls/location-controls"
 
 const MapFullScreen = () => {
     const [isLoading, setIsLoading] = useState(true)
@@ -107,27 +107,12 @@ const MapFullScreen = () => {
                 </div>
             </div>
             
-            {/* Bottom Right - Location Controls */}
-            <div className="absolute bottom-24 right-4 flex flex-col gap-2 z-10">
-                <Button
-                    variant="default"
-                    size="icon"
-                    className="bg-white text-black hover:bg-gray-100 shadow-md rounded-full h-12 w-12"
-                    title="Usar minha localização"
-                    onClick={centerOnUserLocation}
-                >
-                    <Locate className="h-5 w-5" />
-                </Button>
-                <Button
-                    variant="default"
-                    size="icon"
-                    className="bg-white text-black hover:bg-gray-100 shadow-md rounded-full h-12 w-12"
-                    title="Reportar problema"
-                    onClick={toggleReportMenu}
-                >
-                    <AlertTriangle className="h-5 w-5" />
-                </Button>
-            </div>
+    
+            {/* Location Controls Component */}
+            <LocationControls 
+            centerOnUserLocation={centerOnUserLocation}
+            toggleReportMenu={toggleReportMenu}
+            />
 
             {/* Side Menu */}
             {menuOpen && (
