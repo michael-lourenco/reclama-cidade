@@ -3,7 +3,7 @@ import type React from "react"
 import { useEffect, useState, useRef, useCallback } from "react"
 import type { LeafletMouseEvent } from "leaflet"
 import { PROBLEM_TYPES } from "@/constants/map-constants"
-import { dbFirestore, getMarkers } from "@/services/firebase/FirebaseService"
+import { dbFirestore, getMarkers, addMarker } from "@/services/firebase/FirebaseService"
 import type { Marker } from "@/application/entities/Marker"
 
 // Componente interno que será carregado apenas no cliente
@@ -87,8 +87,38 @@ const MapContent = ({
 
     newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup()
 
-    // Aqui deveríamos salvar no Firebase, mas isso não está no escopo da alteração solicitada
-    // O código de salvamento seria implementado através do FirebaseService
+    // Salvar o marcador no Firebase
+    const saveMarkerToFirebase = async () => {
+      try {
+        // Obter informações do usuário atual do localStorage
+        const userDataString = localStorage.getItem("user")
+        const userData = userDataString ? JSON.parse(userDataString) : null
+        const userEmail = userData?.email || "Usuário anônimo"
+        
+        // Criar objeto de marcador para salvar
+        const markerId = `marker_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+        const newMarkerData: Marker = {
+          id: markerId,
+          lat: markerPosition.lat,
+          lng: markerPosition.lng,
+          type: selectedProblemType,
+          userEmail,
+          createdAt: new Date()
+        }
+        
+        // Adicionar ao Firebase usando o FirebaseService
+        await addMarker(dbFirestore, newMarkerData)
+        console.log("Marcador salvo com sucesso:", newMarkerData)
+        
+        // Atualizar o estado local de marcadores
+        setMarkers(prev => [...prev, newMarkerData])
+      } catch (error) {
+        console.error("Erro ao salvar marcador no Firebase:", error)
+      }
+    }
+    
+    // Executar a função de salvamento
+    saveMarkerToFirebase()
 
     // Update current marker reference
     currentMarkerRef.current = newMarker
