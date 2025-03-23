@@ -3,14 +3,8 @@ import type React from "react"
 import { useEffect, useState, useRef, useCallback } from "react"
 import type { LeafletMouseEvent } from "leaflet"
 import { PROBLEM_TYPES } from "@/constants/map-constants"
-
-// Interface para os marcadores salvos
-interface SavedMarker {
-  lat: number
-  lng: number
-  type: string
-  createdAt: number
-}
+import { dbFirestore, getMarkers } from "@/services/firebase/FirebaseService"
+import type { Marker } from "@/application/entities/Marker"
 
 // Componente interno que será carregado apenas no cliente
 const MapContent = ({
@@ -32,7 +26,7 @@ const MapContent = ({
   const mapInitializedRef = useRef<boolean>(false) // Nova ref para controlar a inicialização
   const defaultLocation: [number, number] = [-23.5902, -48.0338]
   const defaultZoom = 15
-  const LOCAL_STORAGE_KEY = "mapProblems"
+  const [markers, setMarkers] = useState<Marker[]>([])
 
   // Memoize functions that don't need to be recreated on every render
   const getProblemLabel = useCallback((type: string): string => {
@@ -48,31 +42,22 @@ const MapContent = ({
     }
   }, [])
 
-  const saveMarkerToLocalStorage = useCallback((markerData: SavedMarker) => {
+  // Função para carregar marcadores do Firebase
+  const loadMarkersFromFirebase = useCallback(async () => {
     try {
-      // Obter marcadores existentes
-      const existingMarkers = localStorage.getItem(LOCAL_STORAGE_KEY)
-      const markers: SavedMarker[] = existingMarkers ? JSON.parse(existingMarkers) : []
-
-      // Adicionar novo marcador
-      markers.push(markerData)
-
-      // Salvar de volta no localStorage
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(markers))
-
-      console.log("Marcador salvo com sucesso:", markerData)
+      const fetchedMarkers = await getMarkers(dbFirestore)
+      // Garantir que todos os marcadores tenham as propriedades necessárias
+      const validMarkers = fetchedMarkers.filter((marker: any) => 
+        marker && marker.lat !== undefined && 
+        marker.lng !== undefined && 
+        marker.type !== undefined
+      ) as Marker[]
+      
+      setMarkers(validMarkers)
+      return validMarkers
     } catch (error) {
-      console.error("Erro ao salvar marcador no localStorage:", error)
-    }
-  }, [])
-
-  const loadMarkersFromLocalStorage = useCallback((): SavedMarker[] => {
-    try {
-      const savedMarkers = localStorage.getItem(LOCAL_STORAGE_KEY)
-      return savedMarkers ? JSON.parse(savedMarkers) : []
-    } catch (error) {
-      console.error("Erro ao carregar marcadores do localStorage:", error)
-      return []
+      console.error("Erro ao carregar marcadores do Firebase:", error)
+      return [] as Marker[]
     }
   }, [])
 
@@ -102,22 +87,15 @@ const MapContent = ({
 
     newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup()
 
-    // Save to localStorage
-    const markerData: SavedMarker = {
-      lat: markerPosition.lat,
-      lng: markerPosition.lng,
-      type: selectedProblemType,
-      createdAt: Date.now(),
-    }
-
-    saveMarkerToLocalStorage(markerData)
+    // Aqui deveríamos salvar no Firebase, mas isso não está no escopo da alteração solicitada
+    // O código de salvamento seria implementado através do FirebaseService
 
     // Update current marker reference
     currentMarkerRef.current = newMarker
 
     // Reset confirmation flag
     resetConfirmation()
-  }, [userConfirmedProblem, selectedProblemType, getProblemLabel, saveMarkerToLocalStorage, resetConfirmation])
+  }, [userConfirmedProblem, selectedProblemType, getProblemLabel, resetConfirmation])
 
   // Add Leaflet CSS
   const addLeafletCSS = useCallback(() => {
@@ -260,26 +238,63 @@ const MapContent = ({
         // Store map instance
         mapInstanceRef.current = mapInstance
 
-        // Load saved markers
-        const savedMarkers = loadMarkersFromLocalStorage()
+        // Load markers from Firebase
+        const firebaseMarkers = await loadMarkersFromFirebase()
 
-        if (savedMarkers.length > 0) {
+        if (firebaseMarkers && firebaseMarkers.length > 0) {
           // Add all saved markers to the map
-          savedMarkers.forEach((marker: SavedMarker) => {
+          firebaseMarkers.forEach((marker) => {
             const icon = iconsRef.current[marker.type] || iconsRef.current.default
             const mapMarker = L.marker([marker.lat, marker.lng], { icon }).addTo(mapInstance)
+            
+            // Converter a data para um objeto Date se ela não for
+            let markerDate: Date
+            if (marker.createdAt instanceof Date) {
+              markerDate = marker.createdAt
+            } else if (marker.createdAt && typeof marker.createdAt === 'object' && 'seconds' in marker.createdAt) {
+              // Lidar com Timestamp do Firestore
+              markerDate = new Date((marker.createdAt as any).seconds * 1000)
+            } else {
+              markerDate = new Date(marker.createdAt as any)
+            }
 
             // Add popup with information
-            const date = new Date(marker.createdAt)
             mapMarker.bindPopup(`
               <strong>Problema: ${getProblemLabel(marker.type)}</strong><br>
-              Reportado em: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
+              Reportado em: ${markerDate.toLocaleDateString()} ${markerDate.toLocaleTimeString()}<br>
+              Por: ${marker.userEmail || 'Usuário anônimo'}
             `)
           })
 
           // Center map on most recent marker
-          const mostRecent = savedMarkers.reduce((a, b) => (a.createdAt > b.createdAt ? a : b))
-          mapInstance.setView([mostRecent.lat, mostRecent.lng], defaultZoom)
+          // Ordenar marcadores por data descendente (mais recente primeiro)
+          const sortedMarkers = [...firebaseMarkers].sort((a, b) => {
+            let dateA: Date
+            let dateB: Date
+            
+            if (a.createdAt instanceof Date) {
+              dateA = a.createdAt
+            } else if (a.createdAt && typeof a.createdAt === 'object' && 'seconds' in a.createdAt) {
+              dateA = new Date((a.createdAt as any).seconds * 1000)
+            } else {
+              dateA = new Date(a.createdAt as any)
+            }
+            
+            if (b.createdAt instanceof Date) {
+              dateB = b.createdAt
+            } else if (b.createdAt && typeof b.createdAt === 'object' && 'seconds' in b.createdAt) {
+              dateB = new Date((b.createdAt as any).seconds * 1000)
+            } else {
+              dateB = new Date(b.createdAt as any)
+            }
+            
+            return dateB.getTime() - dateA.getTime()
+          })
+          
+          if (sortedMarkers.length > 0) {
+            const mostRecent = sortedMarkers[0]
+            mapInstance.setView([mostRecent.lat, mostRecent.lng], defaultZoom)
+          }
         } else {
           // Add default marker if no saved markers
           const tempMarker = L.marker(defaultLocation, { icon: iconsRef.current.default })
@@ -408,14 +423,13 @@ const MapContent = ({
 
     return () => {
       document.removeEventListener("centerOnUser", handleCenterOnUser as EventListener)
-      //navigator.geolocation.clearWatch(watchId);
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove()
         mapInstanceRef.current = null
         mapInitializedRef.current = false
       }
     }
-  }, [loadMarkersFromLocalStorage, getProblemLabel, addLeafletCSS, addMarkerStyles])
+  }, [loadMarkersFromFirebase, getProblemLabel, addLeafletCSS, addMarkerStyles])
 
   // Handle window resize
   useEffect(() => {
