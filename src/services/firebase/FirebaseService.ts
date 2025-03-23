@@ -1,6 +1,7 @@
 import { collection, getFirestore, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc, Firestore, DocumentSnapshot, DocumentData } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, Auth } from "firebase/auth";
+import { UserData } from "@/application/entities/User";
 
 interface CurrencyData {
   value: number;
@@ -27,16 +28,6 @@ export interface UserMarker {
   type: string;
   createdAt: Date;
 }
-
-interface UserData {
-  displayName: string;
-  credits: Credit;
-  currency: CurrencyData;
-  email: string;
-  photoURL: string;
-  userMarkers?: UserMarker[];
-}
-
 export interface Marker {
   id: string;
   lat: number;

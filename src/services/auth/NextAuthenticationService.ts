@@ -2,19 +2,11 @@ import {  doc, setDoc, updateDoc, Firestore } from "firebase/firestore";
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { fetchUserData } from "../firebase/FirebaseService";
-import { Credit } from "@/application/entities/User";
+import { Credit, UserData } from "@/application/entities/User";
 
 interface CurrencyData {
   value: number;
   updatedAt: Date;
-}
-
-interface UserData {
-  displayName: string;
-  currency: CurrencyData;
-  credits: Credit;
-  email: string;
-  photoURL: string;
 }
 
 let globalUser: UserData | null = null;
