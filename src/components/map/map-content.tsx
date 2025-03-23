@@ -3,6 +3,7 @@ import type React from "react"
 import { useEffect, useState, useRef, useCallback } from "react"
 import type { LeafletMouseEvent } from "leaflet"
 import { PROBLEM_TYPES } from "@/constants/map-constants"
+import { getProblemLabel } from "@/utils/map-utils"
 import { dbFirestore, getMarkers, addMarker } from "@/services/firebase/FirebaseService"
 import type { Marker } from "@/application/entities/Marker"
 import { useMarkers } from "@/hooks/use-markers"
@@ -29,19 +30,6 @@ const MapContent = ({
   const defaultLocation: [number, number] = [-23.5902, -48.0338]
   const defaultZoom = 15
 
-  // Memoize functions that don't need to be recreated on every render
-  const getProblemLabel = useCallback((type: string): string => {
-    switch (type) {
-      case PROBLEM_TYPES.BURACO:
-        return "Buraco"
-      case PROBLEM_TYPES.ALAGAMENTO:
-        return "Alagamento"
-      case PROBLEM_TYPES.ILUMINACAO:
-        return "Iluminação"
-      default:
-        return "Desconhecido"
-    }
-  }, [])
 
   // Handle confirmed problem selection and marker update
   useEffect(() => {

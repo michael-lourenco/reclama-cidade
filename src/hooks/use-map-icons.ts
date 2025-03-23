@@ -1,0 +1,58 @@
+"use client"
+
+import { useRef, useCallback } from "react"
+import { PROBLEM_TYPES } from "@/constants/map-constants"
+import { LEAFLET_ICON_URLS } from "@/constants/map-constants"
+import type { MapIcon } from "@/types/map-types"
+
+export const useMapIcons = (L: any) => {
+    const iconsRef = useRef<Record<string, any>>({})
+
+    const createIcons = useCallback(() => {
+    if (!L || Object.keys(iconsRef.current).length > 0) return iconsRef.current
+
+    const baseIconConfig: MapIcon = {
+        iconUrl: LEAFLET_ICON_URLS.ICON,
+        iconRetinaUrl: LEAFLET_ICON_URLS.ICON_RETINA,
+        shadowUrl: LEAFLET_ICON_URLS.SHADOW,
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+    }
+
+    const defaultIcon = new L.Icon(baseIconConfig)
+
+    const buracoIcon = new L.Icon({
+        ...baseIconConfig,
+        className: "buraco-icon",
+    })
+
+    const alagamentoIcon = new L.Icon({
+        ...baseIconConfig,
+        className: "alagamento-icon",
+    })
+
+    const iluminacaoIcon = new L.Icon({
+        ...baseIconConfig,
+        className: "iluminacao-icon",
+    })
+
+    const userLocationIcon = new L.Icon({
+        ...baseIconConfig,
+        className: "user-location-icon",
+    })
+
+    iconsRef.current = {
+        [PROBLEM_TYPES.BURACO]: buracoIcon,
+        [PROBLEM_TYPES.ALAGAMENTO]: alagamentoIcon,
+        [PROBLEM_TYPES.ILUMINACAO]: iluminacaoIcon,
+        default: defaultIcon,
+        userLocation: userLocationIcon,
+    }
+
+    return iconsRef.current
+    }, [L])
+
+    return { iconsRef, createIcons }
+}
