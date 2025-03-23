@@ -2,25 +2,22 @@
 "use client"
 import type React from "react"
 import { MapContent } from "./map-content"
-import { ReportMenu } from "@/components/report/report-menu"
-import { LocationControls } from "../location-controls/location-controls"
-import { TopMenu } from "@/components/menu/top-menu"
-import { useClientState } from "@/hooks/useClientState"
-import { useMenuState } from "@/hooks/useMenuState"
-import { useProblemReport } from "@/hooks/useProblemReport"
-import { useGeolocation } from "@/hooks/useGeolocation"
 
-const MapFullScreen = () => {
+import { useClientState } from "@/hooks/useClientState"
+
+interface MapFullScreenProps {
+    selectedProblemType: string | null;
+    handleProblemSelect: (problemType: string) => void;
+    handleConfirmProblem: () => void;
+    userConfirmedProblem: boolean;
+    resetConfirmation: () => void;
+}
+const MapFullScreen: React.FC<MapFullScreenProps> = ({
+    selectedProblemType,
+    userConfirmedProblem,
+    resetConfirmation
+    }) => {
     const { isLoading, setIsLoading, isClient } = useClientState()
-    const { menuOpen, reportMenuOpen, toggleMenu, toggleReportMenu } = useMenuState()
-    const {
-        selectedProblemType,
-        userConfirmedProblem,
-        handleProblemSelect,
-        handleConfirmProblem,
-        resetConfirmation
-    } = useProblemReport()
-    const { centerOnUserLocation } = useGeolocation()
 
     return (
     <>
@@ -39,26 +36,6 @@ const MapFullScreen = () => {
         />
         )}
 
-        {/* Top Menu Component */}
-        <TopMenu 
-            menuOpen={menuOpen}
-            toggleMenu={toggleMenu}
-        />
-
-        {/* Location Controls Component */}
-        <LocationControls 
-            centerOnUserLocation={centerOnUserLocation}
-            toggleReportMenu={toggleReportMenu}
-        />
-
-        {/* Report Problem Menu */}
-        <ReportMenu
-            reportMenuOpen={reportMenuOpen}
-            toggleReportMenu={toggleReportMenu}
-            selectedProblemType={selectedProblemType}
-            handleProblemSelect={handleProblemSelect}
-            handleConfirmProblem={handleConfirmProblem}
-        />
 
         <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
             <div className="bg-white px-4 py-2 rounded-full shadow-md text-sm">
