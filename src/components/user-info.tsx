@@ -1,8 +1,6 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
 import { UserData } from "@/application/entities/User";
-import { Icon } from "./icons";
-import { Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import React from "react";
 
 interface UserInfoProps {
   user: UserData | null;
@@ -13,7 +11,6 @@ interface UserInfoProps {
 export const UserInfo: React.FC<UserInfoProps> = ({
   user,
   handleLogin,
-  handleLogout,
 }) => {
   const localStorageUser =
     typeof window !== "undefined" && localStorage.getItem("user") !== null
@@ -21,13 +18,11 @@ export const UserInfo: React.FC<UserInfoProps> = ({
       : null;
   return (
     <>
-      {user || (localStorageUser && localStorage.getItem("user") != null)  ? (
+      {user || (localStorageUser && localStorage.getItem("user") != null) ? (
         <div className="flex flex-col text-primary mb-4 p-4 bg-background rounded-sm">
           <div className="grid grid-cols-[1fr,auto,auto] items-center gap-2">
             <div className="flex items-center text-lg font-semibold truncate">
-              <span className="text-primary">
-                {user?.displayName ?? 0}
-              </span>
+              <span className="text-primary">{user?.displayName ?? 0}</span>
             </div>
           </div>
         </div>
@@ -40,6 +35,6 @@ export const UserInfo: React.FC<UserInfoProps> = ({
           </div>
         </div>
       )}
-      </>
+    </>
   );
 };

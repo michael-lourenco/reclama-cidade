@@ -1,5 +1,7 @@
 // useClientState.ts
-import { useState, useEffect } from "react"
+"use client";
+
+import { useEffect, useState } from "react";
 
 export function useClientState() {
   const [isLoading, setIsLoading] = useState(true)

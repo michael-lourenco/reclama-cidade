@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Search, Locate } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Locate, Search } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface MapCardProps {
   title?: string;
@@ -37,16 +36,17 @@ const MapContent = ({
     if (!mapRef.current) return;
 
     // Importar dinamicamente o Leaflet
-    import("leaflet").then((L) => {
+    import("leaflet").then(L => {
       // Corrigir os ícones
 
       //delete L.Icon.Default.prototype._getIconUrl;
 
-      
       L.Icon.Default.mergeOptions({
         iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+        iconRetinaUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+        shadowUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
       });
 
       // Se já temos um mapa, não faça nada
@@ -54,12 +54,16 @@ const MapContent = ({
 
       // Inicializar o mapa
       console.log("Inicializando mapa Leaflet");
-      
-      const mapInstance = L.map(mapRef.current!).setView(defaultLocation, defaultZoom);
+
+      const mapInstance = L.map(mapRef.current!).setView(
+        defaultLocation,
+        defaultZoom
+      );
 
       // Adicionar o tile layer
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19,
       }).addTo(mapInstance);
 
@@ -70,7 +74,7 @@ const MapContent = ({
       // Permitir clicar no mapa para adicionar/mover o marcador
       mapInstance.on("click", (e: any) => {
         const { lat, lng } = e.latlng;
-        
+
         if (marker) {
           marker.setLatLng([lat, lng]);
         } else {
@@ -79,12 +83,12 @@ const MapContent = ({
           setMarker(newMarker);
         }
       });
-      
+
       // Atualizar estado
       setMap(mapInstance);
       setMarker(initialMarker);
       setIsLoading(false);
-      
+
       // Forçar recálculo de tamanho após a renderização completa
       setTimeout(() => {
         mapInstance.invalidateSize();
@@ -102,28 +106,28 @@ const MapContent = ({
 
   const handleSearch = async () => {
     if (!searchQuery || !map) return;
-    
+
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
           searchQuery
         )}&format=json&limit=1`
       );
-      
+
       const data = await response.json();
-      
+
       if (data && data.length > 0) {
         const { lat, lon } = data[0];
         const newLatLng = [parseFloat(lat), parseFloat(lon)];
-        
+
         // Atualizar o mapa e o marcador
         map.setView(newLatLng, 13);
-        
+
         if (marker) {
           marker.setLatLng(newLatLng);
         } else {
           const L = await import("leaflet");
-          const newMarker = L.marker(lat,lon).addTo(map);
+          const newMarker = L.marker(lat, lon).addTo(map);
           newMarker.bindPopup("Localização pesquisada").openPopup();
           setMarker(newMarker);
         }
@@ -135,15 +139,15 @@ const MapContent = ({
 
   const getUserLocation = async () => {
     if (!map) return;
-    
+
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        async (position) => {
+        async position => {
           const { latitude, longitude } = position.coords;
-          
+
           // Atualizar o mapa e o marcador
           map.setView([latitude, longitude], 15);
-          
+
           if (marker) {
             marker.setLatLng([latitude, longitude]);
           } else {
@@ -153,7 +157,7 @@ const MapContent = ({
             setMarker(newMarker);
           }
         },
-        (error) => {
+        error => {
           console.error("Erro ao obter localização do usuário:", error);
         }
       );
@@ -167,28 +171,37 @@ const MapContent = ({
           type="text"
           placeholder="Pesquisar localização..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           className="flex-1"
-          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+          onKeyDown={e => e.key === "Enter" && handleSearch()}
         />
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={handleSearch} 
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleSearch}
           title="Pesquisar localização"
         >
           <Search className="h-4 w-4" />
         </Button>
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={getUserLocation} 
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={getUserLocation}
           title="Usar minha localização"
         >
           <Locate className="h-4 w-4" />
         </Button>
       </div>
-      <div ref={mapRef} style={{ height: height.replace('h-', '') === '96' ? '24rem' : height.replace('h-', '') + 'rem' }} className="w-full" />
+      <div
+        ref={mapRef}
+        style={{
+          height:
+            height.replace("h-", "") === "96"
+              ? "24rem"
+              : height.replace("h-", "") + "rem",
+        }}
+        className="w-full"
+      />
     </>
   );
 };
@@ -221,22 +234,23 @@ const MapCard: React.FC<MapCardProps> = ({
             <div className="h-9 w-9 bg-muted rounded"></div>
           </div>
         ) : null}
-        
+
         {!isClient || isLoading ? (
           <Skeleton className={height + " w-full"} />
         ) : null}
-        
+
         {isClient && (
-          <MapContent 
+          <MapContent
             defaultLocation={defaultLocation}
             defaultZoom={defaultZoom}
             height={height}
             setIsLoading={setIsLoading}
           />
         )}
-        
+
         <div className="p-3 bg-card text-xs text-muted-foreground border-t">
-          Clique no mapa para selecionar uma localização. Use os botões para pesquisar ou usar sua localização atual.
+          Clique no mapa para selecionar uma localização. Use os botões para
+          pesquisar ou usar sua localização atual.
         </div>
       </CardContent>
     </Card>

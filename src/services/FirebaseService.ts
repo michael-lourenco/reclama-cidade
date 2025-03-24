@@ -1,8 +1,6 @@
-import { collection, getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, Firestore, DocumentSnapshot, DocumentData } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, Auth } from "firebase/auth";
-import axios from "axios";
-import { v4 as uuidv4 } from "uuid";
+import { Auth, browserLocalPersistence, getAuth, onAuthStateChanged, setPersistence } from "firebase/auth";
+import { doc, DocumentData, DocumentSnapshot, Firestore, getDoc, getFirestore, setDoc } from "firebase/firestore";
 
 export interface Round {
   dice_1: number;
@@ -253,7 +251,7 @@ export {
   initFirebase,
   initUserFirebase,
   updateUserCredits,
-  updateUserCurrency,
+  updateUserCurrency
 };
 
-export type { UserData, MatchHistoryEntry };
+  export type { MatchHistoryEntry, UserData };

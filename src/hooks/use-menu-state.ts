@@ -1,6 +1,6 @@
-
+"use client";
 // useMenuState.ts
-import { useState } from "react"
+import { useState } from "react";
 
 export function useMenuState() {
   const [menuOpen, setMenuOpen] = useState(false)

@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserData } from "@/services/auth/NextAuthenticationService";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Trophy, Coins, GamepadIcon } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 interface UserStatisticsProps {
   user: UserData | null;
@@ -10,12 +9,9 @@ interface UserStatisticsProps {
   handleLogout: () => void;
 }
 
-export const UserStatistics: React.FC<UserStatisticsProps> = ({
-  user,
-  handleLogin,
-  handleLogout,
-}) => {
-  const localStorageUser = localStorage.getItem("user") != null ? localStorage.getItem("user"): {};
+export const UserStatistics: React.FC<UserStatisticsProps> = ({ user }) => {
+  const localStorageUser =
+    localStorage.getItem("user") != null ? localStorage.getItem("user") : {};
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,29 +28,6 @@ export const UserStatistics: React.FC<UserStatisticsProps> = ({
     }
   }, [user]);
 
-  const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: number; icon: any; color: string }) => (
-    <Card className="bg-background border-none hover:bg-background transition-all duration-300">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-primary">
-          {title}
-        </CardTitle>
-        <div className={`p-2 rounded-lg ${color}`}>
-          <Icon className="h-5 w-5" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-1">
-          <div className="text-3xl font-bold text-primary">{value}</div>
-          <div className="text-xs text-primary">
-            {title === "Best Score" && "Personal Record"}
-            {title === "Coins" && "Available Balance"}
-            {title === "Total Games" && "Games Played"}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   return (
     <>
       {user || (localStorageUser && localStorage.getItem("user") != null) ? (
@@ -66,11 +39,11 @@ export const UserStatistics: React.FC<UserStatisticsProps> = ({
                   <Avatar className="w-24 h-24 border-4 border-background">
                     <AvatarImage
                       src={avatarUrl || "/api/placeholder/150/150"}
-                      alt="User avatar" 
+                      alt="User avatar"
                       className="object-cover"
                     />
                     <AvatarFallback className="bg-background">
-                      {user?.displayName?.charAt(0) || 'MP'}
+                      {user?.displayName?.charAt(0) || "MP"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="absolute -bottom-2 right-0 bg-chart-2 w-4 h-4 rounded-full border-2 border-background"></div>

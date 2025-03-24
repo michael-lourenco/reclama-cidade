@@ -1,10 +1,9 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Icon } from "./icons"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 const menuItems = [
   { icon: "LuHome", label: "Home", href: "/" },
@@ -31,7 +30,6 @@ export function Footer() {
                       className="flex-1 flex flex-col items-center justify-center h-16 space-y-1 rounded-none"
                     >
                       <Link href={item.href}>
-                        {/* <Icon name={item.icon} className="h-5 w-5" /> */}
                         <span className="text-xs font-medium">{item.label}</span>
                       </Link>
                     </Button>

@@ -7,6 +7,7 @@ Reclama Cidade é uma plataforma inovadora que capacita cidadãos a participarem
 ## 🎯 O Problema
 
 As cidades enfrentam desafios diários com:
+
 - Buracos em vias públicas
 - Problemas de iluminação
 - Alagamentos
@@ -18,6 +19,7 @@ As cidades enfrentam desafios diários com:
 Reclama Cidade oferece:
 
 ### Para Cidadãos
+
 - Reporte rápido e fácil de problemas
 - Mapa interativo com visualização em tempo real
 - Acompanhamento do status das ocorrências
@@ -25,6 +27,7 @@ Reclama Cidade oferece:
 - Interface intuitiva e amigável
 
 ### Para Gestores Públicos
+
 - Dashboard com dados em tempo real
 - Mapeamento preciso de áreas problemáticas
 - Priorização inteligente de intervenções
@@ -64,6 +67,7 @@ Reclama Cidade oferece:
 ## 👥 Time
 
 Nossa equipe combina experiência em:
+
 - Desenvolvimento de Software
 - Gestão Pública
 - UX/UI Design
@@ -79,15 +83,15 @@ Nossa equipe combina experiência em:
 ## 📬 Contato
 
 Para parcerias e demonstrações:
-- Email: kontempler@gmail.com
+
+- Email: <kontempler@gmail.com>
 - Website: [www.reclamacidade.com](https://reclama-cidade.vercel.app/)
 
 ---
 
 *Reclama Cidade - Construindo juntos cidades mais inteligentes e participativas.*
 
-
-# Regras de negocio para desenvover
+## Regras de negocio para desenvover
 
 - [DONE] O usuário não seleciona o ponto no mapa, apenas na localizacao de onde está atualmente. Isso será feito automaticamente pelo aplicativo.
 - [DONE] O usuário pode fazer uma reclamacao no ponto em que está. Ele não consegue gerenciar as reclamacoes que fez.
@@ -102,9 +106,10 @@ Para parcerias e demonstrações:
 - Neste caso, vai aparecer para o usuário que o problema foi marcado como solucionado de forma parcial
 - Ainda assim é neccessaria a votação para ir realmente para solucionado
 
-# Icones
-<a href="https://www.flaticon.com/free-icons/maps-and-location" title="maps and location icons">Maps and location icons created by afif fudin - Flaticon</a>
-<a href="https://www.flaticon.com/free-icons/3d-map" title="3d map icons">3d map icons created by Freepik - Flaticon</a>
-<a href="https://www.flaticon.com/free-icons/hole" title="hole icons">Hole icons created by Paul J. - Flaticon</a>
-<a href="https://www.flaticon.com/free-icons/flood" title="flood icons">Flood icons created by Freepik - Flaticon</a>
-<a href="https://www.flaticon.com/free-icons/lighting" title="lighting icons">Lighting icons created by Freepik - Flaticon</a>
+## Icones
+
+[Maps and location icons created by afif fudin - Flaticon](https://www.flaticon.com/free-icons/maps-and-location "maps and location icons")
+[3d map icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/3d-map "3d map icons")
+[Hole icons created by Paul J. - Flaticon](https://www.flaticon.com/free-icons/hole "hole icons")
+[Flood icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/flood "flood icons")
+[Lighting icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/lighting "lighting icons")

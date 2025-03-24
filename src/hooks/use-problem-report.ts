@@ -1,5 +1,6 @@
 // useProblemReport.ts
-import { useState, useEffect } from "react"
+"use client"
+import { useEffect, useState } from "react"
 
 export function useProblemReport() {
     const [selectedProblemType, setSelectedProblemType] = useState<string | null>(null)

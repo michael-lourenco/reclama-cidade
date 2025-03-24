@@ -1,36 +1,41 @@
-"use client"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Locate, AlertTriangle } from "lucide-react"
+"use client";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Locate } from "lucide-react";
+import { DrawerDialogDemo } from "../drawer-default";
 
 interface LocationControlsProps {
-  centerOnUserLocation: () => void
-  toggleReportMenu: () => void
+  centerOnUserLocation: () => void;
+  toggleReportMenu: () => void;
 }
 
-const LocationControls = ({ centerOnUserLocation, toggleReportMenu }: LocationControlsProps) => {
+const LocationControls = ({
+  centerOnUserLocation,
+  toggleReportMenu,
+}: LocationControlsProps) => {
   return (
-    <div className="absolute bottom-24 right-4 flex flex-col gap-2 z-10">
+    <div className="absolute bottom-24 right-4 flex flex-col gap-2 z-[9999]">
+      <DrawerDialogDemo />
       <Button
-        variant="default"
+        variant="floating"
         size="icon"
-        className="bg-white text-black hover:bg-gray-100 shadow-md rounded-full h-12 w-12"
+        className="shadow-md rounded-full h-12 w-12"
         title="Usar minha localização"
         onClick={centerOnUserLocation}
       >
-        <Locate className="h-5 w-5" />
+        <Locate />
       </Button>
       <Button
-        variant="default"
+        variant="floating"
         size="icon"
-        className="bg-white text-black hover:bg-gray-100 shadow-md rounded-full h-12 w-12"
+        className="shadow-md rounded-full h-12 w-12"
         title="Reportar problema"
         onClick={toggleReportMenu}
       >
-        <AlertTriangle className="h-5 w-5" />
+        <AlertTriangle />
       </Button>
     </div>
-  )
-}
+  );
+};
 
-export { LocationControls }
+export { LocationControls };
+

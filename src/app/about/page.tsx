@@ -1,23 +1,17 @@
-"use client"
+"use client";
 
-import { useNavigation } from "@/hooks/useNavigation"
-import { useAuth } from "@/hooks/useAuth"
-import { Button } from "@/components/ui/button"
-import { UserInfo } from "@/components/UserInfo"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Icon } from "@/components/icons"
-import { Footer } from "@/components/Footer"
+import { Footer } from "@/components/Footer";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function About() {
-  const { user, loading, status, handleLogin, handleLogout } = useAuth()
-  const navigationService = useNavigation()
+  const { loading } = useAuth();
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <p>Carregando...</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -29,6 +23,5 @@ export default function About() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }
-

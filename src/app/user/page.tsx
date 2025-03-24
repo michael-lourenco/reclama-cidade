@@ -1,27 +1,13 @@
 "use client";
 
-import React from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { UserInfo } from "@/components/UserInfo";
-import { UserStatistics } from "@/components/user/UserStatistics";
-import { useNavigation } from "@/hooks/useNavigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
-import { UserLogout } from "@/components/UserLogout";
-
-const formatDate = (date: Date): string => {
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
+import { Card, CardContent } from "@/components/ui/card";
+import { UserInfo } from "@/components/user-info";
+import { UserLogout } from "@/components/user-logout";
+import UserStatistics from "@/components/user/user-statistics";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function UserDashboard() {
-
   const { user, loading, status, handleLogin, handleLogout } = useAuth();
 
   if (loading) {
@@ -58,7 +44,6 @@ export default function UserDashboard() {
                     handleLogout={handleLogout}
                   />
                 </>
-
               )}
             </CardContent>
           </Card>

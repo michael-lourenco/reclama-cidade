@@ -13,7 +13,7 @@ export const getProblemLabel = (type: string): string => {
   }
 }
 
-export const formatMarkerDate = (createdAt: Date | any): Date => {
+export const formatMarkerDate = (createdAt: Date | { seconds: number } | string | number): Date => {
   if (createdAt instanceof Date) {
     return createdAt
   } else if (createdAt && typeof createdAt === "object" && "seconds" in createdAt) {
@@ -24,7 +24,11 @@ export const formatMarkerDate = (createdAt: Date | any): Date => {
   }
 }
 
-export const sortMarkersByDate = (markers: any[]) => {
+interface Marker {
+  createdAt: Date | { seconds: number }
+}
+
+export const sortMarkersByDate = (markers: Marker[]) => {
   return [...markers].sort((a, b) => {
     const dateA = formatMarkerDate(a.createdAt)
     const dateB = formatMarkerDate(b.createdAt)

@@ -7,7 +7,7 @@ export interface Marker {
   type: string
   userEmail: string
   createdAt: Date | any // Supporting both Date and Firestore Timestamp
-  likedBy?: string[] 
+  likedBy?: string[]
 }
 
 export interface MapIcon {
@@ -23,11 +23,11 @@ export interface MapIcon {
 
 export interface MapRefs {
   mapRef: React.RefObject<HTMLDivElement>
-  mapInstanceRef: React.MutableRefObject<any>
-  currentMarkerRef: React.MutableRefObject<any>
-  leafletRef: React.MutableRefObject<any>
-  iconsRef: React.MutableRefObject<Record<string, any>>
-  mapInitializedRef: React.MutableRefObject<boolean>
+  mapInstanceRef: React.RefObject<any>
+  currentMarkerRef: React.RefObject<any>
+  leafletRef: React.RefObject<any>
+  iconsRef: React.RefObject<Record<string, any>>
+  mapInitializedRef: React.RefObject<boolean>
 }
 
 export interface MapContentProps {

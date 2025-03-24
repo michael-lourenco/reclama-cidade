@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import {
+  handleAuthResponse,
   signInWithGoogle,
   signOutFromGoogle,
-  handleAuthResponse,
 } from "@/services/auth/NextAuthenticationService";
 import {
-  fetchUserData,
-  UserData,
-  initUserFirebase,
-  dbFirestore,
   authFirestore,
+  dbFirestore,
+  fetchUserData,
+  initUserFirebase,
+  UserData,
 } from "@/services/firebase/FirebaseService";
-import { onAuthStateChanged, Auth } from "firebase/auth";
+import { Auth, onAuthStateChanged } from "firebase/auth";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 export function useAuth() {
   const localStorageUser =
