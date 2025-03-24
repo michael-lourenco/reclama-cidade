@@ -23,13 +23,12 @@ const MapContent = ({
   const { markers, setMarkers, loadMarkersFromFirebase, saveMarkerToFirebase } = useMarkers()
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
-  const currentMarkerRef = useRef<any>(null)
+  const userLocationMarkerRef = useRef<any>(null) // Renomeado para clareza
   const leafletRef = useRef<any>(null)
   const iconsRef = useRef<Record<string, any>>({})
-  const mapInitializedRef = useRef<boolean>(false) // Nova ref para controlar a inicialização
+  const mapInitializedRef = useRef<boolean>(false)
   const defaultLocation: [number, number] = [-23.5902, -48.0338]
   const defaultZoom = 15
-
 
   // Handle confirmed problem selection and marker update
   useEffect(() => {
@@ -37,25 +36,14 @@ const MapContent = ({
       !userConfirmedProblem ||
       !selectedProblemType ||
       !mapInstanceRef.current ||
-      !currentMarkerRef.current ||
+      !userLocationMarkerRef.current ||
       !leafletRef.current
     ) {
       return
     }
 
-    // Get current position
-    const markerPosition = currentMarkerRef.current.getLatLng()
-
-    // Remove current marker
-    mapInstanceRef.current.removeLayer(currentMarkerRef.current)
-
-    // Add new marker with custom icon
-    const L = leafletRef.current
-    const newMarker = L.marker([markerPosition.lat, markerPosition.lng], {
-      icon: iconsRef.current[selectedProblemType],
-    }).addTo(mapInstanceRef.current)
-
-    newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup()
+    // Get current position of user marker
+    const markerPosition = userLocationMarkerRef.current.getLatLng()
 
     // Salvar o marcador no Firebase
     const saveMarkerToFirebase = async () => {
@@ -82,6 +70,14 @@ const MapContent = ({
         
         // Atualizar o estado local de marcadores
         setMarkers(prev => [...prev, newMarkerData])
+        
+        // Adicionar marker no mapa com o ícone correto (mas manter o user location marker)
+        const L = leafletRef.current
+        const newMarker = L.marker([markerPosition.lat, markerPosition.lng], {
+          icon: iconsRef.current[selectedProblemType],
+        }).addTo(mapInstanceRef.current)
+
+        newMarker.bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`).openPopup()
       } catch (error) {
         console.error("Erro ao salvar marcador no Firebase:", error)
       }
@@ -90,12 +86,9 @@ const MapContent = ({
     // Executar a função de salvamento
     saveMarkerToFirebase()
 
-    // Update current marker reference
-    currentMarkerRef.current = newMarker
-
     // Reset confirmation flag
     resetConfirmation()
-  }, [userConfirmedProblem, selectedProblemType, getProblemLabel, resetConfirmation])
+  }, [userConfirmedProblem, selectedProblemType, getProblemLabel, resetConfirmation, setMarkers])
 
   // Add Leaflet CSS
   const addLeafletCSS = useCallback(() => {
@@ -216,11 +209,23 @@ const MapContent = ({
             className: "iluminacao-icon",
           })
 
+          const userLocationIcon = new L.Icon({
+            iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+            iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+            shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+            className: "user-location-icon",
+          })
+
           iconsRef.current = {
             [PROBLEM_TYPES.BURACO]: buracoIcon,
             [PROBLEM_TYPES.ALAGAMENTO]: alagamentoIcon,
             [PROBLEM_TYPES.ILUMINACAO]: iluminacaoIcon,
             default: defaultIcon,
+            userLocation: userLocationIcon,
           }
         }
 
@@ -295,32 +300,10 @@ const MapContent = ({
             const mostRecent = sortedMarkers[0]
             mapInstance.setView([mostRecent.lat, mostRecent.lng], defaultZoom)
           }
-        } else {
-          // Add default marker if no saved markers
-          const tempMarker = L.marker(defaultLocation, { icon: iconsRef.current.default })
-            .addTo(mapInstance)
-            .bindPopup("Clique para reportar um problema")
-            .openPopup()
-
-          currentMarkerRef.current = tempMarker
         }
 
-        // Allow clicking on map to add/move marker
-        mapInstance.on("click", (e: LeafletMouseEvent) => {
-          const { lat, lng } = e.latlng
-
-          if (currentMarkerRef.current) {
-            mapInstance.removeLayer(currentMarkerRef.current)
-          }
-
-          // Create new temporary marker
-          const newMarker = L.marker([lat, lng], { icon: iconsRef.current.default })
-            .addTo(mapInstance)
-            .bindPopup("Clique em 'Reportar problema' para identificar o tipo")
-            .openPopup()
-
-          currentMarkerRef.current = newMarker
-        })
+        // Remova o listener de click do mapa para não permitir criar novos pontos
+        // mapInstance.off("click");
 
         // Get user location and continuously track it
         if ("geolocation" in navigator) {
@@ -332,33 +315,29 @@ const MapContent = ({
               // Update map view
               mapInstance.setView([latitude, longitude], defaultZoom)
 
-              // Create or move user location marker
-              if (currentMarkerRef.current) {
-                currentMarkerRef.current.setLatLng([latitude, longitude])
-                currentMarkerRef.current.bindPopup("Sua localização").openPopup()
-              } else {
-                // Create a special marker for user location
-                const userIcon = new L.Icon({
-                  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-                  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-                  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-                  iconSize: [25, 41],
-                  iconAnchor: [12, 41],
-                  popupAnchor: [1, -34],
-                  shadowSize: [41, 41],
-                  className: "user-location-icon",
-                })
-
-                currentMarkerRef.current = L.marker([latitude, longitude], {
-                  icon: userIcon,
-                  zIndexOffset: 1000, // Make sure user marker is on top
-                })
-                  .addTo(mapInstance)
-                  .bindPopup("Sua localização")
-              }
+              // Create user location marker
+              const userIcon = iconsRef.current.userLocation;
+              
+              userLocationMarkerRef.current = L.marker([latitude, longitude], {
+                icon: userIcon,
+                zIndexOffset: 1000, // Make sure user marker is on top
+              })
+                .addTo(mapInstance)
+                .bindPopup("Sua localização")
+                .openPopup();
             },
             (error) => {
               console.error("Erro ao obter localização do usuário:", error)
+              
+              // Cria o marcador na posição padrão se não conseguir obter a localização
+              const userIcon = iconsRef.current.userLocation;
+              userLocationMarkerRef.current = L.marker(defaultLocation, {
+                icon: userIcon,
+                zIndexOffset: 1000,
+              })
+                .addTo(mapInstance)
+                .bindPopup("Sua localização (aproximada)")
+                .openPopup();
             },
           )
 
@@ -371,8 +350,8 @@ const MapContent = ({
               mapInstance.setView([latitude, longitude], mapInstance.getZoom())
 
               // Update user marker position
-              if (currentMarkerRef.current) {
-                currentMarkerRef.current.setLatLng([latitude, longitude])
+              if (userLocationMarkerRef.current) {
+                userLocationMarkerRef.current.setLatLng([latitude, longitude])
               }
             },
             (error) => {
@@ -414,8 +393,9 @@ const MapContent = ({
 
     // Add event listener for centering on user
     const handleCenterOnUser = (e: CustomEvent) => {
-      if (mapInstanceRef.current && e.detail) {
-        mapInstanceRef.current.setView([e.detail.lat, e.detail.lng], defaultZoom)
+      if (mapInstanceRef.current && userLocationMarkerRef.current) {
+        const latlng = userLocationMarkerRef.current.getLatLng();
+        mapInstanceRef.current.setView([latlng.lat, latlng.lng], defaultZoom);
       }
     }
 
