@@ -2,14 +2,7 @@ import {  doc, setDoc, updateDoc, Firestore } from "firebase/firestore";
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { fetchUserData } from "../firebase/FirebaseService";
-import { Credit, UserData } from "@/application/entities/User";
-
-interface CurrencyData {
-  value: number;
-  updatedAt: Date;
-}
-
-let globalUser: UserData | null = null;
+import { UserData } from "@/application/entities/User";
 
 async function signInWithGoogle(): Promise<void> {
   try {
@@ -24,7 +17,6 @@ async function signOutUser(): Promise<void> {
   try {
     await signOut({ callbackUrl: "/" });
     localStorage.removeItem("user");
-    globalUser = null;
   } catch (error) {
     console.error("Error during sign out:", error);
     throw error;
@@ -57,7 +49,6 @@ async function handleAuthResponse(session: Session | null, db: Firestore): Promi
       userData.photoURL = session.user.image;
     }
 
-    globalUser = userData;
     localStorage.setItem("user", JSON.stringify(userData));
     return userData;
   } catch (error) {

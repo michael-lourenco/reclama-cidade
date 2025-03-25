@@ -3,24 +3,6 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, Auth } from "firebase/auth";
 import { UserData } from "@/application/entities/User";
 
-interface CurrencyData {
-  value: number;
-  updatedAt: Date;
-}
-
-interface Credit {
-  value: number;
-  updatedAt: Date;
-}
-
-interface TotalGamesData {
-  value: number;
-  updatedAt: Date;
-}
-
-interface Votes {
-  [key: string]: string;
-}
 export interface UserMarker {
   id: string;
   lat: number;

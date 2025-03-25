@@ -1,12 +1,13 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { JWT } from "next-auth/jwt";
+import { Session } from "next-auth";
 
 interface Token extends JWT {
   sub?: string;
 }
 
-const handler = NextAuth({
+const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.NEXT_PUBLIC_GOOGLE_CREDENTIALS_OAUTH_CLIENT_ID!,
@@ -18,13 +19,15 @@ const handler = NextAuth({
     async jwt({ token }: { token: Token }) {
       return token;
     },
-    async session({ session, token }: { session: any; token: Token }) {
+    async session({ session, token }: { session: Session; token: Token }) {
       if (session.user && token.sub) {
-        session.user.id = token.sub;
+        (session.user as { id?: string }).id = token.sub;
       }
       return session;
     },
   },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

@@ -13,6 +13,7 @@ import {
 import { Auth, onAuthStateChanged } from "firebase/auth";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { Firestore } from 'firebase/firestore';
 
 export function useAuth() {
   const localStorageUser =
@@ -26,7 +27,7 @@ export function useAuth() {
     (localStorageUser as UserData) || null
   );
   const [loading, setLoading] = useState(false);
-  const [db, setDb] = useState<any>(null);
+  const [db, setDb] = useState<Firestore | null>(null);
 
   const handleLogin = async () => {
     await signInWithGoogle();
@@ -71,9 +72,11 @@ export function useAuth() {
     if (auth) {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
-          const userData = await fetchUserData(db, user.email!);
-          if (userData) {
-            setUser(userData);
+          if(db !== null) {
+            const userData = await fetchUserData(db, user.email!);
+            if (userData) {
+              setUser(userData);
+            }
           }
         } else {
           setUser(null);
