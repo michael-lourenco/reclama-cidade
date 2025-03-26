@@ -1,13 +1,9 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import type React from "react"
+
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   Drawer,
   DrawerClose,
@@ -17,51 +13,39 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { PiWarningCircle, PiX } from "react-icons/pi";
+} from "@/components/ui/drawer"
+import { useMediaQuery } from "@/hooks/use-media-query"
+import { cn } from "@/lib/utils"
+import { useState } from "react"
+import { PiWarningCircle, PiX } from "react-icons/pi"
 
 export function DrawerDialogDemo() {
-  const [open, setOpen] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const [open, setOpen] = useState(false)
+  const isDesktop = useMediaQuery("(min-width: 768px)")
 
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
-          <Button
-            variant="floating"
-            size="icon"
-            className="shadow-md rounded-full h-12 w-12"
-            title="Reportar problema"
-          >
+          <Button variant="floating" size="icon" className="shadow-md rounded-full h-12 w-12" title="Reportar problema">
             <PiWarningCircle className="h-5 w-5" />
           </Button>
         </DrawerTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit profile</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile here. Click save when you're done.
-            </DialogDescription>
+            <DialogDescription>Make changes to your profile here. Click save when you&apos;re done.</DialogDescription>
           </DialogHeader>
           <ProblemForm />
         </DialogContent>
       </Dialog>
-    );
+    )
   }
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button
-          variant="floating"
-          size="icon"
-          className="shadow-md rounded-full h-12 w-12"
-          title="Reportar problema"
-        >
+        <Button variant="floating" size="icon" className="shadow-md rounded-full h-12 w-12" title="Reportar problema">
           <PiWarningCircle className="h-5 w-5" />
         </Button>
       </DrawerTrigger>
@@ -73,9 +57,7 @@ export function DrawerDialogDemo() {
               <PiX name="PiX" />
             </DrawerClose>
           </DrawerTitle>
-          <DrawerDescription>
-            Make changes to your profile here. Click save when re done.
-          </DrawerDescription>
+          <DrawerDescription>Make changes to your profile here. Click save when you&apos;re done.</DrawerDescription>
         </DrawerHeader>
         <ProblemForm className="px-4" />
         <DrawerFooter className="pt-2">
@@ -85,7 +67,7 @@ export function DrawerDialogDemo() {
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
-  );
+  )
 }
 
 function ProblemForm({ className }: React.ComponentProps<"form">) {
@@ -96,5 +78,6 @@ function ProblemForm({ className }: React.ComponentProps<"form">) {
         <Button variant="outline">Cancel</Button>
       </DrawerClose>
     </form>
-  );
+  )
 }
+
