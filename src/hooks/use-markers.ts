@@ -13,7 +13,7 @@ export const useMarkers = () => {
       const fetchedMarkers = await getMarkers(dbFirestore)
       // Ensure all markers have the necessary properties
       const validMarkers = fetchedMarkers.filter(
-        (marker: any) => marker && marker.lat !== undefined && marker.lng !== undefined && marker.type !== undefined,
+        (marker: Partial<Marker>) => marker && marker.lat !== undefined && marker.lng !== undefined && marker.type !== undefined,
       ) as Marker[]
 
       setMarkers(validMarkers)
@@ -59,4 +59,3 @@ export const useMarkers = () => {
 
   return { markers, setMarkers, loadMarkersFromFirebase, saveMarkerToFirebase }
 }
-
