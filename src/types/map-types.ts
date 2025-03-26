@@ -1,12 +1,19 @@
 import type React from "react"
 
+// Define a type for Firestore Timestamp
+export interface FirestoreTimestamp {
+  toDate: () => Date;
+  seconds: number;
+  nanoseconds: number;
+}
+
 export interface Marker {
   id: string
   lat: number
   lng: number
   type: string
   userEmail: string
-  createdAt: Date | any // Supporting both Date and Firestore Timestamp
+  createdAt: Date | FirestoreTimestamp // Using specific type instead of any
   likedBy?: string[]
 }
 
@@ -21,12 +28,29 @@ export interface MapIcon {
   className?: string
 }
 
+// Define types for the map-related objects
+export interface LeafletMap {
+  setView: (center: [number, number], zoom: number) => void;
+  // Add other methods you use
+}
+
+export interface LeafletMarker {
+  setLatLng: (latLng: [number, number]) => void;
+  // Add other methods you use
+}
+
+export interface LeafletInstance {
+  map: (element: HTMLElement) => LeafletMap;
+  marker: (latLng: [number, number]) => LeafletMarker;
+  // Add other properties you use
+}
+
 export interface MapRefs {
   mapRef: React.RefObject<HTMLDivElement>
-  mapInstanceRef: React.RefObject<any>
-  currentMarkerRef: React.RefObject<any>
-  leafletRef: React.RefObject<any>
-  iconsRef: React.RefObject<Record<string, any>>
+  mapInstanceRef: React.RefObject<LeafletMap>
+  currentMarkerRef: React.RefObject<LeafletMarker>
+  leafletRef: React.RefObject<LeafletInstance>
+  iconsRef: React.RefObject<Record<string, MapIcon>>
   mapInitializedRef: React.RefObject<boolean>
 }
 
@@ -36,4 +60,3 @@ export interface MapContentProps {
   userConfirmedProblem: boolean
   resetConfirmation: () => void
 }
-
