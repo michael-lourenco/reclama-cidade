@@ -4,18 +4,24 @@ import { DEFAULT_LOCATION, DEFAULT_ZOOM } from "@/constants/map-constants"
 import { useMapStyles } from "@/hooks/use-map-styles"
 import { useMapIcons } from "@/hooks/use-map-icons"
 import type { LeafletMouseEvent } from "leaflet"
-import type { MapRefs } from "@/types/map-types"
+import type { MapRefs, MapIcon } from "@/types/map-types"
 
-export const useMap = (onMapClick: (e: LeafletMouseEvent) => void, setIsLoading: (loading: boolean) => void) => {
+export const useMap = (onMapClick: (e: LeafletMouseEvent) => void) => {
+
   // Create all necessary refs
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
   const currentMarkerRef = useRef<any>(null)
   const leafletRef = useRef<any>(null)
   const mapInitializedRef = useRef<boolean>(false)
+  // Create a separate ref for icons that matches the expected type
+  const typedIconsRef = useRef<Record<string, MapIcon> | null>(null)
 
   // Get style hooks
   const { addLeafletCSS, addMarkerStyles } = useMapStyles()
+
+  // Initialize icons (must be called outside initializeMap to satisfy hook rules)
+  const { createIcons, iconsRef } = useMapIcons(leafletRef.current)
 
   // Initialize map
   const initializeMap = useCallback(async () => {
@@ -59,9 +65,30 @@ export const useMap = (onMapClick: (e: LeafletMouseEvent) => void, setIsLoading:
         mapInstance.invalidateSize()
       }, 100)
 
-      // Get icons
-      const { createIcons, iconsRef } = useMapIcons(L)
+      // Create icons
       createIcons()
+
+      // Map the Leaflet icons to our MapIcon interface
+      if (iconsRef.current) {
+        const mappedIcons: Record<string, MapIcon> = {}
+
+        Object.entries(iconsRef.current).forEach(([key, leafletIcon]) => {
+          // Extract the properties we need from the Leaflet icon
+          // You may need to adjust this based on the actual structure of LeafletIcon
+          mappedIcons[key] = {
+            iconUrl: leafletIcon.options.iconUrl,
+            iconRetinaUrl: leafletIcon.options.iconRetinaUrl || leafletIcon.options.iconUrl,
+            shadowUrl: leafletIcon.options.shadowUrl || "",
+            iconSize: leafletIcon.options.iconSize || [25, 41],
+            iconAnchor: leafletIcon.options.iconAnchor || [12, 41],
+            popupAnchor: leafletIcon.options.popupAnchor || [1, -34],
+            shadowSize: leafletIcon.options.shadowSize || [41, 41],
+            className: leafletIcon.options.className,
+          }
+        })
+
+        typedIconsRef.current = mappedIcons
+      }
 
       mapInitializedRef.current = true
       return { success: true, L, mapInstance, iconsRef }
@@ -70,7 +97,7 @@ export const useMap = (onMapClick: (e: LeafletMouseEvent) => void, setIsLoading:
       mapInitializedRef.current = false
       return { success: false, error }
     }
-  }, [addLeafletCSS, addMarkerStyles, onMapClick])
+  }, [addLeafletCSS, addMarkerStyles, onMapClick, createIcons])
 
   // Clean up map
   const cleanupMap = useCallback(() => {
@@ -78,6 +105,7 @@ export const useMap = (onMapClick: (e: LeafletMouseEvent) => void, setIsLoading:
       mapInstanceRef.current.remove()
       mapInstanceRef.current = null
       mapInitializedRef.current = false
+      typedIconsRef.current = null
     }
   }, [])
 
@@ -95,7 +123,8 @@ export const useMap = (onMapClick: (e: LeafletMouseEvent) => void, setIsLoading:
     }
   }, [])
 
-  const { iconsRef } = useMapIcons(leafletRef.current)
+  // We don't need this line as we're handling icons in initializeMap
+  // const { iconsRef } = useMapIcons(leafletRef.current)
 
   // Create refs object for easier passing
   const mapRefs: MapRefs = {
@@ -103,7 +132,7 @@ export const useMap = (onMapClick: (e: LeafletMouseEvent) => void, setIsLoading:
     mapInstanceRef,
     currentMarkerRef,
     leafletRef,
-    iconsRef: iconsRef,
+    iconsRef: typedIconsRef,
     mapInitializedRef,
   }
 
@@ -113,4 +142,3 @@ export const useMap = (onMapClick: (e: LeafletMouseEvent) => void, setIsLoading:
     cleanupMap,
   }
 }
-

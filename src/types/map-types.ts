@@ -46,11 +46,11 @@ export interface LeafletInstance {
 }
 
 export interface MapRefs {
-  mapRef: React.RefObject<HTMLDivElement>
+  mapRef: React.RefObject<HTMLDivElement | null>
   mapInstanceRef: React.RefObject<LeafletMap>
   currentMarkerRef: React.RefObject<LeafletMarker>
   leafletRef: React.RefObject<LeafletInstance>
-  iconsRef: React.RefObject<Record<string, MapIcon>>
+  iconsRef: React.RefObject<Record<string, MapIcon> | null>
   mapInitializedRef: React.RefObject<boolean>
 }
 
