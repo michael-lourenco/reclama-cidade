@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Reclama Cidade",
-  description: "Reclama Cidade",
+  title: "Me Arrume",
+  description: "Me Arrume",
 };
 
 export default function RootLayout({

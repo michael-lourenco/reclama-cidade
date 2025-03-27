@@ -1,8 +1,8 @@
-# Reclama Cidade - Transformando Cidades através da Participação Cidadã
+# Me Arrume - Transformando Cidades através da Participação Cidadã
 
 ## 🌟 Visão Geral
 
-Reclama Cidade é uma plataforma inovadora que capacita cidadãos a participarem ativamente na melhoria de suas cidades. Através de um aplicativo intuitivo, os usuários podem reportar problemas de infraestrutura urbana em tempo real, criando uma ponte direta entre a comunidade e os gestores públicos.
+Me Arrume é uma plataforma inovadora que capacita cidadãos a participarem ativamente na melhoria de suas cidades. Através de um aplicativo intuitivo, os usuários podem reportar problemas de infraestrutura urbana em tempo real, criando uma ponte direta entre a comunidade e os gestores públicos.
 
 ## 🎯 O Problema
 
@@ -16,7 +16,7 @@ As cidades enfrentam desafios diários com:
 
 ## 💡 Nossa Solução
 
-Reclama Cidade oferece:
+Me Arrume oferece:
 
 ### Para Cidadãos
 
@@ -85,11 +85,11 @@ Nossa equipe combina experiência em:
 Para parcerias e demonstrações:
 
 - Email: <kontempler@gmail.com>
-- Website: [www.reclamacidade.com](https://reclama-cidade.vercel.app/)
+- Website: [www.mearrume.com](https://reclama-cidade.vercel.app/)
 
 ---
 
-*Reclama Cidade - Construindo juntos cidades mais inteligentes e participativas.*
+*Me Arrume - Construindo juntos cidades mais inteligentes e participativas.*
 
 ## Regras de negocio para desenvover
 
