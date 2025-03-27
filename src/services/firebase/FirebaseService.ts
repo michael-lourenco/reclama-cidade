@@ -3,6 +3,13 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, Auth } from "firebase/auth";
 import { UserData } from "@/application/entities/User";
 
+
+export interface FirestoreTimestamp {
+  toDate: () => Date;
+  seconds: number;
+  nanoseconds: number;
+}
+
 export interface UserMarker {
   id: string;
   lat: number;
@@ -11,12 +18,13 @@ export interface UserMarker {
   createdAt: Date;
 }
 export interface Marker {
-  id: string;
-  lat: number;
-  lng: number;
-  type: string;
-  userEmail: string;
-  createdAt: Date;
+  id: string
+  lat: number
+  lng: number
+  type: string
+  userEmail: string
+  createdAt: Date | FirestoreTimestamp // Using specific type instead of any
+  likedBy?: string[]
 }
 
 let globalUser: UserData | null = null;
