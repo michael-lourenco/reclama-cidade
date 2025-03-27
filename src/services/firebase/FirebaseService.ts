@@ -1,4 +1,4 @@
-import { collection, getFirestore, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc, Firestore, DocumentSnapshot, DocumentData } from "firebase/firestore";
+import { arrayUnion, collection, getFirestore, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc, Firestore, DocumentSnapshot, DocumentData } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, Auth } from "firebase/auth";
 import { UserData } from "@/application/entities/User";
@@ -225,6 +225,23 @@ function displayUserInfo(user: UserData): void {
     `User: ${user.displayName}, Currency: ${user.currency.value}, Photo URL: ${user.photoURL}`
   );
 }
+
+export const updateMarkerLikes = async (
+  dbFirestore: Firestore, 
+  markerId: string, 
+  userEmail: string
+) => {
+  try {
+    const markerRef = doc(dbFirestore, "markers", markerId);
+    
+    await updateDoc(markerRef, {
+      likedBy: arrayUnion(userEmail)
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar likes do marcador:", error);
+    throw error;
+  }
+};
 
 export {
   authFirestore,

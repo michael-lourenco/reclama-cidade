@@ -2,10 +2,26 @@
 import type { Marker } from "@/application/entities/Marker";
 import { PROBLEM_TYPES } from "@/constants/map-constants";
 import { useMarkers } from "@/hooks/use-markers";
-import { addMarker, dbFirestore } from "@/services/firebase/FirebaseService";
+import { addMarker, dbFirestore, updateMarkerLikes } from "@/services/firebase/FirebaseService";
 import { getProblemLabel } from "@/utils/map-utils";
 import type React from "react";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { getDistance } from '@/utils/distance-utils';
+
+// Função utilitária para conversão de timestamps
+const convertToDate = (timestamp: any): Date => {
+  if (timestamp instanceof Date) {
+    return timestamp;
+  }
+  
+  if (timestamp && typeof timestamp === 'object' && 'seconds' in timestamp) {
+    // Firestore Timestamp object
+    return new Date(timestamp.seconds * 1000);
+  }
+  
+  // Fallback para outros formatos de timestamp
+  return new Date(timestamp);
+};
 
 // Componente interno que será carregado apenas no cliente
 const MapContent = ({
@@ -19,85 +35,103 @@ const MapContent = ({
   userConfirmedProblem: boolean;
   resetConfirmation: () => void;
 }) => {
-  const { setMarkers, loadMarkersFromFirebase } = useMarkers();
+  const { markers, setMarkers, loadMarkersFromFirebase } = useMarkers();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
-  const userLocationMarkerRef = useRef<any>(null); // Renomeado para clareza
+  const userLocationMarkerRef = useRef<any>(null);
   const leafletRef = useRef<any>(null);
   const iconsRef = useRef<Record<string, any>>({});
   const mapInitializedRef = useRef<boolean>(false);
   const defaultLocation: [number, number] = [-23.5902, -48.0338];
   const defaultZoom = 15;
 
-  // Handle confirmed problem selection and marker update
-  useEffect(() => {
-    if (
-      !userConfirmedProblem ||
-      !selectedProblemType ||
-      !mapInstanceRef.current ||
-      !userLocationMarkerRef.current ||
-      !leafletRef.current
-    ) {
-      return;
-    }
+  // Função para obter o email do usuário atual
+  const getCurrentUserEmail = () => {
+    const userDataString = localStorage.getItem("user");
+    const userData = userDataString ? JSON.parse(userDataString) : null;
+    return userData?.email || null;
+  };
 
-    // Get current position of user marker
-    const markerPosition = userLocationMarkerRef.current.getLatLng();
-
-    // Salvar o marcador no Firebase
-    const saveMarkerToFirebase = async () => {
-      try {
-        // Obter informações do usuário atual do localStorage
-        const userDataString = localStorage.getItem("user");
-        const userData = userDataString ? JSON.parse(userDataString) : null;
-        const userEmail = userData?.email || "Usuário anônimo";
-
-        // Criar objeto de marcador para salvar
-        const markerId = `marker_${Date.now()}_${Math.random()
-          .toString(36)
-          .substring(2, 9)}`;
-        const newMarkerData: Marker = {
-          id: markerId,
-          lat: markerPosition.lat,
-          lng: markerPosition.lng,
-          type: selectedProblemType,
-          userEmail,
-          createdAt: new Date(),
-        };
-
-        // Adicionar ao Firebase usando o FirebaseService
-        await addMarker(dbFirestore, newMarkerData);
-        console.log("Marcador salvo com sucesso:", newMarkerData);
-
-        // Atualizar o estado local de marcadores
-        setMarkers(prev => [...prev, newMarkerData]);
-
-        // Adicionar marker no mapa com o ícone correto (mas manter o user location marker)
-        const L = leafletRef.current;
-        const newMarker = L.marker([markerPosition.lat, markerPosition.lng], {
-          icon: iconsRef.current[selectedProblemType],
-        }).addTo(mapInstanceRef.current);
-
-        newMarker
-          .bindPopup(`Problema: ${getProblemLabel(selectedProblemType)}`)
-          .openPopup();
-      } catch (error) {
-        console.error("Erro ao salvar marcador no Firebase:", error);
+  // Handle marker like functionality
+  const handleLikeMarker = async (marker: Marker) => {
+    try {
+      const userEmail = getCurrentUserEmail();
+      
+      if (!userEmail) {
+        alert("Por favor, faça login para curtir um marcador.");
+        return;
       }
-    };
 
-    // Executar a função de salvamento
-    saveMarkerToFirebase();
+      // Verificar distância do usuário ao marcador
+      if (!userLocationMarkerRef.current) {
+        alert("Localização do usuário não disponível.");
+        return;
+      }
 
-    // Reset confirmation flag
-    resetConfirmation();
-  }, [
-    userConfirmedProblem,
-    selectedProblemType,
-    getProblemLabel,
-    resetConfirmation,
-    setMarkers,
-  ]);
+      const userLocation = userLocationMarkerRef.current.getLatLng();
+      const markerLocation = { lat: marker.lat, lng: marker.lng };
+      const distance = getDistance(userLocation, markerLocation);
+
+      // Verificar se o usuário está dentro de 100 metros
+      if (distance > 100) {
+        alert("Você precisa estar a até 100 metros do marcador para curtir.");
+        return;
+      }
+
+      // Verificar se o usuário está tentando curtir seu próprio marcador
+      if (marker.userEmail === userEmail) {
+        alert("Você não pode curtir seu próprio marcador.");
+        return;
+      }
+
+      // Verificar se o usuário já curtiu o marcador
+      if (marker.likedBy?.includes(userEmail)) {
+        alert("Você já curtiu este marcador.");
+        return;
+      }
+
+      // Atualizar likes no Firebase
+      await updateMarkerLikes(dbFirestore, marker.id, userEmail);
+
+      // Atualizar estado local dos marcadores
+      const updatedMarkers = markers.map(m => 
+        m.id === marker.id 
+          ? { ...m, likedBy: m.likedBy ? [...m.likedBy, userEmail] : [userEmail] }
+          : m
+      );
+      setMarkers(updatedMarkers);
+    } catch (error) {
+      console.error("Erro ao curtir marcador:", error);
+      alert("Não foi possível curtir o marcador. Tente novamente.");
+    }
+  };
+
+  // Adicionar novos estilos para o botão de like
+  const addLikeStyles = useCallback(() => {
+    if (document.querySelector('style[data-id="like-styles"]')) return;
+
+    const style = document.createElement("style");
+    style.dataset.id = "like-styles";
+    style.textContent = `
+      .marker-popup .like-button {
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px 10px;
+        margin-top: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .marker-popup .like-button:hover {
+        background-color: #e0e0e0;
+      }
+      .marker-popup .like-count {
+        margin-left: 5px;
+        font-weight: bold;
+      }
+    `;
+    document.head.appendChild(style);
+  }, []);
 
   // Add Leaflet CSS
   const addLeafletCSS = useCallback(() => {
@@ -156,6 +190,7 @@ const MapContent = ({
         // Add required styles
         addLeafletCSS();
         addMarkerStyles();
+        addLikeStyles();
 
         // Load Leaflet library only once
         if (!leafletRef.current) {
@@ -279,59 +314,35 @@ const MapContent = ({
               icon,
             }).addTo(mapInstance);
 
-            // Converter a data para um objeto Date se ela não for
-            let markerDate: Date;
-            if (marker.createdAt instanceof Date) {
-              markerDate = marker.createdAt;
-            } else if (
-              marker.createdAt &&
-              typeof marker.createdAt === "object" &&
-              "seconds" in marker.createdAt
-            ) {
-              // Lidar com Timestamp do Firestore
-              markerDate = new Date((marker.createdAt as any).seconds * 1000);
-            } else {
-              markerDate = new Date(marker.createdAt as any);
-            }
+            // Converter timestamp de forma segura
+            const createdAt = convertToDate(marker.createdAt);
 
-            // Add popup with information
-            mapMarker.bindPopup(`
+            // Criar popup personalizado com botão de like
+            const popupContent = document.createElement('div');
+            popupContent.classList.add('marker-popup');
+            popupContent.innerHTML = `
               <strong>Problema: ${getProblemLabel(marker.type)}</strong><br>
-              Reportado em: ${markerDate.toLocaleDateString()} ${markerDate.toLocaleTimeString()}<br>
-              Por: ${marker.userEmail || "Usuário anônimo"}
-            `);
+              Reportado em: ${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}<br>
+              Por: ${marker.userEmail || "Usuário anônimo"}<br>
+              <button class="like-button">
+                Curtir 
+                <span class="like-count">(${marker.likedBy?.length || 0})</span>
+              </button>
+            `;
+
+            // Adicionar evento de clique no botão de like
+            popupContent.querySelector('.like-button')?.addEventListener('click', () => {
+              handleLikeMarker(marker);
+            });
+
+            mapMarker.bindPopup(popupContent);
           });
 
           // Center map on most recent marker
           // Ordenar marcadores por data descendente (mais recente primeiro)
           const sortedMarkers = [...firebaseMarkers].sort((a, b) => {
-            let dateA: Date;
-            let dateB: Date;
-
-            if (a.createdAt instanceof Date) {
-              dateA = a.createdAt;
-            } else if (
-              a.createdAt &&
-              typeof a.createdAt === "object" &&
-              "seconds" in a.createdAt
-            ) {
-              dateA = new Date((a.createdAt as any).seconds * 1000);
-            } else {
-              dateA = new Date(a.createdAt as any);
-            }
-
-            if (b.createdAt instanceof Date) {
-              dateB = b.createdAt;
-            } else if (
-              b.createdAt &&
-              typeof b.createdAt === "object" &&
-              "seconds" in b.createdAt
-            ) {
-              dateB = new Date((b.createdAt as any).seconds * 1000);
-            } else {
-              dateB = new Date(b.createdAt as any);
-            }
-
+            const dateA = convertToDate(a.createdAt);
+            const dateB = convertToDate(b.createdAt);
             return dateB.getTime() - dateA.getTime();
           });
 
@@ -340,9 +351,6 @@ const MapContent = ({
             mapInstance.setView([mostRecent.lat, mostRecent.lng], defaultZoom);
           }
         }
-
-        // Remova o listener de click do mapa para não permitir criar novos pontos
-        // mapInstance.off("click");
 
         // Get user location and continuously track it
         if ("geolocation" in navigator) {
@@ -459,6 +467,91 @@ const MapContent = ({
     getProblemLabel,
     addLeafletCSS,
     addMarkerStyles,
+    addLikeStyles,
+  ]);
+
+  // Handle confirmed problem selection and marker update
+  useEffect(() => {
+    if (
+      !userConfirmedProblem ||
+      !selectedProblemType ||
+      !mapInstanceRef.current ||
+      !userLocationMarkerRef.current ||
+      !leafletRef.current
+    ) {
+      return;
+    }
+
+    // Get current position of user marker
+    const markerPosition = userLocationMarkerRef.current.getLatLng();
+
+    // Salvar o marcador no Firebase
+    const saveMarkerToFirebase = async () => {
+      try {
+        // Obter informações do usuário atual do localStorage
+        const userDataString = localStorage.getItem("user");
+        const userData = userDataString ? JSON.parse(userDataString) : null;
+        const userEmail = userData?.email || "Usuário anônimo";
+
+        // Criar objeto de marcador para salvar
+        const markerId = `marker_${Date.now()}_${Math.random()
+          .toString(36)
+          .substring(2, 9)}`;
+        const newMarkerData: Marker = {
+          id: markerId,
+          lat: markerPosition.lat,
+          lng: markerPosition.lng,
+          type: selectedProblemType,
+          userEmail,
+          createdAt: new Date(),
+          likedBy: [] // Inicializa como um array vazio
+        };
+
+        // Adicionar ao Firebase usando o FirebaseService
+        await addMarker(dbFirestore, newMarkerData);
+        console.log("Marcador salvo com sucesso:", newMarkerData);
+
+        // Atualizar o estado local de marcadores
+        setMarkers(prev => [...prev, newMarkerData]);
+
+        // Adicionar marker no mapa com o ícone correto (mas manter o user location marker)
+        const L = leafletRef.current;
+        const newMarker = L.marker([markerPosition.lat, markerPosition.lng], {
+          icon: iconsRef.current[selectedProblemType],
+        }).addTo(mapInstanceRef.current);
+
+        // Criar popup personalizado com botão de like
+        const popupContent = document.createElement('div');
+        popupContent.classList.add('marker-popup');
+        popupContent.innerHTML = `
+          <strong>Problema: ${getProblemLabel(selectedProblemType)}</strong><br>
+          Reportado em: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}<br>
+          Por: ${userEmail}<br>
+          <button class="like-button">
+            Curtir 
+            <span class="like-count">(0)</span>
+          </button>
+        `;
+
+        newMarker
+          .bindPopup(popupContent)
+          .openPopup();
+      } catch (error) {
+        console.error("Erro ao salvar marcador no Firebase:", error);
+      }
+    };
+
+    // Executar a função de salvamento
+    saveMarkerToFirebase();
+
+    // Reset confirmation flag
+    resetConfirmation();
+  }, [
+    userConfirmedProblem,
+    selectedProblemType,
+    getProblemLabel,
+    resetConfirmation,
+    setMarkers,
   ]);
 
   // Handle window resize
@@ -480,4 +573,3 @@ const MapContent = ({
 };
 
 export { MapContent };
-
