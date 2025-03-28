@@ -8,6 +8,16 @@ export const getProblemLabel = (type: string): string => {
       return "Alagamento"
     case PROBLEM_TYPES.ILUMINACAO:
       return "Iluminação"
+    case PROBLEM_TYPES.BLITZ:
+      return "Blitz"
+    case PROBLEM_TYPES.PISTA:
+      return "Pista"
+    case PROBLEM_TYPES.BUEIRO_ABERTO:
+      return "Bueiro Aberto"
+    case PROBLEM_TYPES.BUEIRO_VAZAMENTO:
+      return "bueiro Vazamento"
+    case PROBLEM_TYPES.SEMAFARO:
+      return "Semafaro"
     default:
       return "Desconhecido"
   }

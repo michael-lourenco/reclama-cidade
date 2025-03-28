@@ -50,6 +50,28 @@ export const useMapIcons = (L: LeafletStatic) => {
       className: "iluminacao-icon",
     })
 
+    const blitzIcon = new L.Icon({
+      ...baseIconConfig,
+      className: "blitz-icon",
+    })
+    const pistaIcon = new L.Icon({
+      ...baseIconConfig,
+      className: "pista-icon",
+    })
+    const bueiroAbertoIcon = new L.Icon({
+      ...baseIconConfig,
+      className: "bueiro-aberto-icon",
+    })
+    const bueiroVazamentoIcon = new L.Icon({
+      ...baseIconConfig,
+      className: "bueiro-vazamento-icon",
+    })
+    const semafaroIcon = new L.Icon({
+      ...baseIconConfig,
+      className: "semafaro-icon",
+    })
+
+
     const userLocationIcon = new L.Icon({
       ...baseIconConfig,
       className: "user-location-icon",
@@ -59,6 +81,11 @@ export const useMapIcons = (L: LeafletStatic) => {
       [PROBLEM_TYPES.BURACO]: buracoIcon,
       [PROBLEM_TYPES.ALAGAMENTO]: alagamentoIcon,
       [PROBLEM_TYPES.ILUMINACAO]: iluminacaoIcon,
+      [PROBLEM_TYPES.BLITZ]: blitzIcon,
+      [PROBLEM_TYPES.PISTA]: pistaIcon,
+      [PROBLEM_TYPES.BUEIRO_ABERTO]: bueiroAbertoIcon,
+      [PROBLEM_TYPES.BUEIRO_VAZAMENTO]: bueiroVazamentoIcon,
+      [PROBLEM_TYPES.SEMAFARO]: semafaroIcon,
       default: defaultIcon,
       userLocation: userLocationIcon,
     }

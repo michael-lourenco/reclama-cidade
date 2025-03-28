@@ -165,7 +165,27 @@ const MapContent = ({
         filter: hue-rotate(120deg); /* Green color for user location */
         animation: pulse 1.5s infinite;
       }
-
+      .blitz-icon {
+        filter: hue-rotate(120deg); /* Green color for user location */
+        animation: pulse 1.5s infinite;
+      }
+      .pista-icon {
+        filter: hue-rotate(120deg); /* Green color for user location */
+        animation: pulse 1.5s infinite;
+      }
+      .bueiro-aberto-icon {
+        filter: hue-rotate(120deg); /* Green color for user location */
+        animation: pulse 1.5s infinite;
+      }
+      .bueiro-vazamento-icon {
+        filter: hue-rotate(120deg); /* Green color for user location */
+        animation: pulse 1.5s infinite;
+      }
+      .semafaro-icon {
+        filter: hue-rotate(120deg); /* Green color for user location */
+        animation: pulse 1.5s infinite;
+      }
+          
       @keyframes pulse {
         0% { opacity: 1; }
         50% { opacity: 0.6; }
@@ -265,6 +285,76 @@ const MapContent = ({
             className: "iluminacao-icon",
           });
 
+          const blitzIcon = new L.Icon({
+            iconUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+            iconRetinaUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+            shadowUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+            className: "blitz-icon",
+          });
+
+          const pistaIcon = new L.Icon({
+            iconUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+            iconRetinaUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+            shadowUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+            className: "pista-icon",
+          });          
+
+          const bueiroAbertoIcon = new L.Icon({
+            iconUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+            iconRetinaUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+            shadowUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+            className: "bueiro-aberto-icon",
+          });
+
+          const bueiroVazamentoIcon = new L.Icon({
+            iconUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+            iconRetinaUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+            shadowUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+            className: "bueiro-vazamento-icon",
+          });
+
+          const semafaroIcon = new L.Icon({
+            iconUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+            iconRetinaUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+            shadowUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+            className: "semafaro-icon",
+          });
+
           const userLocationIcon = new L.Icon({
             iconUrl:
               "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -283,6 +373,11 @@ const MapContent = ({
             [PROBLEM_TYPES.BURACO]: buracoIcon,
             [PROBLEM_TYPES.ALAGAMENTO]: alagamentoIcon,
             [PROBLEM_TYPES.ILUMINACAO]: iluminacaoIcon,
+            [PROBLEM_TYPES.BLITZ]: blitzIcon,
+            [PROBLEM_TYPES.PISTA]: pistaIcon,
+            [PROBLEM_TYPES.BUEIRO_ABERTO]: bueiroAbertoIcon,
+            [PROBLEM_TYPES.BUEIRO_VAZAMENTO]: bueiroVazamentoIcon,
+            [PROBLEM_TYPES.SEMAFARO]: semafaroIcon,
             default: defaultIcon,
             userLocation: userLocationIcon,
           };

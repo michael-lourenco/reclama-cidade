@@ -3,6 +3,11 @@ const PROBLEM_TYPES = {
     BURACO: "buraco",
     ALAGAMENTO: "alagamento",
     ILUMINACAO: "iluminacao",
+    BLITZ:"blitz",
+    PISTA:"pista",
+    BUEIRO_ABERTO:"bueiro-aberto",
+    BUEIRO_VAZAMENTO:"bueiro-vazamento",
+    SEMAFARO:"semafaro",
 } as const
 
 const LOCAL_STORAGE_KEY = "mapProblems"
