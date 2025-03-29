@@ -7,6 +7,7 @@ import { getProblemLabel } from "@/utils/map-utils";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getDistance } from '@/utils/distance-utils';
+import { useMarkerStyles } from "@/utils/marker-styles"
 
 // Função utilitária para conversão de timestamps
 const convertToDate = (timestamp: any): Date => {
@@ -44,6 +45,9 @@ const MapContent = ({
   const mapInitializedRef = useRef<boolean>(false);
   const defaultLocation: [number, number] = [-23.5902, -48.0338];
   const defaultZoom = 15;
+
+  // Add CSS for marker icons
+  const addMarkerStyles = useMarkerStyles()
 
   // Função para obter o email do usuário atual
   const getCurrentUserEmail = () => {
@@ -145,50 +149,6 @@ const MapContent = ({
     document.head.appendChild(link);
   }, []);
 
-  // Add CSS for marker icons
-  const addMarkerStyles = useCallback(() => {
-    if (document.querySelector('style[data-id="marker-styles"]')) return;
-
-    const style = document.createElement("style");
-    style.dataset.id = "marker-styles";
-    style.textContent = `
-      .buraco-icon {
-        filter: hue-rotate(320deg); /* Vermelho */
-      }
-      .alagamento-icon {
-        filter: hue-rotate(60deg); /* Amarelo */
-      }
-      .iluminacao-icon {
-        filter: hue-rotate(240deg); /* Azul */
-      }
-      .user-location-icon {
-        filter: hue-rotate(120deg);
-        animation: pulse 1.5s infinite;
-      }
-      .blitz-icon {
-        filter: hue-rotate(300deg);
-      }
-      .pista-icon {
-        filter: hue-rotate(50deg);
-      }
-      .bueiro-aberto-icon {
-        filter: hue-rotate(270deg) brightness(1.2) contrast(1.5);
-      }
-      .bueiro-vazamento-icon {
-        filter: hue-rotate(120deg);
-      }
-      .semafaro-icon {
-        filter: hue-rotate(180deg) brightness(1.2) contrast(1.5);
-      }
-          
-      @keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.6; }
-        100% { opacity: 1; }
-      }
-    `;
-    document.head.appendChild(style);
-  }, []);
 
   // Initialize map only once
   useEffect(() => {
