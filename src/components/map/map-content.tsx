@@ -9,21 +9,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getDistance } from '@/utils/distance-utils';
 import { createMapIcons } from "@/utils/marker-icons"
 import { useMarkerStyles } from "@/utils/marker-styles"
+import { handleLikeMarker, convertToDate } from "@/utils/marker-interactions"
 
-// Função utilitária para conversão de timestamps
-const convertToDate = (timestamp: any): Date => {
-  if (timestamp instanceof Date) {
-    return timestamp;
-  }
-  
-  if (timestamp && typeof timestamp === 'object' && 'seconds' in timestamp) {
-    // Firestore Timestamp object
-    return new Date(timestamp.seconds * 1000);
-  }
-  
-  // Fallback para outros formatos de timestamp
-  return new Date(timestamp);
-};
 
 // Componente interno que será carregado apenas no cliente
 const MapContent = ({
@@ -50,66 +37,9 @@ const MapContent = ({
   // Add CSS for marker icons
   const addMarkerStyles = useMarkerStyles()
 
-  // Função para obter o email do usuário atual
-  const getCurrentUserEmail = () => {
-    const userDataString = localStorage.getItem("user");
-    const userData = userDataString ? JSON.parse(userDataString) : null;
-    return userData?.email || null;
-  };
-
-  // Handle marker like functionality
-  const handleLikeMarker = async (marker: Marker) => {
-    try {
-      const userEmail = getCurrentUserEmail();
-      
-      if (!userEmail) {
-        alert("Por favor, faça login para curtir um marcador.");
-        return;
-      }
-
-      // Verificar distância do usuário ao marcador
-      if (!userLocationMarkerRef.current) {
-        alert("Localização do usuário não disponível.");
-        return;
-      }
-
-      const userLocation = userLocationMarkerRef.current.getLatLng();
-      const markerLocation = { lat: marker.lat, lng: marker.lng };
-      const distance = getDistance(userLocation, markerLocation);
-
-      // Verificar se o usuário está dentro de 100 metros
-      if (distance > 100) {
-        alert("Você precisa estar a até 100 metros do marcador para curtir.");
-        return;
-      }
-
-      // Verificar se o usuário está tentando curtir seu próprio marcador
-      if (marker.userEmail === userEmail) {
-        alert("Você não pode curtir seu próprio marcador.");
-        return;
-      }
-
-      // Verificar se o usuário já curtiu o marcador
-      if (marker.likedBy?.includes(userEmail)) {
-        alert("Você já curtiu este marcador.");
-        return;
-      }
-
-      // Atualizar likes no Firebase
-      await updateMarkerLikes(dbFirestore, marker.id, userEmail);
-
-      // Atualizar estado local dos marcadores
-      const updatedMarkers = markers.map(m => 
-        m.id === marker.id 
-          ? { ...m, likedBy: m.likedBy ? [...m.likedBy, userEmail] : [userEmail] }
-          : m
-      );
-      setMarkers(updatedMarkers);
-    } catch (error) {
-      console.error("Erro ao curtir marcador:", error);
-      alert("Não foi possível curtir o marcador. Tente novamente.");
-    }
-  };
+  const onLikeMarker = async (marker: any) => {
+    await handleLikeMarker(marker, userLocationMarkerRef.current, markers, setMarkers)
+  }
 
   // Adicionar novos estilos para o botão de like
   const addLikeStyles = useCallback(() => {
@@ -233,7 +163,7 @@ const MapContent = ({
 
             // Adicionar evento de clique no botão de like
             popupContent.querySelector('.like-button')?.addEventListener('click', () => {
-              handleLikeMarker(marker);
+              onLikeMarker(marker)
             });
 
             mapMarker.bindPopup(popupContent);
