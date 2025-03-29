@@ -1,17 +1,16 @@
-"use client"
-
-import type { Marker } from "@/types/marker-types"
-import { useMarkers } from "@/hooks/use-markers"
-import { addMarker, dbFirestore } from "@/services/firebase/FirebaseService"
-import { getProblemLabel } from "@/utils/map-utils"
-import type React from "react"
-import { useCallback, useEffect, useRef } from "react"
-
-// Importações das funções extraídas
-import { useMarkerStyles } from "@/utils/marker-styles"
+"use client";
+import type { Marker } from "@/types/marker-types";
+import { PROBLEM_TYPES } from "@/constants/map-constants";
+import { useMarkers } from "@/hooks/use-markers";
+import { addMarker, dbFirestore, updateMarkerLikes } from "@/services/firebase/FirebaseService";
+import { getProblemLabel } from "@/utils/map-utils";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { getDistance } from '@/utils/distance-utils';
 import { createMapIcons } from "@/utils/marker-icons"
+import { useMarkerStyles } from "@/utils/marker-styles"
 import { handleLikeMarker, convertToDate } from "@/utils/marker-interactions"
-import { useLocationTracker } from "@/utils/user-location"
+
 
 // Componente interno que será carregado apenas no cliente
 const MapContent = ({
@@ -20,65 +19,34 @@ const MapContent = ({
   userConfirmedProblem,
   resetConfirmation,
 }: {
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-  selectedProblemType: string | null
-  userConfirmedProblem: boolean
-  resetConfirmation: () => void
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedProblemType: string | null;
+  userConfirmedProblem: boolean;
+  resetConfirmation: () => void;
 }) => {
-  const { markers, setMarkers, loadMarkersFromFirebase } = useMarkers()
-  const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstanceRef = useRef<any>(null)
-  const userLocationMarkerRef = useRef<any>(null)
-  const leafletRef = useRef<any>(null)
-  const iconsRef = useRef<Record<string, any>>({})
-  const mapInitializedRef = useRef<boolean>(false)
-  const defaultLocation: [number, number] = [-23.5902, -48.0338]
-  const defaultZoom = 15
+  const { markers, setMarkers, loadMarkersFromFirebase } = useMarkers();
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const userLocationMarkerRef = useRef<any>(null);
+  const leafletRef = useRef<any>(null);
+  const iconsRef = useRef<Record<string, any>>({});
+  const mapInitializedRef = useRef<boolean>(false);
+  const defaultLocation: [number, number] = [-23.5902, -48.0338];
+  const defaultZoom = 15;
 
-  // Usar os hooks extraídos
+  // Add CSS for marker icons
   const addMarkerStyles = useMarkerStyles()
 
-  // Função local que usa a função extraída para manipular likes
-  const onLikeMarker = async (marker: Marker) => {
+  const onLikeMarker = async (marker: any) => {
     await handleLikeMarker(marker, userLocationMarkerRef.current, markers, setMarkers)
   }
 
-  // Usar o hook de rastreamento de localização
-  const locationTracker = useLocationTracker({
-    onLocationUpdate: (position) => {
-      const { latitude, longitude } = position.coords
-
-      // Atualizar a posição do marcador de localização do usuário
-      if (userLocationMarkerRef.current && mapInstanceRef.current) {
-        userLocationMarkerRef.current.setLatLng([latitude, longitude])
-      }
-    },
-    onLocationError: (error) => {
-      console.error("Erro ao rastrear localização do usuário:", error)
-    },
-    enableHighAccuracy: true,
-    maximumAge: 0,
-    timeout: 5000,
-  })
-
-  // Adicionar CSS para Leaflet
-  const addLeafletCSS = useCallback(() => {
-    if (document.querySelector('link[href*="leaflet.css"]')) return
-
-    const link = document.createElement("link")
-    link.rel = "stylesheet"
-    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    link.integrity = "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    link.crossOrigin = ""
-    document.head.appendChild(link)
-  }, [])
-
   // Adicionar novos estilos para o botão de like
   const addLikeStyles = useCallback(() => {
-    if (document.querySelector('style[data-id="like-styles"]')) return
+    if (document.querySelector('style[data-id="like-styles"]')) return;
 
-    const style = document.createElement("style")
-    style.dataset.id = "like-styles"
+    const style = document.createElement("style");
+    style.dataset.id = "like-styles";
     style.textContent = `
       .marker-popup .like-button {
         background-color: #f0f0f0;
@@ -96,79 +64,93 @@ const MapContent = ({
         margin-left: 5px;
         font-weight: bold;
       }
-    `
-    document.head.appendChild(style)
-  }, [])
+    `;
+    document.head.appendChild(style);
+  }, []);
+
+  // Add Leaflet CSS
+  const addLeafletCSS = useCallback(() => {
+    if (document.querySelector('link[href*="leaflet.css"]')) return;
+
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+    link.integrity = "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=";
+    link.crossOrigin = "";
+    document.head.appendChild(link);
+  }, []);
+
 
   // Initialize map only once
   useEffect(() => {
     // Verificação principal para evitar múltiplas inicializações
     if (!mapRef.current || mapInitializedRef.current) {
-      return
+      return;
     }
 
     // Marcar que a inicialização começou
-    mapInitializedRef.current = true
+    mapInitializedRef.current = true;
 
     async function initMap() {
       try {
         // Add required styles
-        addLeafletCSS()
-        addMarkerStyles()
-        addLikeStyles()
+        addLeafletCSS();
+        addMarkerStyles();
+        addLikeStyles();
 
         // Load Leaflet library only once
         if (!leafletRef.current) {
-          const L = await import("leaflet")
-          leafletRef.current = L
+          const L = await import("leaflet");
+          leafletRef.current = L;
         }
 
-        const L = leafletRef.current
-        console.log("Inicializando mapa Leaflet")
+        const L = leafletRef.current;
+        console.log("Inicializando mapa Leaflet");
 
         // Verificação adicional antes da criação do mapa
         if (mapInstanceRef.current) {
-          console.log("Mapa já existe, pulando inicialização")
-          setIsLoading(false)
-          return
+          console.log("Mapa já existe, pulando inicialização");
+          setIsLoading(false);
+          return;
         }
 
-        // Criar ícones usando a função extraída
+        // Create custom icons once
         if (Object.keys(iconsRef.current).length === 0) {
-          iconsRef.current = createMapIcons(L)
+          iconsRef.current = createMapIcons(L);
         }
 
         // Initialize map
         const mapInstance = L.map(mapRef.current, {
           zoomControl: false,
           attributionControl: false,
-        }).setView(defaultLocation, defaultZoom)
+        }).setView(defaultLocation, defaultZoom);
 
         // Add tile layer
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
-        }).addTo(mapInstance)
+        }).addTo(mapInstance);
 
         // Store map instance
-        mapInstanceRef.current = mapInstance
+        mapInstanceRef.current = mapInstance;
 
         // Load markers from Firebase
-        const firebaseMarkers = await loadMarkersFromFirebase()
+        const firebaseMarkers = await loadMarkersFromFirebase();
 
         if (firebaseMarkers && firebaseMarkers.length > 0) {
           // Add all saved markers to the map
-          firebaseMarkers.forEach((marker) => {
-            const icon = iconsRef.current[marker.type] || iconsRef.current.default
+          firebaseMarkers.forEach(marker => {
+            const icon =
+              iconsRef.current[marker.type] || iconsRef.current.default;
             const mapMarker = L.marker([marker.lat, marker.lng], {
               icon,
-            }).addTo(mapInstance)
+            }).addTo(mapInstance);
 
-            // Converter timestamp de forma segura usando a função extraída
-            const createdAt = convertToDate(marker.createdAt)
+            // Converter timestamp de forma segura
+            const createdAt = convertToDate(marker.createdAt);
 
             // Criar popup personalizado com botão de like
-            const popupContent = document.createElement("div")
-            popupContent.classList.add("marker-popup")
+            const popupContent = document.createElement('div');
+            popupContent.classList.add('marker-popup');
             popupContent.innerHTML = `
               <strong>Problema: ${getProblemLabel(marker.type)}</strong><br>
               Reportado em: ${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}<br>
@@ -177,104 +159,147 @@ const MapContent = ({
                 Curtir 
                 <span class="like-count">(${marker.likedBy?.length || 0})</span>
               </button>
-            `
+            `;
 
-            // Adicionar evento de clique no botão de like usando a função extraída
-            popupContent.querySelector(".like-button")?.addEventListener("click", () => {
+            // Adicionar evento de clique no botão de like
+            popupContent.querySelector('.like-button')?.addEventListener('click', () => {
               onLikeMarker(marker)
-            })
+            });
 
-            mapMarker.bindPopup(popupContent)
-          })
+            mapMarker.bindPopup(popupContent);
+          });
 
           // Center map on most recent marker
           // Ordenar marcadores por data descendente (mais recente primeiro)
           const sortedMarkers = [...firebaseMarkers].sort((a, b) => {
-            const dateA = convertToDate(a.createdAt)
-            const dateB = convertToDate(b.createdAt)
-            return dateB.getTime() - dateA.getTime()
-          })
+            const dateA = convertToDate(a.createdAt);
+            const dateB = convertToDate(b.createdAt);
+            return dateB.getTime() - dateA.getTime();
+          });
 
           if (sortedMarkers.length > 0) {
-            const mostRecent = sortedMarkers[0]
-            mapInstance.setView([mostRecent.lat, mostRecent.lng], defaultZoom)
+            const mostRecent = sortedMarkers[0];
+            mapInstance.setView([mostRecent.lat, mostRecent.lng], defaultZoom);
           }
         }
 
-        // Obter localização do usuário usando o hook extraído
-        try {
-          const position = await locationTracker.getCurrentPosition()
-          const { latitude, longitude } = position.coords
+        // Get user location and continuously track it
+        if ("geolocation" in navigator) {
+          // First get initial position
+          navigator.geolocation.getCurrentPosition(
+            position => {
+              const { latitude, longitude } = position.coords;
 
-          // Update map view
-          mapInstance.setView([latitude, longitude], defaultZoom)
+              // Update map view
+              mapInstance.setView([latitude, longitude], defaultZoom);
 
-          // Create user location marker
-          const userIcon = iconsRef.current.userLocation
+              // Create user location marker
+              const userIcon = iconsRef.current.userLocation;
 
-          userLocationMarkerRef.current = L.marker([latitude, longitude], {
-            icon: userIcon,
-            zIndexOffset: 1000, // Make sure user marker is on top
-          })
-            .addTo(mapInstance)
-            .bindPopup("Sua localização")
-            .openPopup()
+              userLocationMarkerRef.current = L.marker([latitude, longitude], {
+                icon: userIcon,
+                zIndexOffset: 1000, // Make sure user marker is on top
+              })
+                .addTo(mapInstance)
+                .bindPopup("Sua localização")
+                .openPopup();
+            },
+            error => {
+              console.error("Erro ao obter localização do usuário:", error);
 
-          // Iniciar rastreamento contínuo da localização
-          locationTracker.startTracking()
-        } catch (error) {
-          console.error("Erro ao obter localização do usuário:", error)
+              // Cria o marcador na posição padrão se não conseguir obter a localização
+              const userIcon = iconsRef.current.userLocation;
+              userLocationMarkerRef.current = L.marker(defaultLocation, {
+                icon: userIcon,
+                zIndexOffset: 1000,
+              })
+                .addTo(mapInstance)
+                .bindPopup("Sua localização (aproximada)")
+                .openPopup();
+            }
+          );
 
-          // Cria o marcador na posição padrão se não conseguir obter a localização
-          const userIcon = iconsRef.current.userLocation
-          userLocationMarkerRef.current = L.marker(defaultLocation, {
-            icon: userIcon,
-            zIndexOffset: 1000,
-          })
-            .addTo(mapInstance)
-            .bindPopup("Sua localização (aproximada)")
-            .openPopup()
+          // Then set up continuous tracking
+          const watchId = navigator.geolocation.watchPosition(
+            position => {
+              const { latitude, longitude } = position.coords;
+
+              // Update map view to follow user
+              mapInstance.setView([latitude, longitude], mapInstance.getZoom());
+
+              // Update user marker position
+              if (userLocationMarkerRef.current) {
+                userLocationMarkerRef.current.setLatLng([latitude, longitude]);
+              }
+            },
+            error => {
+              console.error("Erro ao rastrear localização do usuário:", error);
+            },
+            {
+              enableHighAccuracy: true,
+              maximumAge: 0,
+              timeout: 5000,
+            }
+          );
+
+          // Clean up the watch when component unmounts
+          return () => {
+            navigator.geolocation.clearWatch(watchId);
+            if (mapInstanceRef.current) {
+              mapInstanceRef.current.remove();
+              mapInstanceRef.current = null;
+              mapInitializedRef.current = false;
+            }
+          };
         }
 
         // Force size recalculation
         setTimeout(() => {
-          mapInstance.invalidateSize()
-        }, 100)
+          mapInstance.invalidateSize();
+        }, 100);
 
-        setIsLoading(false)
+        setIsLoading(false);
       } catch (error) {
-        console.error("Erro ao inicializar o mapa:", error)
-        setIsLoading(false)
+        console.error("Erro ao inicializar o mapa:", error);
+        setIsLoading(false);
         // Resetar flag se houver erro para permitir tentar novamente
-        mapInitializedRef.current = false
+        mapInitializedRef.current = false;
       }
     }
 
-    initMap()
+    initMap();
 
     // Add event listener for centering on user
     const handleCenterOnUser = (e: CustomEvent) => {
       if (mapInstanceRef.current && userLocationMarkerRef.current) {
-        const latlng = userLocationMarkerRef.current.getLatLng()
-        mapInstanceRef.current.setView([latlng.lat, latlng.lng], defaultZoom)
+        const latlng = userLocationMarkerRef.current.getLatLng();
+        mapInstanceRef.current.setView([latlng.lat, latlng.lng], defaultZoom);
       }
-    }
+    };
 
-    document.addEventListener("centerOnUser", handleCenterOnUser as EventListener)
+    document.addEventListener(
+      "centerOnUser",
+      handleCenterOnUser as EventListener
+    );
 
     return () => {
-      document.removeEventListener("centerOnUser", handleCenterOnUser as EventListener)
-
-      // Parar o rastreamento de localização
-      locationTracker.stopTracking()
-
+      document.removeEventListener(
+        "centerOnUser",
+        handleCenterOnUser as EventListener
+      );
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove()
-        mapInstanceRef.current = null
-        mapInitializedRef.current = false
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        mapInitializedRef.current = false;
       }
-    }
-  }, [loadMarkersFromFirebase, getProblemLabel, addLeafletCSS, addMarkerStyles, addLikeStyles, locationTracker])
+    };
+  }, [
+    loadMarkersFromFirebase,
+    getProblemLabel,
+    addLeafletCSS,
+    addMarkerStyles,
+    addLikeStyles,
+  ]);
 
   // Handle confirmed problem selection and marker update
   useEffect(() => {
@@ -285,22 +310,24 @@ const MapContent = ({
       !userLocationMarkerRef.current ||
       !leafletRef.current
     ) {
-      return
+      return;
     }
 
     // Get current position of user marker
-    const markerPosition = userLocationMarkerRef.current.getLatLng()
+    const markerPosition = userLocationMarkerRef.current.getLatLng();
 
     // Salvar o marcador no Firebase
     const saveMarkerToFirebase = async () => {
       try {
         // Obter informações do usuário atual do localStorage
-        const userDataString = localStorage.getItem("user")
-        const userData = userDataString ? JSON.parse(userDataString) : null
-        const userEmail = userData?.email || "Usuário anônimo"
+        const userDataString = localStorage.getItem("user");
+        const userData = userDataString ? JSON.parse(userDataString) : null;
+        const userEmail = userData?.email || "Usuário anônimo";
 
         // Criar objeto de marcador para salvar
-        const markerId = `marker_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+        const markerId = `marker_${Date.now()}_${Math.random()
+          .toString(36)
+          .substring(2, 9)}`;
         const newMarkerData: Marker = {
           id: markerId,
           lat: markerPosition.lat,
@@ -308,25 +335,25 @@ const MapContent = ({
           type: selectedProblemType,
           userEmail,
           createdAt: new Date(),
-          likedBy: [], // Inicializa como um array vazio
-        }
+          likedBy: [] // Inicializa como um array vazio
+        };
 
         // Adicionar ao Firebase usando o FirebaseService
-        await addMarker(dbFirestore, newMarkerData)
-        console.log("Marcador salvo com sucesso:", newMarkerData)
+        await addMarker(dbFirestore, newMarkerData);
+        console.log("Marcador salvo com sucesso:", newMarkerData);
 
         // Atualizar o estado local de marcadores
-        setMarkers((prev) => [...prev, newMarkerData])
+        setMarkers(prev => [...prev, newMarkerData]);
 
         // Adicionar marker no mapa com o ícone correto (mas manter o user location marker)
-        const L = leafletRef.current
+        const L = leafletRef.current;
         const newMarker = L.marker([markerPosition.lat, markerPosition.lng], {
           icon: iconsRef.current[selectedProblemType],
-        }).addTo(mapInstanceRef.current)
+        }).addTo(mapInstanceRef.current);
 
         // Criar popup personalizado com botão de like
-        const popupContent = document.createElement("div")
-        popupContent.classList.add("marker-popup")
+        const popupContent = document.createElement('div');
+        popupContent.classList.add('marker-popup');
         popupContent.innerHTML = `
           <strong>Problema: ${getProblemLabel(selectedProblemType)}</strong><br>
           Reportado em: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}<br>
@@ -335,38 +362,45 @@ const MapContent = ({
             Curtir 
             <span class="like-count">(0)</span>
           </button>
-        `
+        `;
 
-        newMarker.bindPopup(popupContent).openPopup()
+        newMarker
+          .bindPopup(popupContent)
+          .openPopup();
       } catch (error) {
-        console.error("Erro ao salvar marcador no Firebase:", error)
+        console.error("Erro ao salvar marcador no Firebase:", error);
       }
-    }
+    };
 
     // Executar a função de salvamento
-    saveMarkerToFirebase()
+    saveMarkerToFirebase();
 
     // Reset confirmation flag
-    resetConfirmation()
-  }, [userConfirmedProblem, selectedProblemType, getProblemLabel, resetConfirmation, setMarkers])
+    resetConfirmation();
+  }, [
+    userConfirmedProblem,
+    selectedProblemType,
+    getProblemLabel,
+    resetConfirmation,
+    setMarkers,
+  ]);
 
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.invalidateSize()
+        mapInstanceRef.current.invalidateSize();
       }
-    }
+    };
 
-    window.addEventListener("resize", handleResize)
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [])
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
-  return <div ref={mapRef} className="absolute inset-0 w-full h-full z-0" />
-}
+  return <div ref={mapRef} className="absolute inset-0 w-full h-full z-0" />;
+};
 
-export { MapContent }
-
+export { MapContent };
