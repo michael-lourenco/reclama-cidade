@@ -1,4 +1,4 @@
-import { UserData } from "@/application/entities/User";
+import { UserData } from "@/types/user-types";
 import { Button } from "@/components/ui/button";
 import React from "react";
 

@@ -2,7 +2,7 @@ import {  doc, setDoc, updateDoc, Firestore } from "firebase/firestore";
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { fetchUserData } from "../firebase/FirebaseService";
-import { UserData } from "@/application/entities/User";
+import { UserData } from "@/types/user-types";
 
 async function signInWithGoogle(): Promise<void> {
   try {

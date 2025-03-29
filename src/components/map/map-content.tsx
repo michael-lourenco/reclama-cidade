@@ -1,5 +1,5 @@
 "use client";
-import type { Marker } from "@/application/entities/Marker";
+import type { Marker } from "@/types/marker-types";
 import { PROBLEM_TYPES } from "@/constants/map-constants";
 import { useMarkers } from "@/hooks/use-markers";
 import { addMarker, dbFirestore, updateMarkerLikes } from "@/services/firebase/FirebaseService";
