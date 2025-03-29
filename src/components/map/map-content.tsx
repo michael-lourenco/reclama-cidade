@@ -2,7 +2,6 @@
 
 import type { Marker } from "@/types/marker-types"
 import { useMarkers } from "@/hooks/use-markers"
-import { addMarker, dbFirestore } from "@/services/firebase/FirebaseService"
 import { getProblemLabel } from "@/utils/map-utils"
 import type React from "react"
 import { useCallback, useEffect, useRef } from "react"
@@ -12,6 +11,7 @@ import { useMarkerStyles } from "@/utils/marker-styles"
 import { createMapIcons } from "@/utils/marker-icons"
 import { handleLikeMarker, convertToDate } from "@/utils/marker-interactions"
 import { useLocationTracker } from "@/utils/user-location"
+import { addNewMarker, createMarkerPopupContent } from "@/utils/marker-creation"
 
 // Componente interno que será carregado apenas no cliente
 const MapContent = ({
@@ -163,27 +163,8 @@ const MapContent = ({
               icon,
             }).addTo(mapInstance)
 
-            // Converter timestamp de forma segura usando a função extraída
-            const createdAt = convertToDate(marker.createdAt)
-
-            // Criar popup personalizado com botão de like
-            const popupContent = document.createElement("div")
-            popupContent.classList.add("marker-popup")
-            popupContent.innerHTML = `
-              <strong>Problema: ${getProblemLabel(marker.type)}</strong><br>
-              Reportado em: ${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}<br>
-              Por: ${marker.userEmail || "Usuário anônimo"}<br>
-              <button class="like-button">
-                Curtir 
-                <span class="like-count">(${marker.likedBy?.length || 0})</span>
-              </button>
-            `
-
-            // Adicionar evento de clique no botão de like usando a função extraída
-            popupContent.querySelector(".like-button")?.addEventListener("click", () => {
-              onLikeMarker(marker)
-            })
-
+            // Usar a função extraída para criar o conteúdo do popup
+            const popupContent = createMarkerPopupContent(marker, onLikeMarker)
             mapMarker.bindPopup(popupContent)
           })
 
@@ -274,7 +255,16 @@ const MapContent = ({
         mapInitializedRef.current = false
       }
     }
-  }, [loadMarkersFromFirebase, getProblemLabel, addLeafletCSS, addMarkerStyles, addLikeStyles, locationTracker])
+  }, [
+    loadMarkersFromFirebase,
+    getProblemLabel,
+    addLeafletCSS,
+    addMarkerStyles,
+    addLikeStyles,
+    locationTracker,
+    addLikeStyles,
+    locationTracker,
+  ])
 
   // Handle confirmed problem selection and marker update
   useEffect(() => {
@@ -291,64 +281,24 @@ const MapContent = ({
     // Get current position of user marker
     const markerPosition = userLocationMarkerRef.current.getLatLng()
 
-    // Salvar o marcador no Firebase
-    const saveMarkerToFirebase = async () => {
-      try {
-        // Obter informações do usuário atual do localStorage
-        const userDataString = localStorage.getItem("user")
-        const userData = userDataString ? JSON.parse(userDataString) : null
-        const userEmail = userData?.email || "Usuário anônimo"
+    // Usar a função extraída para adicionar um novo marcador
+    const addMarkerToMap = async () => {
+      await addNewMarker({
+        position: markerPosition,
+        problemType: selectedProblemType,
+        leaflet: leafletRef.current,
+        mapInstance: mapInstanceRef.current,
+        icons: iconsRef.current,
+        setMarkers,
+      })
 
-        // Criar objeto de marcador para salvar
-        const markerId = `marker_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
-        const newMarkerData: Marker = {
-          id: markerId,
-          lat: markerPosition.lat,
-          lng: markerPosition.lng,
-          type: selectedProblemType,
-          userEmail,
-          createdAt: new Date(),
-          likedBy: [], // Inicializa como um array vazio
-        }
-
-        // Adicionar ao Firebase usando o FirebaseService
-        await addMarker(dbFirestore, newMarkerData)
-        console.log("Marcador salvo com sucesso:", newMarkerData)
-
-        // Atualizar o estado local de marcadores
-        setMarkers((prev) => [...prev, newMarkerData])
-
-        // Adicionar marker no mapa com o ícone correto (mas manter o user location marker)
-        const L = leafletRef.current
-        const newMarker = L.marker([markerPosition.lat, markerPosition.lng], {
-          icon: iconsRef.current[selectedProblemType],
-        }).addTo(mapInstanceRef.current)
-
-        // Criar popup personalizado com botão de like
-        const popupContent = document.createElement("div")
-        popupContent.classList.add("marker-popup")
-        popupContent.innerHTML = `
-          <strong>Problema: ${getProblemLabel(selectedProblemType)}</strong><br>
-          Reportado em: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}<br>
-          Por: ${userEmail}<br>
-          <button class="like-button">
-            Curtir 
-            <span class="like-count">(0)</span>
-          </button>
-        `
-
-        newMarker.bindPopup(popupContent).openPopup()
-      } catch (error) {
-        console.error("Erro ao salvar marcador no Firebase:", error)
-      }
+      // Reset confirmation flag
+      resetConfirmation()
     }
 
-    // Executar a função de salvamento
-    saveMarkerToFirebase()
-
-    // Reset confirmation flag
-    resetConfirmation()
-  }, [userConfirmedProblem, selectedProblemType, getProblemLabel, resetConfirmation, setMarkers])
+    // Executar a função de adição de marcador
+    addMarkerToMap()
+  }, [userConfirmedProblem, selectedProblemType, resetConfirmation, setMarkers])
 
   // Handle window resize
   useEffect(() => {
