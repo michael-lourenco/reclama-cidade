@@ -162,28 +162,23 @@ const MapContent = ({
         filter: hue-rotate(240deg); /* Azul */
       }
       .user-location-icon {
-        filter: hue-rotate(120deg); /* Green color for user location */
+        filter: hue-rotate(120deg);
         animation: pulse 1.5s infinite;
       }
       .blitz-icon {
-        filter: hue-rotate(120deg); /* Green color for user location */
-        animation: pulse 1.5s infinite;
+        filter: hue-rotate(300deg);
       }
       .pista-icon {
-        filter: hue-rotate(120deg); /* Green color for user location */
-        animation: pulse 1.5s infinite;
+        filter: hue-rotate(50deg);
       }
       .bueiro-aberto-icon {
-        filter: hue-rotate(120deg); /* Green color for user location */
-        animation: pulse 1.5s infinite;
+        filter: hue-rotate(270deg) brightness(1.2) contrast(1.5);
       }
       .bueiro-vazamento-icon {
-        filter: hue-rotate(120deg); /* Green color for user location */
-        animation: pulse 1.5s infinite;
+        filter: hue-rotate(120deg);
       }
       .semafaro-icon {
-        filter: hue-rotate(120deg); /* Green color for user location */
-        animation: pulse 1.5s infinite;
+        filter: hue-rotate(180deg) brightness(1.2) contrast(1.5);
       }
           
       @keyframes pulse {
