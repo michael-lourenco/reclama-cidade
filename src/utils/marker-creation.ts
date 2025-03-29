@@ -1,7 +1,6 @@
 import type { Marker } from "@/types/marker-types"
 import { addMarker, dbFirestore } from "@/services/firebase/FirebaseService"
 import { getProblemLabel } from "@/utils/map-utils"
-import { convertToDate } from "@/utils/marker-interactions"
 
 /**
  * Função para adicionar um novo marcador ao mapa e ao Firebase
@@ -57,14 +56,14 @@ export const addNewMarker = async ({
     const popupContent = document.createElement("div")
     popupContent.classList.add("marker-popup")
     popupContent.innerHTML = `
-     <strong>Problema: ${getProblemLabel(problemType)}</strong><br>
-     Reportado em: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}<br>
-     Por: ${userEmail}<br>
-     <button class="like-button">
-       Curtir 
-       <span class="like-count">(0)</span>
-     </button>
-   `
+      <strong>Problema: ${getProblemLabel(problemType)}</strong><br>
+      Reportado em: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}<br>
+      Por: ${userEmail}<br>
+      <button class="like-button">
+        Curtir 
+        <span class="like-count">(0)</span>
+      </button>
+    `
 
     newMarker.bindPopup(popupContent).openPopup()
 
@@ -79,7 +78,7 @@ export const addNewMarker = async ({
  * Função para criar o conteúdo do popup de um marcador
  */
 export const createMarkerPopupContent = (marker: Marker, onLikeClick: (marker: Marker) => void): HTMLElement => {
-  const createdAt = convertToDate(marker.createdAt)
+  const createdAt = marker.createdAt instanceof Date ? marker.createdAt : new Date(marker.createdAt)
 
   const popupContent = document.createElement("div")
   popupContent.classList.add("marker-popup")
