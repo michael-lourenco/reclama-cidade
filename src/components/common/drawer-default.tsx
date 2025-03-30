@@ -80,4 +80,3 @@ function ProblemForm({ className }: React.ComponentProps<"form">) {
     </form>
   )
 }
-

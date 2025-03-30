@@ -22,7 +22,7 @@ export default function CookieConsent() {
     setConsent(false);
   };
 
-  if (consent !== null) return null; // Oculta o banner se o usuário já escolheu
+  if (consent !== null) return null;
 
   return (
     <div className="fixed bottom-0 left-0 w-full bg-gray-900 text-white p-4 flex flex-col md:flex-row items-center justify-between shadow-md">

@@ -38,4 +38,3 @@ const LocationControls = ({
 };
 
 export { LocationControls };
-

@@ -22,8 +22,16 @@ export const GridButtons: React.FC<GridButtonsProps> = ({
           variant="outline"
           className={`w-full aspect-square flex items-center justify-center p-0 text-xs 
             sm:text-sm md:text-base rounded-lg border border-dashed border-muted-foreground text-primary
-            ${isAuthenticated(value) ? "authenticated border border-dashed border-muted-foreground text-primary	bg-chart-4 opacity-100" : "border-muted-foreground"}
-            ${!isAuthenticated(value) ? "" : "hover:text-chart-4 hover:bg-background opacity-100"} transition-colors`}
+            ${
+              isAuthenticated(value)
+                ? "authenticated border border-dashed border-muted-foreground text-primary	bg-chart-4 opacity-100"
+                : "border-muted-foreground"
+            }
+            ${
+              !isAuthenticated(value)
+                ? ""
+                : "hover:text-chart-4 hover:bg-background opacity-100"
+            } transition-colors`}
           onClick={() => handleGridItemClick(value)}
           disabled={allDisabled || isAuthenticated(value)}
         >

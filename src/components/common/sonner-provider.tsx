@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { Toaster } from "sonner"
+import { Toaster } from "sonner";
 
 export function SonnerProvider() {
   return (
@@ -12,6 +12,5 @@ export function SonnerProvider() {
         duration: 3000,
       }}
     />
-  )
+  );
 }
-

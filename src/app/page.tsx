@@ -22,16 +22,13 @@ export default function Home() {
 
   return (
     <div className="relative w-full h-screen">
-      {/* Top Menu Component */}
       <TopMenu menuOpen={menuOpen} toggleMenu={toggleMenu} />
 
-      {/* Location Controls Component */}
       <LocationControls
         centerOnUserLocation={centerOnUserLocation}
         toggleReportMenu={toggleReportMenu}
       />
 
-      {/* Report Problem Menu */}
       <ReportMenu
         reportMenuOpen={reportMenuOpen}
         toggleReportMenu={toggleReportMenu}
@@ -39,7 +36,7 @@ export default function Home() {
         handleProblemSelect={handleProblemSelect}
         handleConfirmProblem={handleConfirmProblem}
       />
-      {/* Map Component */}
+
       <MapFullScreen
         selectedProblemType={selectedProblemType}
         handleProblemSelect={handleProblemSelect}
