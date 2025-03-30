@@ -44,9 +44,10 @@ const MapContent = ({
 
       if (map) return;
 
+      // Use a non-null assertion to tell TypeScript we've already checked
       const mapInstance = createMapInstance(
         L,
-        mapRef.current,
+        mapRef.current!, // Use the non-null assertion operator here
         defaultLocation,
         defaultZoom
       );
@@ -73,7 +74,7 @@ const MapContent = ({
         map.remove();
       }
     };
-  }, [mapRef.current]);
+  }, [defaultLocation, defaultZoom, map, marker]);
 
   const configureLeafletIcons = (L: typeof import("leaflet")) => {
     L.Icon.Default.mergeOptions({
@@ -207,9 +208,9 @@ const MapContent = ({
   ) => {
     if (marker) {
       marker.setLatLng(position);
-    } else {
+    } else if (map) {
       const L = await import("leaflet");
-      const newMarker = addMarkerToMap(L, map!, position, popupText);
+      const newMarker = addMarkerToMap(L, map, position, popupText);
       setMarker(newMarker);
     }
   };
