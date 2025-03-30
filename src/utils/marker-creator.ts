@@ -1,8 +1,8 @@
 // marker-creator.ts
 "use client";
-import type { Marker } from "@/types/marker-types";
+import type { Marker } from "@/types/marker";
 import { addMarker, dbFirestore } from "@/services/firebase/FirebaseService";
-import { getProblemLabel } from "@/utils/map-utils";
+import { getProblemLabel } from "@/utils/map";
 
 /**
  * Cria e salva um novo marcador no mapa e no Firebase

@@ -1,4 +1,4 @@
-import { getProblemLabel } from "@/utils/map-utils";
+import { getProblemLabel } from "@/utils/map";
 import { createMapIcons } from "@/utils/marker-icons";
 import { convertToDate } from "@/utils/marker-interactions";
 

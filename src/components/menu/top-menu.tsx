@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import { ToggleTheme } from "../toggle-theme";
+import { ToggleTheme } from "@/components/common/toggle-theme";
 
 interface TopMenuProps {
   menuOpen: boolean;

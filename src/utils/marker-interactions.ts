@@ -1,6 +1,6 @@
-import type { Marker } from "@/types/marker-types"
+import type { Marker } from "@/types/marker"
 import { dbFirestore, updateMarkerLikes } from "@/services/firebase/FirebaseService"
-import { getDistance } from "@/utils/distance-utils"
+import { getDistance } from "@/utils/distance"
 
 // Função para obter o email do usuário atual
 export const getCurrentUserEmail = () => {

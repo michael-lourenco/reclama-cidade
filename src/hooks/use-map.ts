@@ -4,7 +4,7 @@ import { DEFAULT_LOCATION, DEFAULT_ZOOM } from "@/constants/map-constants"
 import { useMapStyles } from "@/hooks/use-map-styles"
 import { useMapIcons } from "@/hooks/use-map-icons"
 import type { LeafletMouseEvent } from "leaflet"
-import type { MapRefs, MapIcon } from "@/types/map-types"
+import type { MapRefs, MapIcon } from "@/types/map"
 
 export const useMap = (onMapClick: (e: LeafletMouseEvent) => void) => {
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { Footer } from "@/components/Footer";
+import { Footer } from "@/components/common/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { UserInfo } from "@/components/user-info";
-import { UserLogout } from "@/components/user-logout";
+import { UserInfo } from "@/components/common/user-info";
+import { UserLogout } from "@/components/common/user-logout";
 import UserStatistics from "@/components/user/user-statistics";
 import { useAuth } from "@/hooks/use-auth";
 

@@ -1,7 +1,7 @@
 "use client";
 
-import CookieConsent from "@/components/cookie-consent";
-import { ThemeProvider } from "@/components/theme-provider";
+import CookieConsent from "@/components/common/cookie-consent";
+import { ThemeProvider } from "@/components/common/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider } from "next-auth/react";

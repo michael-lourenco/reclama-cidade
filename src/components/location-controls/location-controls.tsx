@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Locate } from "lucide-react";
-import { DrawerDialogDemo } from "../drawer-default";
+import { DrawerDialogDemo } from "@/components/common/drawer-default";
 
 interface LocationControlsProps {
   centerOnUserLocation: () => void;

@@ -3,7 +3,7 @@
 import { useRef, useCallback } from "react"
 import { PROBLEM_TYPES } from "@/constants/map-constants"
 import { LEAFLET_ICON_URLS } from "@/constants/map-constants"
-import type { MapIcon } from "@/types/map-types"
+import type { MapIcon } from "@/types/map"
 
 // Define a more specific type for Leaflet
 interface LeafletStatic {

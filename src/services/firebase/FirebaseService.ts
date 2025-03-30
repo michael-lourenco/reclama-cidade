@@ -1,7 +1,7 @@
 import { arrayUnion, collection, getFirestore, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc, Firestore, DocumentSnapshot, DocumentData } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, Auth } from "firebase/auth";
-import { UserData } from "@/types/user-types";
+import { UserData } from "@/types/user";
 
 
 export interface FirestoreTimestamp {
