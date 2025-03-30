@@ -1,5 +1,5 @@
 import type { Marker } from "@/types/marker"
-import { dbFirestore, updateMarkerLikes } from "@/services/firebase/FirebaseService"
+import { dbFirestore, updateMarkerLikes, updateMarkerResolved } from "@/services/firebase/FirebaseService"
 import { getDistance } from "@/utils/distance"
 
 // Função para obter o email do usuário atual
@@ -7,6 +7,12 @@ export const getCurrentUserEmail = () => {
   const userDataString = localStorage.getItem("user")
   const userData = userDataString ? JSON.parse(userDataString) : null
   return userData?.email || null
+}
+
+// Função para verificar se o marcador tem likes e deve mostrar o botão de resolução
+export const shouldShowResolvedButton = (marker: Marker): boolean => {
+  // Verifica explicitamente se likedBy existe e tem pelo menos 1 elemento
+  return Boolean(marker.likedBy && marker.likedBy.length >= 1)
 }
 
 // Função para manipular a ação de curtir um marcador
@@ -65,6 +71,58 @@ export const handleLikeMarker = async (
   } catch (error) {
     console.error("Erro ao curtir marcador:", error)
     alert("Não foi possível curtir o marcador. Tente novamente.")
+    return false
+  }
+}
+
+// Nova função para manipular a verificação de resolução do problema
+export const handleVerifyResolved = async (
+  marker: Marker,
+  userLocationMarker: any,
+  markers: Marker[],
+  setMarkers: (markers: Marker[]) => void,
+) => {
+  try {
+    const userEmail = getCurrentUserEmail()
+
+    if (!userEmail) {
+      alert("Por favor, faça login para verificar a resolução.")
+      return
+    }
+
+    // Verificar se o usuário é o criador do marcador
+    if (marker.userEmail !== userEmail) {
+      alert("Apenas o criador do marcador pode verificar se o problema foi resolvido.")
+      return
+    }
+
+    // Verificar distância do usuário ao marcador
+    if (!userLocationMarker) {
+      alert("Localização do usuário não disponível.")
+      return
+    }
+
+    const userLocation = userLocationMarker.getLatLng()
+    const markerLocation = { lat: marker.lat, lng: marker.lng }
+    const distance = getDistance(userLocation, markerLocation)
+
+    // Verificar se o usuário está dentro de 100 metros
+    if (distance > 100) {
+      alert("Você precisa estar a até 100 metros do marcador para verificar a resolução.")
+      return
+    }
+
+    // Atualizar status de resolução no Firebase
+    await updateMarkerResolved(dbFirestore, marker.id, true)
+
+    // Atualizar estado local dos marcadores
+    const updatedMarkers = markers.map((m) => (m.id === marker.id ? { ...m, resolved: true } : m))
+    setMarkers(updatedMarkers)
+
+    return true // Retorna true se a verificação foi bem-sucedida
+  } catch (error) {
+    console.error("Erro ao verificar resolução do marcador:", error)
+    alert("Não foi possível verificar a resolução do marcador. Tente novamente.")
     return false
   }
 }
