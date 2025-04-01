@@ -1,4 +1,5 @@
 import {
+  addDoc,
   arrayUnion,
   collection,
   getFirestore,
@@ -6,7 +7,9 @@ import {
   doc,
   getDoc,
   getDocs,
+  query,
   setDoc,
+  orderBy,
   updateDoc,
   type Firestore,
   type DocumentSnapshot,
@@ -16,6 +19,20 @@ import {
 import { initializeApp } from "firebase/app"
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, type Auth } from "firebase/auth"
 import type { UserData } from "@/types/user"
+import type { Marker } from "@/types/marker"
+import type { StatusChange } from "@/types/marker"
+
+
+export enum ProblemStatus {
+  REPORTED = "Reportado",
+  UNDER_ANALYSIS = "Em Análise",
+  VERIFIED = "Verificado",
+  IN_PROGRESS = "Em Andamento",
+  RESOLVED = "Resolvido",
+  CLOSED = "Fechado",
+  REOPENED = "Reaberto",
+  // Adicione outros conforme necessário
+}
 
 export interface FirestoreTimestamp {
   toDate: () => Date
@@ -29,17 +46,6 @@ export interface UserMarker {
   lng: number
   type: string
   createdAt: Date
-}
-export interface Marker {
-  id: string
-  lat: number
-  lng: number
-  type: string
-  userEmail: string
-  createdAt: Date | FirestoreTimestamp // Using specific type instead of any
-  likedBy?: string[]
-  resolved?: boolean
-  resolvedAt?: FirestoreTimestamp
 }
 
 let globalUser: UserData | null = null
@@ -117,6 +123,9 @@ async function updateUserMarker(
 async function addMarker(db: Firestore, marker: Marker): Promise<void> {
   const markerRef = doc(db, "markers", marker.id)
   await setDoc(markerRef, marker)
+  
+  // Criar o status inicial como "Reportado" ao adicionar um marcador
+  await addStatusChange(marker.id, ProblemStatus.REPORTED, "Problema reportado inicialmente", marker.userEmail)
 }
 
 async function addUserMarker(db: Firestore, email: string, marker: UserMarker): Promise<void> {
@@ -234,7 +243,7 @@ function displayUserInfo(user: UserData): void {
   console.log(`User: ${user.displayName}, Currency: ${user.currency.value}, Photo URL: ${user.photoURL}`)
 }
 
-export const updateMarkerLikes = async (dbFirestore: Firestore, markerId: string, userEmail: string) => {
+const updateMarkerLikes = async (dbFirestore: Firestore, markerId: string, userEmail: string) => {
   try {
     const markerRef = doc(dbFirestore, "markers", markerId)
 
@@ -247,18 +256,61 @@ export const updateMarkerLikes = async (dbFirestore: Firestore, markerId: string
   }
 }
 
-export const updateMarkerResolved = async (dbFirestore: Firestore, markerId: string, resolved: boolean) => {
-  try {
-    const markerRef = doc(dbFirestore, "markers", markerId)
+// Função separada para adicionar entrada ao histórico de status
+async function addStatusChange(
+  markerId: string,
+  status: ProblemStatus,
+  comment: string | undefined,
+  updatedBy: string
+): Promise<string> {
+  const db = getFirestore();
+  
+  const statusChangeData = {
+    status,
+    timestamp: serverTimestamp(),
+    comment,
+    updatedBy
+  };
+  
+  const docRef = await addDoc(
+    collection(db, 'markers', markerId, 'statusHistory'),
+    statusChangeData
+  );
+  
+  return docRef.id;
+}
 
-    await updateDoc(markerRef, {
-      resolved: resolved,
-      resolvedAt: serverTimestamp(),
-    })
-  } catch (error) {
-    console.error("Erro ao atualizar status de resolução do marcador:", error)
-    throw error
-  }
+// Atualizar status e registrar no histórico
+async function updateMarkerStatus(
+  markerId: string, 
+  newStatus: ProblemStatus, 
+  comment: string | undefined, 
+  updatedBy: string
+): Promise<void> {
+  const db = getFirestore();
+  
+  // Atualizar status atual no marcador
+  await updateDoc(doc(db, 'markers', markerId), {
+    currentStatus: newStatus
+  });
+  
+  // Chamar a função separada para adicionar ao histórico
+  await addStatusChange(markerId, newStatus, comment, updatedBy);
+}
+
+// Obter histórico de um marcador
+async function getMarkerStatusHistory(markerId: string) {
+  const db = getFirestore();
+  const historyRef = collection(db, 'markers', markerId, 'statusHistory');
+  
+  // Ordenar por timestamp decrescente (mais recente primeiro)
+  const q = query(historyRef, orderBy('timestamp', 'desc'));
+  const snapshot = await getDocs(q);
+  
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  })) as StatusChange[];
 }
 
 export {
@@ -267,12 +319,16 @@ export {
   displayUserInfo,
   fetchUserData,
   getMarkers,
+  getMarkerStatusHistory,
   getUserMarkers,
   initFirebase,
   initUserFirebase,
   updateUserCredits,
   updateUserCurrency,
   updateMarkers,
+  updateMarkerLikes,
+  updateMarkerStatus,
+  addStatusChange,
   updateUserMarker,
   addMarker,
   addUserMarker,
@@ -281,4 +337,3 @@ export {
 }
 
 export type { UserData }
-

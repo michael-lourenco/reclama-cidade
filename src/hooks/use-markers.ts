@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react"
 import { dbFirestore, getMarkers, addMarker } from "@/services/firebase/FirebaseService"
-import type { Marker } from "@/types/map"
+import type { Marker } from "@/types/marker"
 
 export const useMarkers = () => {
   const [markers, setMarkers] = useState<Marker[]>([])
@@ -31,6 +31,7 @@ export const useMarkers = () => {
       const userDataString = localStorage.getItem("user")
       const userData = userDataString ? JSON.parse(userDataString) : null
       const userEmail = userData?.email || "Usuário anônimo"
+      const currentStatus = "reportado"
 
       // Create marker object to save
       const markerId = `marker_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
@@ -41,6 +42,7 @@ export const useMarkers = () => {
         type,
         userEmail,
         createdAt: new Date(),
+        currentStatus,
       }
 
       // Add to Firebase using FirebaseService

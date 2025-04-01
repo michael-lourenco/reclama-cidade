@@ -1,7 +1,7 @@
 // marker-creator.ts
 "use client";
 import type { Marker } from "@/types/marker";
-import { addMarker, dbFirestore } from "@/services/firebase/FirebaseService";
+import { addMarker, updateMarkerStatus, dbFirestore } from "@/services/firebase/FirebaseService";
 import { getProblemLabel } from "@/utils/map";
 
 /**
@@ -39,11 +39,12 @@ export const createAndSaveMarker = async ({
       type: selectedProblemType,
       userEmail,
       createdAt: new Date(),
-      likedBy: [] // Inicializa como um array vazio
+      likedBy: [],
+      currentStatus: "reportado"
     };
 
     // Adicionar ao Firebase usando o FirebaseService
-    await addMarker(dbFirestore, newMarkerData);
+    await addMarker(dbFirestore, newMarkerData); 
     console.log("Marcador salvo com sucesso:", newMarkerData);
 
     // Atualizar o estado local de marcadores
