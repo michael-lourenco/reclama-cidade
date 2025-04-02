@@ -1,7 +1,8 @@
 "use client";
+import { DialogProblems } from "@/components/common/drawer-default";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Locate } from "lucide-react";
-import { DrawerDialogDemo } from "@/components/common/drawer-default";
+import { SidebarTrigger } from "../ui/sidebar";
 
 interface LocationControlsProps {
   centerOnUserLocation: () => void;
@@ -14,7 +15,14 @@ const LocationControls = ({
 }: LocationControlsProps) => {
   return (
     <div className="absolute bottom-24 right-4 flex flex-col gap-2 z-[9999]">
-      <DrawerDialogDemo />
+      <DialogProblems
+        title="Testes"
+        description="Subdescriçao"
+        onCancel={() => alert("oi")}
+        onSubmit={() => alert("oi")}
+      >
+        Teste
+      </DialogProblems>
       <Button
         variant="floating"
         size="icon"
@@ -33,8 +41,10 @@ const LocationControls = ({
       >
         <AlertTriangle />
       </Button>
+      <SidebarTrigger />
     </div>
   );
 };
 
 export { LocationControls };
+

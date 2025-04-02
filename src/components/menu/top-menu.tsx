@@ -1,23 +1,43 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
-import { ToggleTheme } from "@/components/common/toggle-theme";
+import { AlertTriangle, Cloud, Mail, Menu, X } from "lucide-react";
+import Link from "next/link";
+import { SwitchTheme } from "../common/switch-theme";
 
 interface TopMenuProps {
   menuOpen: boolean;
   toggleMenu: () => void;
 }
 
+const listMenu = [
+  {
+    label: "Inicio",
+    href: "/",
+    icon: <Menu />,
+  },
+  {
+    label: "Mapa de Problemas",
+    href: "/mapa-de-problemas",
+    icon: <AlertTriangle />,
+  },
+  {
+    label: "Sobre",
+    href: "/sobre",
+    icon: <Cloud />,
+  },
+  {
+    label: "Contato",
+    href: "/contato",
+    icon: <Mail />,
+  },
+];
+
 const TopMenu = ({ menuOpen, toggleMenu }: TopMenuProps) => {
   return (
     <>
       {/* Toggle Menu Button */}
       <div className="absolute top-4 left-4 right-4 flex gap-2 z-10">
-        <Button
-          variant="floating"
-          size="icon"
-          onClick={toggleMenu}
-        >
+        <Button variant="floating" size="icon" onClick={toggleMenu}>
           <Menu className="h-5 w-5" />
         </Button>
       </div>
@@ -33,12 +53,19 @@ const TopMenu = ({ menuOpen, toggleMenu }: TopMenuProps) => {
           </div>
           <div className="p-4">
             <ul className="space-y-2">
-              <li className="p-2 cursor-pointer">Meus Reportes</li>
-              <li className="p-2 cursor-pointer">Configurações</li>
-              <li className="p-2 cursor-pointer">Ajuda</li>
+              {listMenu.map((item, index) => (
+                <li key={index} className="p-2">
+                  <Link href={item.href} className="flex items-center gap-2">
+                    {item.icon}
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              <li className="p-2">
+                <SwitchTheme />
+              </li>
             </ul>
           </div>
-          <ToggleTheme />
         </div>
       )}
     </>

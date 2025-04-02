@@ -2,7 +2,6 @@
 
 import { LocationControls } from "@/components/location-controls/location-controls";
 import { MapFullScreen } from "@/components/map/map-fullscreen";
-import { TopMenu } from "@/components/menu/top-menu";
 import { ReportMenu } from "@/components/report/report-menu";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useMenuState } from "@/hooks/use-menu-state";
@@ -22,8 +21,6 @@ export default function Home() {
 
   return (
     <div className="relative w-full h-screen">
-      <TopMenu menuOpen={menuOpen} toggleMenu={toggleMenu} />
-
       <LocationControls
         centerOnUserLocation={centerOnUserLocation}
         toggleReportMenu={toggleReportMenu}
