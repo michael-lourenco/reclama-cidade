@@ -30,6 +30,8 @@ const MapContent = ({
   const mapInitializedRef = useRef<boolean>(false);
   const defaultLocation: [number, number] = [-23.5902, -48.0338];
   const defaultZoom = 15;
+  // Flag to track if initial centering on user has happened
+  const initialCenteringDoneRef = useRef<boolean>(false);
 
   // Add CSS for marker icons
   const addMarkerStyles = useMarkerStyles();
@@ -52,13 +54,42 @@ const MapContent = ({
 
     async function initMap() {
       try {
+        // Get user location first, with a short timeout
+        const userLocationPromise = new Promise<[number, number]>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              resolve([position.coords.latitude, position.coords.longitude]);
+            },
+            (error) => {
+              console.warn("Erro ao obter localização do usuário:", error);
+              reject(error);
+            },
+            { timeout: 3000, maximumAge: 0 }
+          );
+        });
+
+        // Try to get user location first, but don't wait too long
+        let initialLocation = defaultLocation;
+        try {
+          initialLocation = await Promise.race([
+            userLocationPromise,
+            new Promise<[number, number]>((_, reject) => 
+              setTimeout(() => reject(new Error("Timeout")), 3000)
+            )
+          ]);
+          initialCenteringDoneRef.current = true;
+        } catch (error) {
+          console.warn("Usando localização padrão para inicialização inicial:", error);
+        }
+
+        // Initialize map with the best available location (user or default)
         await initializeMap({
           mapRef,
           mapInstanceRef,
           userLocationMarkerRef,
           leafletRef,
           iconsRef,
-          defaultLocation,
+          defaultLocation: initialLocation, // Use user location if available
           defaultZoom,
           loadMarkersFromFirebase,
           onLikeMarker,
@@ -66,14 +97,33 @@ const MapContent = ({
           addLeafletCSS,
           addMarkerStyles,
           addLikeStyles,
+          skipUserLocationSetView: initialCenteringDoneRef.current, // Skip the setView in initializeMap if we already have location
         });
 
-        // Set up continuous location tracking
+        // Set up location tracking without automatic centering
         watchId = setupLocationTracking(
           mapInstanceRef,
           userLocationMarkerRef,
-          defaultZoom
+          defaultZoom,
+          false // Don't center map on each location update
         );
+
+        // If we didn't get user location initially, try again with a longer timeout
+        if (!initialCenteringDoneRef.current) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const { latitude, longitude } = position.coords;
+              if (mapInstanceRef.current && !initialCenteringDoneRef.current) {
+                mapInstanceRef.current.setView([latitude, longitude], defaultZoom);
+                initialCenteringDoneRef.current = true;
+              }
+            },
+            (error) => {
+              console.error("Erro secundário ao obter localização:", error);
+            },
+            { timeout: 10000, maximumAge: 0 }
+          );
+        }
       } catch (error) {
         console.error("Erro ao inicializar o mapa:", error);
         // Resetar flag se houver erro para permitir tentar novamente
@@ -102,6 +152,7 @@ const MapContent = ({
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
         mapInitializedRef.current = false;
+        initialCenteringDoneRef.current = false;
       }
     };
   }, [

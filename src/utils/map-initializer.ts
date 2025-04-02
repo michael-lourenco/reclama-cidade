@@ -4,7 +4,7 @@ import { createMapIcons } from "@/utils/marker-icons"
 import { convertToDate } from "@/utils/marker-interactions"
 
 type MapInitializerProps = {
-  mapRef: React.RefObject<HTMLDivElement | null> // Corrigido para aceitar HTMLDivElement | null
+  mapRef: React.RefObject<HTMLDivElement | null>
   mapInstanceRef: React.MutableRefObject<any>
   userLocationMarkerRef: React.MutableRefObject<any>
   leafletRef: React.MutableRefObject<any>
@@ -17,6 +17,7 @@ type MapInitializerProps = {
   addLeafletCSS: () => void
   addMarkerStyles: () => void
   addLikeStyles: () => void
+  skipUserLocationSetView?: boolean // New prop to control whether to set view on user location
 }
 
 export const initializeMap = async ({
@@ -33,6 +34,7 @@ export const initializeMap = async ({
   addLeafletCSS,
   addMarkerStyles,
   addLikeStyles,
+  skipUserLocationSetView = false, // Default to false for backward compatibility
 }: MapInitializerProps) => {
   try {
     // Verificar se o elemento do mapa existe
@@ -84,6 +86,7 @@ export const initializeMap = async ({
 
     // Load markers from Firebase
     const firebaseMarkers = await loadMarkersFromFirebase()
+    let shouldCenterOnMarker = !skipUserLocationSetView; // Only center on marker if not centering on user
 
     if (firebaseMarkers && firebaseMarkers.length > 0) {
       // Add all saved markers to the map
@@ -143,53 +146,54 @@ export const initializeMap = async ({
         mapMarker.bindPopup(popupContent)
       })
 
-      // Center map on most recent marker
-      // Ordenar marcadores por data descendente (mais recente primeiro)
-      const sortedMarkers = [...firebaseMarkers].sort((a, b) => {
-        const dateA = convertToDate(a.createdAt)
-        const dateB = convertToDate(b.createdAt)
-        return dateB.getTime() - dateA.getTime()
-      })
+      // Center map on most recent marker only if not centering on user
+      if (shouldCenterOnMarker) {
+        // Ordenar marcadores por data descendente (mais recente primeiro)
+        const sortedMarkers = [...firebaseMarkers].sort((a, b) => {
+          const dateA = convertToDate(a.createdAt)
+          const dateB = convertToDate(b.createdAt)
+          return dateB.getTime() - dateA.getTime()
+        })
 
-      if (sortedMarkers.length > 0) {
-        const mostRecent = sortedMarkers[0]
-        mapInstance.setView([mostRecent.lat, mostRecent.lng], defaultZoom)
+        if (sortedMarkers.length > 0) {
+          const mostRecent = sortedMarkers[0]
+          mapInstance.setView([mostRecent.lat, mostRecent.lng], defaultZoom)
+        }
       }
     }
 
-    // Get user location and continuously track it
+    // Get user location and create marker
     if ("geolocation" in navigator) {
-      // First get initial position
+      // Create user location marker
+      const userIcon = iconsRef.current.userLocation
+      
+      // First create marker at default location
+      userLocationMarkerRef.current = L.marker(defaultLocation, {
+        icon: userIcon,
+        zIndexOffset: 1000, // Make sure user marker is on top
+      })
+        .addTo(mapInstance)
+        .bindPopup("Sua localização")
+      
+      // Get position and update marker
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords
 
-          // Update map view
-          mapInstance.setView([latitude, longitude], defaultZoom)
+          // Update user marker position
+          if (userLocationMarkerRef.current) {
+            userLocationMarkerRef.current.setLatLng([latitude, longitude])
+              .bindPopup("Sua localização")
+          }
 
-          // Create user location marker
-          const userIcon = iconsRef.current.userLocation
-
-          userLocationMarkerRef.current = L.marker([latitude, longitude], {
-            icon: userIcon,
-            zIndexOffset: 1000, // Make sure user marker is on top
-          })
-            .addTo(mapInstance)
-            .bindPopup("Sua localização")
-            .openPopup()
+          // Update map view only if we weren't told to skip it
+          if (!skipUserLocationSetView) {
+            mapInstance.setView([latitude, longitude], defaultZoom)
+          }
         },
         (error) => {
           console.error("Erro ao obter localização do usuário:", error)
-
-          // Cria o marcador na posição padrão se não conseguir obter a localização
-          const userIcon = iconsRef.current.userLocation
-          userLocationMarkerRef.current = L.marker(defaultLocation, {
-            icon: userIcon,
-            zIndexOffset: 1000,
-          })
-            .addTo(mapInstance)
-            .bindPopup("Sua localização (aproximada)")
-            .openPopup()
+          // Marker already created at default location
         },
       )
     }
@@ -212,6 +216,7 @@ export const setupLocationTracking = (
   mapInstanceRef: React.MutableRefObject<any>,
   userLocationMarkerRef: React.MutableRefObject<any>,
   defaultZoom: number,
+  centerMapOnLocationUpdate = true // New parameter to control automatic centering
 ) => {
   if (!("geolocation" in navigator)) {
     return null
@@ -221,14 +226,14 @@ export const setupLocationTracking = (
     (position) => {
       const { latitude, longitude } = position.coords
 
-      // Update map view to follow user
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.setView([latitude, longitude], mapInstanceRef.current.getZoom())
-      }
-
       // Update user marker position
       if (userLocationMarkerRef.current) {
         userLocationMarkerRef.current.setLatLng([latitude, longitude])
+      }
+
+      // Update map view to follow user only if requested
+      if (centerMapOnLocationUpdate && mapInstanceRef.current) {
+        mapInstanceRef.current.setView([latitude, longitude], mapInstanceRef.current.getZoom())
       }
     },
     (error) => {
@@ -241,4 +246,3 @@ export const setupLocationTracking = (
     },
   )
 }
-
