@@ -34,10 +34,8 @@ const MapFullScreen: React.FC<MapFullScreenProps> = ({
           resetConfirmation={resetConfirmation}
         />
       )}
-
     </>
   );
 };
 
 export { MapFullScreen };
-

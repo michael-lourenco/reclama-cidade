@@ -1,6 +1,6 @@
 "use client";
 
-import { LocationControls } from "@/components/location-controls/location-controls";
+// import { LocationControls } from "@/components/location-controls/location-controls";
 import { MapFullScreen } from "@/components/map/map-fullscreen";
 import { TopMenu } from "@/components/menu/top-menu";
 import { ReportMenu } from "@/components/report/report-menu";
@@ -24,10 +24,10 @@ export default function Home() {
     <div className="relative w-full h-screen">
       <TopMenu menuOpen={menuOpen} toggleMenu={toggleMenu} />
 
-      <LocationControls
+      {/* <LocationControls
         centerOnUserLocation={centerOnUserLocation}
         toggleReportMenu={toggleReportMenu}
-      />
+      /> */}
 
       <ReportMenu
         reportMenuOpen={reportMenuOpen}

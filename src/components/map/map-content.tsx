@@ -8,6 +8,7 @@ import { handleLikeMarker } from "@/utils/marker-interactions";
 import { initializeMap, setupLocationTracking } from "@/utils/map-initializer";
 import { addLeafletCSS, addLikeStyles, setupCenterOnUserEvent, setupResizeHandler } from "@/utils/map-styles";
 import { createAndSaveMarker } from "@/utils/marker-creator";
+import { LocationControls } from "@/components/location-controls/location-controls";
 
 // Componente interno que será carregado apenas no cliente
 const MapContent = ({
@@ -30,14 +31,64 @@ const MapContent = ({
   const mapInitializedRef = useRef<boolean>(false);
   const defaultLocation: [number, number] = [-23.5902, -48.0338];
   const defaultZoom = 15;
+  const watchIdRef = useRef<number | null>(null);
   // Flag to track if initial centering on user has happened
   const initialCenteringDoneRef = useRef<boolean>(false);
+  // Track if location follow mode is active
+  const [followMode, setFollowMode] = useState<boolean>(true);
+  // State for problem reporting menu
+  const [reportMenuOpen, setReportMenuOpen] = useState<boolean>(false);
 
   // Add CSS for marker icons
   const addMarkerStyles = useMarkerStyles();
 
   const onLikeMarker = async (marker: any) => {
     await handleLikeMarker(marker, userLocationMarkerRef.current, markers, setMarkers);
+  };
+
+  // Toggle report menu
+  const toggleReportMenu = () => {
+    setReportMenuOpen(!reportMenuOpen);
+  };
+
+  // Center on user location manually (one-time centering)
+  const centerOnUserLocation = () => {
+    if (userLocationMarkerRef.current && mapInstanceRef.current) {
+      const position = userLocationMarkerRef.current.getLatLng();
+      mapInstanceRef.current.setView([position.lat, position.lng], mapInstanceRef.current.getZoom());
+    }
+  };
+
+  // Toggle follow mode
+  const toggleFollowMode = () => {
+    const newMode = !followMode;
+    setFollowMode(newMode);
+    
+    // Update location tracking with new follow mode
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    
+    // Restart location tracking with new follow mode setting
+    if (newMode) {
+      watchIdRef.current = setupLocationTracking(
+        mapInstanceRef,
+        userLocationMarkerRef,
+        defaultZoom,
+        true // Center map on location updates when follow mode is on
+      );
+      
+      // Immediately center on user's location when turning on follow mode
+      centerOnUserLocation();
+    } else {
+      watchIdRef.current = setupLocationTracking(
+        mapInstanceRef,
+        userLocationMarkerRef,
+        defaultZoom,
+        false // Don't center map on location updates when follow mode is off
+      );
+    }
   };
 
   // Initialize map only once
@@ -49,8 +100,6 @@ const MapContent = ({
 
     // Marcar que a inicialização começou
     mapInitializedRef.current = true;
-
-    let watchId: number | null = null;
 
     async function initMap() {
       try {
@@ -100,12 +149,12 @@ const MapContent = ({
           skipUserLocationSetView: initialCenteringDoneRef.current, // Skip the setView in initializeMap if we already have location
         });
 
-        // Set up location tracking without automatic centering
-        watchId = setupLocationTracking(
+        // Set up location tracking with auto-centering based on initial follow mode state
+        watchIdRef.current = setupLocationTracking(
           mapInstanceRef,
           userLocationMarkerRef,
           defaultZoom,
-          false // Don't center map on each location update
+          followMode // Center map on location updates if follow mode is on
         );
 
         // If we didn't get user location initially, try again with a longer timeout
@@ -133,7 +182,7 @@ const MapContent = ({
 
     initMap();
 
-    // Configurar evento de centralização no usuário
+    // Configure event for centering on user (original code)
     const cleanupCenterOnUserEvent = setupCenterOnUserEvent(
       mapInstanceRef,
       userLocationMarkerRef,
@@ -144,8 +193,9 @@ const MapContent = ({
       cleanupCenterOnUserEvent();
       
       // Clean up location tracking
-      if (watchId !== null) {
-        navigator.geolocation.clearWatch(watchId);
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
       }
       
       if (mapInstanceRef.current) {
@@ -158,6 +208,7 @@ const MapContent = ({
   }, [
     loadMarkersFromFirebase,
     addMarkerStyles,
+    followMode // Add followMode as dependency to react to initial state
   ]);
 
   // Handle confirmed problem selection and marker update
@@ -199,7 +250,17 @@ const MapContent = ({
     return setupResizeHandler(mapInstanceRef);
   }, []);
 
-  return <div ref={mapRef} className="absolute inset-0 w-full h-full z-0" />;
+  return (
+    <>
+      <div ref={mapRef} className="absolute inset-0 w-full h-full z-0" />
+      <LocationControls 
+        centerOnUserLocation={centerOnUserLocation}
+        toggleReportMenu={toggleReportMenu}
+        followMode={followMode}
+        toggleFollowMode={toggleFollowMode}
+      />
+    </>
+  );
 };
 
 export { MapContent };
