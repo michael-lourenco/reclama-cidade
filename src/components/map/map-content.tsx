@@ -16,11 +16,13 @@ const MapContent = ({
   selectedProblemType,
   userConfirmedProblem,
   resetConfirmation,
+  toggleReportMenu
 }: {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   selectedProblemType: string | null;
   userConfirmedProblem: boolean;
   resetConfirmation: () => void;
+  toggleReportMenu: () => void;
 }) => {
   const { markers, setMarkers, loadMarkersFromFirebase } = useMarkers();
   const mapRef = useRef<HTMLDivElement>(null);
@@ -47,10 +49,6 @@ const MapContent = ({
   };
 
   // Toggle report menu
-  const toggleReportMenu = () => {
-    setReportMenuOpen(!reportMenuOpen);
-  };
-
   // Center on user location manually (one-time centering)
   const centerOnUserLocation = () => {
     if (userLocationMarkerRef.current && mapInstanceRef.current) {

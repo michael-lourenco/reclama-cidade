@@ -43,6 +43,7 @@ export default function Home() {
         handleConfirmProblem={handleConfirmProblem}
         userConfirmedProblem={userConfirmedProblem}
         resetConfirmation={resetConfirmation}
+        toggleReportMenu={toggleReportMenu}
       />
     </div>
   );

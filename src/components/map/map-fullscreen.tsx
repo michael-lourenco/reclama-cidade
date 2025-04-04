@@ -10,11 +10,13 @@ interface MapFullScreenProps {
   handleConfirmProblem: () => void;
   userConfirmedProblem: boolean;
   resetConfirmation: () => void;
+  toggleReportMenu: () => void; // Pass the toggleReportMenu function as a prop {toggleReportMenu}
 }
 const MapFullScreen: React.FC<MapFullScreenProps> = ({
   selectedProblemType,
   userConfirmedProblem,
   resetConfirmation,
+  toggleReportMenu,
 }) => {
   const { isLoading, setIsLoading, isClient } = useClientState();
 
@@ -32,6 +34,7 @@ const MapFullScreen: React.FC<MapFullScreenProps> = ({
           selectedProblemType={selectedProblemType}
           userConfirmedProblem={userConfirmedProblem}
           resetConfirmation={resetConfirmation}
+          toggleReportMenu={toggleReportMenu}
         />
       )}
     </>
