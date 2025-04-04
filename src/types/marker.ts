@@ -13,6 +13,7 @@ export interface Marker {
     userEmail: string;
     createdAt: Date | FirestoreTimestamp;
     likedBy?: string[];
+    resolvedBy?: string[];
     currentStatus: string; 
 }
 

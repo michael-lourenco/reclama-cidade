@@ -13,6 +13,7 @@ type MapInitializerProps = {
   defaultZoom: number
   loadMarkersFromFirebase: () => Promise<any[]>
   onLikeMarker: (marker: any) => Promise<void>
+  onResolvedMarker: (marker: any) => Promise<void>
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
   addLeafletCSS: () => void
   addMarkerStyles: () => void
@@ -30,6 +31,7 @@ export const initializeMap = async ({
   defaultZoom,
   loadMarkersFromFirebase,
   onLikeMarker,
+  onResolvedMarker,
   setIsLoading,
   addLeafletCSS,
   addMarkerStyles,
@@ -103,7 +105,7 @@ export const initializeMap = async ({
         const popupContent = document.createElement("div")
         popupContent.classList.add("marker-popup")
         const likesCount = marker.likedBy?.length || 0
-
+        const resolvedCount = marker.resolvedBy?.length || 0
         // Conteúdo base do popup
         let popupHTML = `
           <strong>Problema: ${getProblemLabel(marker.type)}</strong><br>
@@ -113,13 +115,22 @@ export const initializeMap = async ({
 
         // Adicionar botão apropriado com base no número de likes
         if (likesCount >= 1) {
-          // Mostrar botão de verificação se tiver 1 ou mais likes
-          popupHTML += `
-            <button class="resolved-button">
-              Resolvido?
-              <span class="like-count">(${likesCount})</span>
-            </button>
-          `
+          if (resolvedCount >= 1) {
+            // Mostrar botão de verificação se tiver 1 ou mais likes
+            popupHTML += `
+              <button class="resolved-button">
+                RESOLVIDO
+              </button>
+            `
+          } else{
+            // Mostrar botão de verificação se tiver 1 ou mais likes
+            popupHTML += `
+              <button class="resolved-button">
+                Resolvido?
+                <span class="like-count">(${likesCount})</span>
+              </button>
+            `
+          }
         } else {
           // Mostrar botão de like se não tiver likes
           popupHTML += `
@@ -135,7 +146,7 @@ export const initializeMap = async ({
         // Adicionar evento de clique no botão apropriado
         if (likesCount >= 1) {
           popupContent.querySelector(".resolved-button")?.addEventListener("click", () => {
-            onLikeMarker(marker) // Reutilizando a mesma função para simplificar
+            onResolvedMarker(marker) // Reutilizando a mesma função para simplificar
           })
         } else {
           popupContent.querySelector(".like-button")?.addEventListener("click", () => {

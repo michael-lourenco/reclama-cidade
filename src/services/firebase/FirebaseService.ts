@@ -256,6 +256,29 @@ const updateMarkerLikes = async (dbFirestore: Firestore, markerId: string, userE
   }
 }
 
+const updateMarkerResolved = async (dbFirestore: Firestore, markerId: string, userEmail: string) => {
+  try {
+    const markerRef = doc(dbFirestore, "markers", markerId)
+
+    await updateDoc(markerRef, {
+      resolvedBy: arrayUnion(userEmail),
+    })
+
+    const markerRefAfter = doc(dbFirestore, "markers", markerId)
+
+    const markerSnapshot = await getDoc(markerRef)
+    const markerData = markerSnapshot.data()
+
+    // Verificar se o array 'resolvedBy' existe e tem pelo menos um item
+    if (markerData?.resolvedBy?.length >= 1) {
+      await addStatusChange(markerId, ProblemStatus.RESOLVED, "Problema resolvido", userEmail)
+    }
+  } catch (error) {
+    console.error("Erro ao atualizar likes do marcador:", error)
+    throw error
+  }
+}
+
 // Função separada para adicionar entrada ao histórico de status
 async function addStatusChange(
   markerId: string,
@@ -327,6 +350,7 @@ export {
   updateUserCurrency,
   updateMarkers,
   updateMarkerLikes,
+  updateMarkerResolved,
   updateMarkerStatus,
   addStatusChange,
   updateUserMarker,

@@ -4,7 +4,7 @@ import { useMarkers } from "@/hooks/use-markers";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useMarkerStyles } from "@/hooks/marker-styles";
-import { handleLikeMarker } from "@/utils/marker-interactions";
+import { handleLikeMarker, handleResolvedMarker } from "@/utils/marker-interactions";
 import { initializeMap, setupLocationTracking } from "@/utils/map-initializer";
 import { addLeafletCSS, addLikeStyles, setupCenterOnUserEvent, setupResizeHandler } from "@/utils/map-styles";
 import { createAndSaveMarker } from "@/utils/marker-creator";
@@ -46,6 +46,11 @@ const MapContent = ({
 
   const onLikeMarker = async (marker: any) => {
     await handleLikeMarker(marker, userLocationMarkerRef.current, markers, setMarkers);
+  };
+
+
+  const onResolvedMarker = async (marker: any) => {
+    await handleResolvedMarker(marker, userLocationMarkerRef.current, markers, setMarkers);
   };
 
   // Toggle report menu
@@ -140,6 +145,7 @@ const MapContent = ({
           defaultZoom,
           loadMarkersFromFirebase,
           onLikeMarker,
+          onResolvedMarker,
           setIsLoading,
           addLeafletCSS,
           addMarkerStyles,
