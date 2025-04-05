@@ -13,7 +13,7 @@ const PROBLEM_TYPES = {
 const LOCAL_STORAGE_KEY = "mapProblems"
 
 const DEFAULT_LOCATION: [number, number] = [-23.5902, -48.0338]
-const DEFAULT_ZOOM = 15
+const DEFAULT_ZOOM = 16
 
 const LEAFLET_ICON_URLS = {
   ICON: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",

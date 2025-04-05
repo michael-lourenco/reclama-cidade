@@ -25,14 +25,14 @@ const LocationControls = ({
         <DrawerDialogDemo /> 
       */}
       
-      <DialogProblems
+      {/* <DialogProblems
         title="Testes"
         description="Subdescriçao"
         onCancel={() => alert("oi")}
         onSubmit={() => alert("oi")}
       >
-        Teste
-      </DialogProblems>
+        <AlertTriangle />
+      </DialogProblems> */}
       <Button
         variant={followMode ? "default" : "floating"}
         size="icon"

@@ -32,7 +32,7 @@ const MapContent = ({
   const iconsRef = useRef<Record<string, any>>({});
   const mapInitializedRef = useRef<boolean>(false);
   const defaultLocation: [number, number] = [-23.5902, -48.0338];
-  const defaultZoom = 15;
+  const defaultZoom = 16;
   const watchIdRef = useRef<number | null>(null);
   // Flag to track if initial centering on user has happened
   const initialCenteringDoneRef = useRef<boolean>(false);
