@@ -1,24 +1,9 @@
-"use client";
 import { Button } from "@/components/ui/button";
-import { PROBLEM_TYPES } from "@/constants/map-constants";
+import { PROBLEM_CATEGORIES } from "@/config/problem-categories";
 import { X } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
-
-// Define a type for the subcategory
-type Subcategory = {
-  icon: string;
-  label: string;
-  type: string;
-};
-
-// Create a type that matches exactly the keys of PROBLEM_TYPES
-type ProblemTypesKeys = keyof typeof PROBLEM_TYPES;
-
-// Define a type for the subcategories object
-type SubcategoriesType = {
-  [K in ProblemTypesKeys]?: Subcategory[];
-};
+import { ProblemCategory, ProblemSubcategory } from "@/types/map";
 
 interface ReportMenuProps {
   reportMenuOpen: boolean;
@@ -28,75 +13,34 @@ interface ReportMenuProps {
   handleConfirmProblem: () => void;
 }
 
-const ReportMenu: React.FC<ReportMenuProps> = ({
+export const ReportMenu: React.FC<ReportMenuProps> = ({
   reportMenuOpen,
   toggleReportMenu,
   selectedProblemType,
   handleProblemSelect,
   handleConfirmProblem,
 }) => {
-  const [currentView, setCurrentView] = useState<
-    "categories" | "subcategories"
-  >("categories");
-  const [selectedCategory, setSelectedCategory] = useState<
-    (typeof PROBLEM_TYPES)[ProblemTypesKeys] | null
-  >(null);
+  const [currentView, setCurrentView] = useState<"categories" | "subcategories">("categories");
+  const [selectedCategory, setSelectedCategory] = useState<ProblemCategory | null>(null);
 
   if (!reportMenuOpen) return null;
 
-  const subcategories: SubcategoriesType = {
-    ALERTA: [
-      { icon: "/map-icons/blitz.svg", label: "Blitz", type: "blitz" },
-      { icon: "/map-icons/pista.svg", label: "Pista", type: "pista" },
-    ],
-    BURACO: [
-      {
-        icon: "/map-icons/bueiro-aberto.svg",
-        label: "Bueiro Aberto",
-        type: "bueiro-aberto",
-      },
-      {
-        icon: "/map-icons/bueiro-vazamento.svg",
-        label: "Bueiro Vazamento",
-        type: "bueiro-vazamento",
-      },
-    ],
-    ILUMINACAO: [
-      { icon: "/map-icons/semafaro.svg", label: "Semáfaro", type: "semafaro" },
-    ],
-  };
-
   const renderCategories = () => (
     <div className="grid grid-cols-3 gap-4 mb-4">
-      {[
-        {
-          type: PROBLEM_TYPES.BURACO,
-          icon: "/map-icons/buraco.svg",
-          label: "Buraco",
-          bgColor: "bg-red-100",
-        },
-        {
-          type: PROBLEM_TYPES.ALERTA,
-          icon: "/map-icons/alerta.svg",
-          label: "Alerta",
-          bgColor: "bg-yellow-100",
-        },
-        {
-          type: PROBLEM_TYPES.ILUMINACAO,
-          icon: "/map-icons/iluminacao-publica.svg",
-          label: "Iluminação",
-          bgColor: "bg-blue-100",
-        },
-      ].map(category => (
+      {PROBLEM_CATEGORIES.map((category) => (
         <div
-          key={category.type}
+          key={category.id}
           className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer ${
             selectedProblemType === category.type ? "bg-gray-100" : ""
           }`}
           onClick={() => {
             queueMicrotask(() => {
-              setCurrentView("subcategories");
-              setSelectedCategory(category.type);
+              if (category.subcategories && category.subcategories.length > 0) {
+                setCurrentView("subcategories");
+                setSelectedCategory(category);
+              } else {
+                handleProblemSelect(category.type);
+              }
             });
           }}
         >
@@ -116,17 +60,13 @@ const ReportMenu: React.FC<ReportMenuProps> = ({
   );
 
   const renderSubcategories = () => {
-    const categoryKey = Object.keys(PROBLEM_TYPES).find(
-      key => PROBLEM_TYPES[key as ProblemTypesKeys] === selectedCategory
-    ) as ProblemTypesKeys | undefined;
-
-    if (!categoryKey || !subcategories[categoryKey]) return null;
+    if (!selectedCategory || !selectedCategory.subcategories) return null;
 
     return (
       <div className="grid grid-cols-3 gap-4 mb-4">
-        {subcategories[categoryKey]!.map(subcategory => (
+        {selectedCategory.subcategories.map((subcategory) => (
           <div
-            key={subcategory.type}
+            key={subcategory.id}
             className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer ${
               selectedProblemType === subcategory.type ? "bg-gray-100" : ""
             }`}
@@ -170,18 +110,14 @@ const ReportMenu: React.FC<ReportMenuProps> = ({
     <div className="absolute bg-background bottom-0 left-0 right-0 rounded-t-2xl shadow-lg z-20 p-4">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold">
-          {currentView === "categories"
-            ? "Reportar Problema"
-            : "Selecione a Subcategoria"}
+          {currentView === "categories" ? "Reportar Problema" : "Selecione a Subcategoria"}
         </h3>
         <Button variant="ghost" size="icon" onClick={toggleReportMenu}>
           <X className="h-5 w-5" />
         </Button>
       </div>
 
-      {currentView === "categories"
-        ? renderCategories()
-        : renderSubcategories()}
+      {currentView === "categories" ? renderCategories() : renderSubcategories()}
 
       <Button
         className="w-full"
@@ -193,6 +129,3 @@ const ReportMenu: React.FC<ReportMenuProps> = ({
     </div>
   );
 };
-
-export { ReportMenu };
-
