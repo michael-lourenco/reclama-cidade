@@ -13,7 +13,7 @@ export const useMarkerStyles = () => {
       .buraco-icon {
         filter: hue-rotate(320deg); /* Vermelho */
       }
-      .alagamento-icon {
+      .alerta-icon {
         filter: hue-rotate(60deg); /* Amarelo */
       }
       .iluminacao-icon {

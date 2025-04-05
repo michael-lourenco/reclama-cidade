@@ -40,9 +40,9 @@ export const useMapIcons = (L: LeafletStatic) => {
       className: "buraco-icon",
     })
 
-    const alagamentoIcon = new L.Icon({
+    const alertaIcon = new L.Icon({
       ...baseIconConfig,
-      className: "alagamento-icon",
+      className: "alerta-icon",
     })
 
     const iluminacaoIcon = new L.Icon({
@@ -79,7 +79,7 @@ export const useMapIcons = (L: LeafletStatic) => {
 
     iconsRef.current = {
       [PROBLEM_TYPES.BURACO]: buracoIcon,
-      [PROBLEM_TYPES.ALAGAMENTO]: alagamentoIcon,
+      [PROBLEM_TYPES.ALERTA]: alertaIcon,
       [PROBLEM_TYPES.ILUMINACAO]: iluminacaoIcon,
       [PROBLEM_TYPES.BLITZ]: blitzIcon,
       [PROBLEM_TYPES.PISTA]: pistaIcon,

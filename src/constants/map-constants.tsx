@@ -1,7 +1,8 @@
 // Define tipos para os problemas
 const PROBLEM_TYPES = {
     BURACO: "buraco",
-    ALAGAMENTO: "alagamento",
+    ALERTA: "alerta",
+    // ALAGAMENTO: "alagamento",
     ILUMINACAO: "iluminacao",
     BLITZ:"blitz",
     PISTA:"pista",

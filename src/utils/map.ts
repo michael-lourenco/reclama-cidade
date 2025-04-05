@@ -2,10 +2,12 @@ import { PROBLEM_TYPES } from "@/constants/map-constants"
 
 export const getProblemLabel = (type: string): string => {
   switch (type) {
+    case PROBLEM_TYPES.ALERTA:
+      return "Alerta"
     case PROBLEM_TYPES.BURACO:
       return "Buraco"
-    case PROBLEM_TYPES.ALAGAMENTO:
-      return "Alagamento"
+    // case PROBLEM_TYPES.ALAGAMENTO:
+    //   return "Alagamento"
     case PROBLEM_TYPES.ILUMINACAO:
       return "Iluminação"
     case PROBLEM_TYPES.BLITZ:

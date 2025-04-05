@@ -45,7 +45,7 @@ const ReportMenu: React.FC<ReportMenuProps> = ({
   if (!reportMenuOpen) return null;
 
   const subcategories: SubcategoriesType = {
-    ALAGAMENTO: [
+    ALERTA: [
       { icon: "/map-icons/blitz.svg", label: "Blitz", type: "blitz" },
       { icon: "/map-icons/pista.svg", label: "Pista", type: "pista" },
     ],
@@ -76,9 +76,9 @@ const ReportMenu: React.FC<ReportMenuProps> = ({
           bgColor: "bg-red-100",
         },
         {
-          type: PROBLEM_TYPES.ALAGAMENTO,
+          type: PROBLEM_TYPES.ALERTA,
           icon: "/map-icons/alerta.svg",
-          label: "Alagamento",
+          label: "Alerta",
           bgColor: "bg-yellow-100",
         },
         {
