@@ -1,15 +1,18 @@
-import type React from "react"
-import { Marker } from "@/types/marker"
+// src/types/map.ts
+import type React from "react";
+import { Marker } from "@/types/marker";
+import { PROBLEM_TYPES } from "@/constants/map-constants";
 
+// Reuse your existing type interfaces
 export interface MapIcon {
-  iconUrl: string
-  iconRetinaUrl: string
-  shadowUrl: string
-  iconSize: [number, number]
-  iconAnchor: [number, number]
-  popupAnchor: [number, number]
-  shadowSize: [number, number]
-  className?: string
+  iconUrl: string;
+  iconRetinaUrl: string;
+  shadowUrl: string;
+  iconSize: [number, number];
+  iconAnchor: [number, number];
+  popupAnchor: [number, number];
+  shadowSize: [number, number];
+  className?: string;
 }
 
 // Define types for the map-related objects
@@ -30,17 +33,58 @@ export interface LeafletInstance {
 }
 
 export interface MapRefs {
-  mapRef: React.RefObject<HTMLDivElement | null>
-  mapInstanceRef: React.RefObject<LeafletMap>
-  currentMarkerRef: React.RefObject<LeafletMarker>
-  leafletRef: React.RefObject<LeafletInstance>
-  iconsRef: React.RefObject<Record<string, MapIcon> | null>
-  mapInitializedRef: React.RefObject<boolean>
+  mapRef: React.RefObject<HTMLDivElement | null>;
+  mapInstanceRef: React.RefObject<LeafletMap>;
+  currentMarkerRef: React.RefObject<LeafletMarker>;
+  leafletRef: React.RefObject<LeafletInstance>;
+  iconsRef: React.RefObject<Record<string, MapIcon> | null>;
+  mapInitializedRef: React.RefObject<boolean>;
 }
 
 export interface MapContentProps {
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-  selectedProblemType: string | null
-  userConfirmedProblem: boolean
-  resetConfirmation: () => void
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedProblemType: string | null;
+  userConfirmedProblem: boolean;
+  resetConfirmation: () => void;
+}
+
+// Add the new type definitions for the problem categories system
+export type ProblemType = typeof PROBLEM_TYPES[keyof typeof PROBLEM_TYPES];
+
+export interface ProblemCategory {
+  id: string;
+  type: ProblemType;
+  label: string;
+  icon: string;
+  bgColor: string;
+  subcategories?: ProblemSubcategory[];
+}
+
+export interface ProblemSubcategory {
+  id: string;
+  type: ProblemType;
+  label: string;
+  icon: string;
+}
+
+// Define a more specific type for Leaflet
+export interface LeafletStatic {
+  Icon: new (options: MapIcon) => LeafletIcon;
+}
+
+// Define the LeafletIcon interface
+export interface LeafletIcon {
+  options: MapIcon;
+  createIcon: () => HTMLElement;
+  createShadow: () => HTMLElement;
+}
+
+// Interface for marker style configuration
+export interface MarkerStyle {
+  filter?: string;
+  animation?: string;
+}
+
+export interface MarkerStylesMap {
+  [key: string]: string;
 }
