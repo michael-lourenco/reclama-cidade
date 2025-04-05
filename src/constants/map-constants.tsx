@@ -2,8 +2,10 @@
 export const PROBLEM_TYPES = {
   BURACO: "buraco",
   ALERTA: "alerta",
+  CANO_QUEBRADO: "cano-quebrado",
   // ALAGAMENTO: "alagamento", // Comentado como estava no seu código original
   ILUMINACAO: "iluminacao",
+  HIDRAULICA: "hidraulica",
   BLITZ: "blitz",
   PISTA: "pista",
   BUEIRO_ABERTO: "bueiro-aberto",

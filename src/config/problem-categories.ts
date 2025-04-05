@@ -60,4 +60,19 @@ export const PROBLEM_CATEGORIES: ProblemCategory[] = [
       },
     ],
   },
+  {
+    id: "HIDRAULICA",
+    type: PROBLEM_TYPES.HIDRAULICA,
+    label: "Hidráulica",
+    icon: "/map-icons/hidraulica.svg",
+    bgColor: "bg-blue-100",
+    subcategories: [
+      {
+        id: "CANO_QUEBRADO",
+        type: PROBLEM_TYPES.CANO_QUEBRADO,
+        label: "Cano Quebrado",
+        icon: "/map-icons/cano-quebrado.svg",
+      },
+    ],
+  },
 ];

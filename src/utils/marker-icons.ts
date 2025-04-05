@@ -23,6 +23,18 @@ export const createMapIcons = (L: any) => {
     className: "buraco-icon",
   })
 
+  const canoQuebradoIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: "cano-quebrado-icon",
+  })
+
+
   // const alertaIcon = new L.Icon({
   //   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   //   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -55,6 +67,18 @@ export const createMapIcons = (L: any) => {
     shadowSize: [41, 41],
     className: "iluminacao-icon",
   })
+
+  const hidraulicaIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: "hidraulica-icon",
+  })
+
 
   const blitzIcon = new L.Icon({
     iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -123,9 +147,11 @@ export const createMapIcons = (L: any) => {
   })
 
   return {
-    [PROBLEM_TYPES.BURACO]: buracoIcon,
     [PROBLEM_TYPES.ALERTA]: alertaIcon,
+    [PROBLEM_TYPES.BURACO]: buracoIcon,
+    [PROBLEM_TYPES.CANO_QUEBRADO]: canoQuebradoIcon,
     [PROBLEM_TYPES.ILUMINACAO]: iluminacaoIcon,
+    [PROBLEM_TYPES.HIDRAULICA]: hidraulicaIcon,
     [PROBLEM_TYPES.BLITZ]: blitzIcon,
     [PROBLEM_TYPES.PISTA]: pistaIcon,
     [PROBLEM_TYPES.BUEIRO_ABERTO]: bueiroAbertoIcon,
