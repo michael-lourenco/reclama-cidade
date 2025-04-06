@@ -1,5 +1,4 @@
 
-// useGeolocation.ts
 import { useCallback } from "react"
 
 export function useGeolocation() {
