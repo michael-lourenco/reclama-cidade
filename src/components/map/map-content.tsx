@@ -1,5 +1,5 @@
 "use client";
-import type { Marker } from "@/types/marker";
+
 import { useMarkers } from "@/hooks/use-markers";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
@@ -10,7 +10,6 @@ import { addLeafletCSS, addLikeStyles, setupCenterOnUserEvent, setupResizeHandle
 import { createAndSaveMarker } from "@/utils/marker-creator";
 import { LocationControls } from "@/components/location-controls/location-controls";
 
-// Componente interno que será carregado apenas no cliente
 const MapContent = ({
   setIsLoading,
   selectedProblemType,
@@ -34,12 +33,10 @@ const MapContent = ({
   const defaultLocation: [number, number] = [-23.5902, -48.0338];
   const defaultZoom = 16;
   const watchIdRef = useRef<number | null>(null);
-  // Flag to track if initial centering on user has happened
+  
   const initialCenteringDoneRef = useRef<boolean>(false);
-  // Track if location follow mode is active
+  
   const [followMode, setFollowMode] = useState<boolean>(true);
-  // State for problem reporting menu
-  const [reportMenuOpen, setReportMenuOpen] = useState<boolean>(false);
 
   // Add CSS for marker icons
   const addMarkerStyles = useMarkerStyles();
@@ -48,49 +45,14 @@ const MapContent = ({
     await handleLikeMarker(marker, userLocationMarkerRef.current, markers, setMarkers);
   };
 
-
   const onResolvedMarker = async (marker: any) => {
     await handleResolvedMarker(marker, userLocationMarkerRef.current, markers, setMarkers);
   };
 
-  // Toggle report menu
-  // Center on user location manually (one-time centering)
   const centerOnUserLocation = () => {
     if (userLocationMarkerRef.current && mapInstanceRef.current) {
       const position = userLocationMarkerRef.current.getLatLng();
       mapInstanceRef.current.setView([position.lat, position.lng], mapInstanceRef.current.getZoom());
-    }
-  };
-
-  // Toggle follow mode
-  const toggleFollowMode = () => {
-    const newMode = !followMode;
-    setFollowMode(newMode);
-    
-    // Update location tracking with new follow mode
-    if (watchIdRef.current !== null) {
-      navigator.geolocation.clearWatch(watchIdRef.current);
-      watchIdRef.current = null;
-    }
-    
-    // Restart location tracking with new follow mode setting
-    if (newMode) {
-      watchIdRef.current = setupLocationTracking(
-        mapInstanceRef,
-        userLocationMarkerRef,
-        defaultZoom,
-        true // Center map on location updates when follow mode is on
-      );
-      
-      // Immediately center on user's location when turning on follow mode
-      centerOnUserLocation();
-    } else {
-      watchIdRef.current = setupLocationTracking(
-        mapInstanceRef,
-        userLocationMarkerRef,
-        defaultZoom,
-        false // Don't center map on location updates when follow mode is off
-      );
     }
   };
 
@@ -260,7 +222,6 @@ const MapContent = ({
       <LocationControls
         centerOnUserLocation={centerOnUserLocation}
         followMode={false}
-        toggleFollowMode={() => {}}
         toggleReportMenu={toggleReportMenu} // Added this prop
       />
     </>

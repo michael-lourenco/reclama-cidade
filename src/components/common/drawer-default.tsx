@@ -44,7 +44,7 @@ export function DialogProblems({
 
   const handleConfirmAndClose = () => {
     handleConfirmProblem()
-    onOpenChange(false) // Close the dialog after confirming
+    onOpenChange(false)
   }
 
   const renderCategories = () => (
@@ -128,7 +128,7 @@ export function DialogProblems({
       <Button
         className="w-full"
         disabled={!selectedProblemType}
-        onClick={handleConfirmAndClose} // Use the new handler that also closes the dialog
+        onClick={handleConfirmAndClose}
       >
         Confirmar Problema
       </Button>

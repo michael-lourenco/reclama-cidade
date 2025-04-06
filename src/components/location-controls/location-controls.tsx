@@ -6,14 +6,12 @@ import { SidebarTrigger } from "../ui/sidebar"
 interface LocationControlsProps {
   centerOnUserLocation: () => void
   followMode: boolean
-  toggleFollowMode: () => void
   toggleReportMenu: () => void
 }
 
 const LocationControls = ({
   centerOnUserLocation,
   followMode,
-  toggleFollowMode,
   toggleReportMenu,
 }: LocationControlsProps) => {
   return (
@@ -23,7 +21,7 @@ const LocationControls = ({
         size="icon"
         className={`shadow-md rounded-full h-12 w-12 ${followMode ? "bg-blue-500 hover:bg-blue-600 text-white" : ""}`}
         title={followMode ? "Desativar centralização automática" : "Ativar centralização automática"}
-        onClick={centerOnUserLocation} // This button should call centerOnUserLocation
+        onClick={centerOnUserLocation}
       >
         {followMode ? <MapPin /> : <Locate />}
       </Button>
@@ -42,4 +40,3 @@ const LocationControls = ({
 }
 
 export { LocationControls }
-
