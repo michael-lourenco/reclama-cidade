@@ -15,6 +15,7 @@ export const PROBLEM_TYPES = {
   BUEIRO_ABERTO: "bueiro-aberto",
   BUEIRO_VAZAMENTO: "bueiro-vazamento",
   SEMAFARO: "semafaro",
+  TIROTEIO: "tiroteio",
 } as const;
 
 export type ProblemType = typeof PROBLEM_TYPES[keyof typeof PROBLEM_TYPES];

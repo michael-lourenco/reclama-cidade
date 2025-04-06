@@ -43,6 +43,12 @@ export const PROBLEM_CATEGORIES: ProblemCategory[] = [
         label: "Pista",
         icon: "/map-icons/pista.svg",
       },
+      {
+        id: "TIROTEIO",
+        type: PROBLEM_TYPES.TIROTEIO,
+        label: "Tiroteio",
+        icon: "/map-icons/tiroteio.svg",
+      },
     ],
   },
   {

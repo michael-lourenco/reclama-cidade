@@ -32,6 +32,8 @@ export const getProblemLabel = (type: string): string => {
       return "bueiro Vazamento"
     case PROBLEM_TYPES.SEMAFARO:
       return "Semafaro"
+    case PROBLEM_TYPES.TIROTEIO:
+      return "Tiroteio"
     default:
       return "Desconhecido"
   }

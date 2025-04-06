@@ -179,6 +179,17 @@ export const createMapIcons = (L: any) => {
     className: "semafaro-icon",
   })
 
+  const tiroteioIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: "tiroteio-icon",
+  })
+
   const userLocationIcon = new L.Icon({
     iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
     iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -205,6 +216,7 @@ export const createMapIcons = (L: any) => {
     [PROBLEM_TYPES.BUEIRO_ABERTO]: bueiroAbertoIcon,
     [PROBLEM_TYPES.BUEIRO_VAZAMENTO]: bueiroVazamentoIcon,
     [PROBLEM_TYPES.SEMAFARO]: semafaroIcon,
+    [PROBLEM_TYPES.TIROTEIO]: tiroteioIcon,
     default: defaultIcon,
     userLocation: userLocationIcon,
   }

@@ -17,5 +17,6 @@ export const MARKER_STYLES: MarkerStylesMap = {
     [PROBLEM_TYPES.BUEIRO_ABERTO]: "filter: hue-rotate(270deg) brightness(1.2) contrast(1.5);",
     [PROBLEM_TYPES.BUEIRO_VAZAMENTO]: "filter: hue-rotate(120deg);",
     [PROBLEM_TYPES.SEMAFARO]: "filter: hue-rotate(180deg) brightness(1.2) contrast(1.5);",
+    [PROBLEM_TYPES.TIROTEIO]: "filter: hue-rotate(180deg) brightness(1.2) contrast(1.5);",
     userLocation: "filter: hue-rotate(120deg); animation: pulse 1.5s infinite;",
 };
