@@ -1,15 +1,15 @@
 "use client";
-
 import { useMarkers } from "@/hooks/use-markers";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { useMarkerStyles } from "@/hooks/marker-styles";
+import { useMarkerStyles } from "@/hooks/use-marker-styles";
 import { handleLikeMarker, handleResolvedMarker } from "@/utils/marker-interactions";
 import { initializeMap, setupLocationTracking } from "@/utils/map-initializer";
 import { addLeafletCSS, addLikeStyles, setupCenterOnUserEvent, setupResizeHandler } from "@/utils/map-styles";
 import { createAndSaveMarker } from "@/utils/marker-creator";
 import { LocationControls } from "@/components/location-controls/location-controls";
 
+// Componente interno que será carregado apenas no cliente
 const MapContent = ({
   setIsLoading,
   selectedProblemType,
@@ -34,8 +34,10 @@ const MapContent = ({
   const defaultZoom = 16;
   const watchIdRef = useRef<number | null>(null);
   
+  // Flag to track if initial centering on user has happened
   const initialCenteringDoneRef = useRef<boolean>(false);
-  
+
+  // Track if location follow mode is active
   const [followMode, setFollowMode] = useState<boolean>(true);
 
   // Add CSS for marker icons
@@ -49,13 +51,13 @@ const MapContent = ({
     await handleResolvedMarker(marker, userLocationMarkerRef.current, markers, setMarkers);
   };
 
+  // Center on user location manually (one-time centering)
   const centerOnUserLocation = () => {
     if (userLocationMarkerRef.current && mapInstanceRef.current) {
       const position = userLocationMarkerRef.current.getLatLng();
       mapInstanceRef.current.setView([position.lat, position.lng], mapInstanceRef.current.getZoom());
     }
   };
-
   // Initialize map only once
   useEffect(() => {
     // Verificação principal para evitar múltiplas inicializações
@@ -103,7 +105,7 @@ const MapContent = ({
           userLocationMarkerRef,
           leafletRef,
           iconsRef,
-          defaultLocation: initialLocation, // Use user location if available
+          defaultLocation: initialLocation,
           defaultZoom,
           loadMarkersFromFirebase,
           onLikeMarker,

@@ -73,4 +73,3 @@ const TopMenu = ({ menuOpen, toggleMenu }: TopMenuProps) => {
 };
 
 export { TopMenu };
-

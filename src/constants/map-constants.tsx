@@ -29,4 +29,3 @@ SHADOW: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 export const DEFAULT_LOCATION: [number, number] = [-23.5902, -48.0338];
 export const DEFAULT_ZOOM = 16;
 export const LOCAL_STORAGE_KEY = "mapProblems";
-

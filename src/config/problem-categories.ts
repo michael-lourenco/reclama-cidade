@@ -2,8 +2,6 @@
 import { PROBLEM_TYPES } from "@/constants/map-constants";
 import type { ProblemCategory } from "@/types/map";
 
-  
-
 export const PROBLEM_CATEGORIES: ProblemCategory[] = [
   {
     id: "BURACO",

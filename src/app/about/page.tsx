@@ -1,6 +1,6 @@
 "use client";
 
-import { Footer } from "@/components/common/Footer";
+import { Footer } from "@/components/common/footer";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function About() {

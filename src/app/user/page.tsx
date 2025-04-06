@@ -1,6 +1,6 @@
 "use client";
 
-import { Footer } from "@/components/common/Footer";
+import { Footer } from "@/components/common/footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserInfo } from "@/components/common/user-info";
 import { UserLogout } from "@/components/common/user-logout";

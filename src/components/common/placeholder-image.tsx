@@ -7,7 +7,7 @@ interface PlaceholderImageProps {
 export function PlaceholderImage({
   width,
   height,
-  text = "Game Image",
+  text = "Placeholder Image",
 }: PlaceholderImageProps) {
   return (
     <div
