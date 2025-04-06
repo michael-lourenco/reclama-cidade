@@ -5,6 +5,10 @@ export const PROBLEM_TYPES = {
   CANO_QUEBRADO: "cano-quebrado",
   // ALAGAMENTO: "alagamento", // Comentado como estava no seu código original
   ILUMINACAO: "iluminacao",
+  INCENDIO: "incendio",
+  INCENDIO_CARRO: "incendio-carro",
+  INCENDIO_CASA: "incendio-casa",
+  INCENDIO_FLORESTA: "incendio-floresta",
   HIDRAULICA: "hidraulica",
   BLITZ: "blitz",
   PISTA: "pista",

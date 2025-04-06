@@ -12,6 +12,14 @@ export const getProblemLabel = (type: string): string => {
     //   return "Alagamento"
     case PROBLEM_TYPES.ILUMINACAO:
       return "Iluminação"
+    case PROBLEM_TYPES.INCENDIO:
+      return "Incendio"
+    case PROBLEM_TYPES.INCENDIO_CARRO:
+      return "Incendio Carro"
+    case PROBLEM_TYPES.INCENDIO_CASA:
+      return "Incendio Casa"
+    case PROBLEM_TYPES.INCENDIO_FLORESTA:
+      return "Incendio Floresta"
     case PROBLEM_TYPES.HIDRAULICA:
       return "Hidráulica"
       case PROBLEM_TYPES.BLITZ:

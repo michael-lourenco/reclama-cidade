@@ -68,6 +68,50 @@ export const createMapIcons = (L: any) => {
     className: "iluminacao-icon",
   })
 
+  const incendioIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: "incendio-icon",
+  })
+
+  const incendioCasaIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: "incendio-casa-icon",
+  })
+
+  const incendioCarroIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: "incendio-carro-icon",
+  })
+
+  const incendioFlorestaIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: "incendio-floresta-icon",
+  })
+
   const hidraulicaIcon = new L.Icon({
     iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
     iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -151,6 +195,10 @@ export const createMapIcons = (L: any) => {
     [PROBLEM_TYPES.BURACO]: buracoIcon,
     [PROBLEM_TYPES.CANO_QUEBRADO]: canoQuebradoIcon,
     [PROBLEM_TYPES.ILUMINACAO]: iluminacaoIcon,
+    [PROBLEM_TYPES.INCENDIO]: incendioIcon,
+    [PROBLEM_TYPES.INCENDIO_CARRO]: incendioCarroIcon,
+    [PROBLEM_TYPES.INCENDIO_CASA]: incendioCasaIcon,
+    [PROBLEM_TYPES.INCENDIO_FLORESTA]: incendioFlorestaIcon,
     [PROBLEM_TYPES.HIDRAULICA]: hidraulicaIcon,
     [PROBLEM_TYPES.BLITZ]: blitzIcon,
     [PROBLEM_TYPES.PISTA]: pistaIcon,

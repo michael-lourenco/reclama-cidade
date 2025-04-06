@@ -61,6 +61,33 @@ export const PROBLEM_CATEGORIES: ProblemCategory[] = [
     ],
   },
   {
+    id: "INCENDIO",
+    type: PROBLEM_TYPES.INCENDIO,
+    label: "Incendio",
+    icon: "/map-icons/incendio.svg",
+    bgColor: "bg-blue-100",
+    subcategories: [
+      {
+        id: "INCENDIO_CARRO",
+        type: PROBLEM_TYPES.INCENDIO_CARRO,
+        label: "Incendio Carro",
+        icon: "/map-icons/incendio-carro.svg",
+      },
+      {
+        id: "INCENDIO_CASA",
+        type: PROBLEM_TYPES.INCENDIO_CASA,
+        label: "Incendio Casa",
+        icon: "/map-icons/incendio-casa.svg",
+      },
+      {
+        id: "INCENDIO_FLORESTA",
+        type: PROBLEM_TYPES.INCENDIO_FLORESTA,
+        label: "Incendio Floresta",
+        icon: "/map-icons/incendio-floresta.svg",
+      },
+    ],
+  },
+  {
     id: "HIDRAULICA",
     type: PROBLEM_TYPES.HIDRAULICA,
     label: "Hidráulica",
