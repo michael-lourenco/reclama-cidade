@@ -1,9 +1,9 @@
 import { PROBLEM_CATEGORIES } from "@/config/problem-categories"
 import type { ProblemCategory, ProblemSubcategory } from "@/types/map"
 
-// Função refatorada para criar ícones de forma dinâmica baseado nos dados de PROBLEM_CATEGORIES
+// Refactored function to create icons dynamically using mapIcon config from each category/subcategory
 export const createMapIcons = (L: any) => {
-  // Configuração base para todos os ícones
+  // Default base configuration for unconfigured icons
   const baseIconConfig = {
     iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
     iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -14,39 +14,37 @@ export const createMapIcons = (L: any) => {
     shadowSize: [41, 41],
   }
 
-  // Ícone padrão para casos não mapeados
+  // Default icon for unmapped cases
   const defaultIcon = new L.Icon(baseIconConfig)
   
-  // Ícone para localização do usuário
+  // User location icon
   const userLocationIcon = new L.Icon({
     ...baseIconConfig,
     className: "user-location-icon",
   })
   
-  // Inicializa o objeto de ícones com os ícones padrão
+  // Initialize the icons object with default icons
   const icons: Record<string, any> = {
     default: defaultIcon,
     userLocation: userLocationIcon,
   }
-  
-  // Função para criar um ícone com base no tipo do problema
-  const createIconForType = (type: string, className: string) => {
-    return new L.Icon({
-      ...baseIconConfig,
-      className: `${className}-icon`,
-    })
-  }
 
-  // Processa todas as categorias principais
+  // Process all main categories
   PROBLEM_CATEGORIES.forEach((category: ProblemCategory) => {
-    // Cria ícone para a categoria principal
-    icons[category.type] = createIconForType(category.type, category.id.toLowerCase())
+    // Create icon for the main category using its mapIcon configuration
+    icons[category.type] = new L.Icon({
+      ...(category.mapIcon || baseIconConfig),
+      className: `${category.id.toLowerCase()}-icon`,
+    })
     
-    // Processa subcategorias se existirem
+    // Process subcategories if they exist
     if (category.subcategories && category.subcategories.length > 0) {
       category.subcategories.forEach((subCategory: ProblemSubcategory) => {
-        // Cria ícone para cada subcategoria
-        icons[subCategory.type] = createIconForType(subCategory.type, subCategory.id.toLowerCase())
+        // Create icon for each subcategory using its mapIcon configuration
+        icons[subCategory.type] = new L.Icon({
+          ...(subCategory.mapIcon || category.mapIcon || baseIconConfig),
+          className: `${subCategory.id.toLowerCase()}-icon`,
+        })
       })
     }
   })

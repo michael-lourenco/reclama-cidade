@@ -57,6 +57,7 @@ export interface ProblemCategory {
   label: string;
   icon: string;
   bgColor: string;
+  mapIcon?: MapIcon;
   subcategories?: ProblemSubcategory[];
 }
 
@@ -65,6 +66,7 @@ export interface ProblemSubcategory {
   type: ProblemType;
   label: string;
   icon: string;
+  mapIcon?: MapIcon;
 }
 
 // Define a more specific type for Leaflet
