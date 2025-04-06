@@ -1,8 +1,10 @@
-import { PROBLEM_TYPES } from "@/constants/map-constants"
+import { PROBLEM_CATEGORIES } from "@/config/problem-categories"
+import type { ProblemCategory, ProblemSubcategory } from "@/types/map"
 
-// Função para criar e retornar todos os ícones personalizados do mapa
+// Função refatorada para criar ícones de forma dinâmica baseado nos dados de PROBLEM_CATEGORIES
 export const createMapIcons = (L: any) => {
-  const defaultIcon = new L.Icon({
+  // Configuração base para todos os ícones
+  const baseIconConfig = {
     iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
     iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
     shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -10,215 +12,44 @@ export const createMapIcons = (L: any) => {
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
     shadowSize: [41, 41],
-  })
+  }
 
-  const buracoIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "buraco-icon",
-  })
-
-  const canoQuebradoIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "cano-quebrado-icon",
-  })
-
-
-  // const alertaIcon = new L.Icon({
-  //   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  //   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  //   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  //   iconSize: [25, 41],
-  //   iconAnchor: [12, 41],
-  //   popupAnchor: [1, -34],
-  //   shadowSize: [41, 41],
-  //   className: "alerta-icon",
-  // })
-
-  const alertaIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "alerta-icon",
-  })
-
-  const iluminacaoIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "iluminacao-icon",
-  })
-
-  const incendioIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "incendio-icon",
-  })
-
-  const incendioCasaIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "incendio-casa-icon",
-  })
-
-  const incendioCarroIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "incendio-carro-icon",
-  })
-
-  const incendioFlorestaIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "incendio-floresta-icon",
-  })
-
-  const hidraulicaIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "hidraulica-icon",
-  })
-
-
-  const blitzIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "blitz-icon",
-  })
-
-  const pistaIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "pista-icon",
-  })
-
-  const bueiroAbertoIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "bueiro-aberto-icon",
-  })
-
-  const bueiroVazamentoIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "bueiro-vazamento-icon",
-  })
-
-  const semafaroIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "semafaro-icon",
-  })
-
-  const tiroteioIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: "tiroteio-icon",
-  })
-
+  // Ícone padrão para casos não mapeados
+  const defaultIcon = new L.Icon(baseIconConfig)
+  
+  // Ícone para localização do usuário
   const userLocationIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
+    ...baseIconConfig,
     className: "user-location-icon",
   })
-
-  return {
-    [PROBLEM_TYPES.ALERTA]: alertaIcon,
-    [PROBLEM_TYPES.BURACO]: buracoIcon,
-    [PROBLEM_TYPES.CANO_QUEBRADO]: canoQuebradoIcon,
-    [PROBLEM_TYPES.ILUMINACAO]: iluminacaoIcon,
-    [PROBLEM_TYPES.INCENDIO]: incendioIcon,
-    [PROBLEM_TYPES.INCENDIO_CARRO]: incendioCarroIcon,
-    [PROBLEM_TYPES.INCENDIO_CASA]: incendioCasaIcon,
-    [PROBLEM_TYPES.INCENDIO_FLORESTA]: incendioFlorestaIcon,
-    [PROBLEM_TYPES.HIDRAULICA]: hidraulicaIcon,
-    [PROBLEM_TYPES.BLITZ]: blitzIcon,
-    [PROBLEM_TYPES.PISTA]: pistaIcon,
-    [PROBLEM_TYPES.BUEIRO_ABERTO]: bueiroAbertoIcon,
-    [PROBLEM_TYPES.BUEIRO_VAZAMENTO]: bueiroVazamentoIcon,
-    [PROBLEM_TYPES.SEMAFARO]: semafaroIcon,
-    [PROBLEM_TYPES.TIROTEIO]: tiroteioIcon,
+  
+  // Inicializa o objeto de ícones com os ícones padrão
+  const icons: Record<string, any> = {
     default: defaultIcon,
     userLocation: userLocationIcon,
   }
-}
+  
+  // Função para criar um ícone com base no tipo do problema
+  const createIconForType = (type: string, className: string) => {
+    return new L.Icon({
+      ...baseIconConfig,
+      className: `${className}-icon`,
+    })
+  }
 
+  // Processa todas as categorias principais
+  PROBLEM_CATEGORIES.forEach((category: ProblemCategory) => {
+    // Cria ícone para a categoria principal
+    icons[category.type] = createIconForType(category.type, category.id.toLowerCase())
+    
+    // Processa subcategorias se existirem
+    if (category.subcategories && category.subcategories.length > 0) {
+      category.subcategories.forEach((subCategory: ProblemSubcategory) => {
+        // Cria ícone para cada subcategoria
+        icons[subCategory.type] = createIconForType(subCategory.type, subCategory.id.toLowerCase())
+      })
+    }
+  })
+
+  return icons
+}
