@@ -1,4 +1,4 @@
-import { MarkerStylesMap } from "@/types/map";
+import { MarkerStylesMap } from "@/components/map/types/map";
 import { PROBLEM_TYPES } from "@/constants/map-constants";
 
 export const MARKER_STYLES: MarkerStylesMap = {

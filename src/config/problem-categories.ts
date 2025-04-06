@@ -1,6 +1,6 @@
 // src/config/problem-categories.ts
 import { PROBLEM_TYPES } from "@/constants/map-constants";
-import type { ProblemCategory } from "@/types/map";
+import type { ProblemCategory } from "@/components/map/types/map";
 
 export const PROBLEM_CATEGORIES: ProblemCategory[] = [
   {

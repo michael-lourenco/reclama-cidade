@@ -1,6 +1,6 @@
 // src/types/map.ts
 import type React from "react";
-import { Marker } from "@/types/marker";
+import { Marker } from "@/components/marker/types/marker";
 import { PROBLEM_TYPES } from "@/constants/map-constants";
 
 // Reuse your existing type interfaces

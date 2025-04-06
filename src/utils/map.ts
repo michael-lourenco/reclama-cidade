@@ -61,4 +61,3 @@ export const sortMarkersByDate = (markers: Marker[]) => {
     return dateB.getTime() - dateA.getTime()
   })
 }
-

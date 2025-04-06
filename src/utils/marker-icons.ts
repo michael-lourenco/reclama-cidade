@@ -1,5 +1,5 @@
 import { PROBLEM_CATEGORIES } from "@/config/problem-categories"
-import type { ProblemCategory, ProblemSubcategory } from "@/types/map"
+import type { ProblemCategory, ProblemSubcategory } from "@/components/map/types/map"
 
 // Refactored function to create icons dynamically using mapIcon config from each category/subcategory
 export const createMapIcons = (L: any) => {

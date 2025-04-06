@@ -136,4 +136,3 @@ export const getUserLocation = async (options: PositionOptions = {}): Promise<Ge
     )
   })
 }
-

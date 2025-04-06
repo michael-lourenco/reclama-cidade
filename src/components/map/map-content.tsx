@@ -1,10 +1,10 @@
 "use client";
-import { useMarkers } from "@/hooks/use-markers";
+import { useMarkers } from "@/components/marker/use-markers";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { useMarkerStyles } from "@/hooks/use-marker-styles";
+import { useMarkerStyles } from "@/components/marker/use-marker-styles";
 import { handleLikeMarker, handleResolvedMarker } from "@/utils/marker-interactions";
-import { initializeMap, setupLocationTracking } from "@/utils/map-initializer";
+import { initializeMap, setupLocationTracking } from "@/components/map/map-initializer";
 import { addLeafletCSS, addLikeStyles, setupCenterOnUserEvent, setupResizeHandler } from "@/utils/map-styles";
 import { createAndSaveMarker } from "@/utils/marker-creator";
 import { LocationControls } from "@/components/location-controls/location-controls";

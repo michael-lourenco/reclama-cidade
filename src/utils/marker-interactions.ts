@@ -1,4 +1,4 @@
-import type { Marker } from "@/types/marker"
+import type { Marker } from "@/components/marker/types/marker"
 import { dbFirestore, updateMarkerLikes, updateMarkerResolved } from "@/services/firebase/FirebaseService"
 import { getDistance } from "@/utils/distance"
 
@@ -143,4 +143,3 @@ export const convertToDate = (timestamp: any): Date => {
   // Fallback para outros formatos de timestamp
   return new Date(timestamp)
 }
-

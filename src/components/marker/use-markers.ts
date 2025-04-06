@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react"
 import { dbFirestore, getMarkers, addMarker } from "@/services/firebase/FirebaseService"
-import type { Marker } from "@/types/marker"
+import type { Marker } from "@/components/marker/types/marker"
 
 export const useMarkers = () => {
   const [markers, setMarkers] = useState<Marker[]>([])

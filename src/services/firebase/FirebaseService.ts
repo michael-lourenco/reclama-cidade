@@ -18,9 +18,9 @@ import {
 } from "firebase/firestore"
 import { initializeApp } from "firebase/app"
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, type Auth } from "firebase/auth"
-import type { UserData } from "@/types/user"
-import type { Marker } from "@/types/marker"
-import type { StatusChange } from "@/types/marker"
+import type { UserData } from "@/components/user/types/user"
+import type { Marker } from "@/components/marker/types/marker"
+import type { StatusChange } from "@/components/marker/types/marker"
 
 
 export enum ProblemStatus {

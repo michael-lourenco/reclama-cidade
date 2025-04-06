@@ -17,7 +17,7 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 import { X } from "lucide-react"
 import Image from "next/image"
 import { PROBLEM_CATEGORIES } from "@/config/problem-categories"
-import type { ProblemCategory } from "@/types/map"
+import type { ProblemCategory } from "@/components/map/types/map"
 
 interface DialogProblemsProps {
   open: boolean

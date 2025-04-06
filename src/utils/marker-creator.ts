@@ -1,6 +1,6 @@
 // marker-creator.ts
 "use client";
-import type { Marker } from "@/types/marker";
+import type { Marker } from "@/components/marker/types/marker";
 import { addMarker, updateMarkerStatus, dbFirestore } from "@/services/firebase/FirebaseService";
 import { getProblemLabel } from "@/utils/map";
 

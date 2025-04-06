@@ -1,4 +1,4 @@
-import { UserData } from "@/types/user";
+import { UserData } from "@/components/user/types/user";
 import { Button } from "@/components/ui/button";
 import React from "react";
 

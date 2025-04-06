@@ -3,8 +3,8 @@
 import { MapFullScreen } from "@/components/map/map-fullscreen"
 import { TopMenu } from "@/components/menu/top-menu"
 import { DialogProblems } from "@/components/common/drawer-default"
-import { useMenuState } from "@/hooks/use-menu-state"
-import { useProblemReport } from "@/hooks/use-problem-report"
+import { useMenuState } from "@/components/menu/use-menu-state"
+import { useProblemReport } from "@/components/problem/use-problem-report"
 
 export default function Home() {
   const { menuOpen, reportMenuOpen, toggleMenu, toggleReportMenu } = useMenuState()

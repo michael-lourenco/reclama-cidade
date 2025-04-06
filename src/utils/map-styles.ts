@@ -1,4 +1,3 @@
-// map-styles-utils.ts
 "use client";
 
 /**
