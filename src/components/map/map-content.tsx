@@ -257,11 +257,11 @@ const MapContent = ({
   return (
     <>
       <div ref={mapRef} className="absolute inset-0 w-full h-full z-0" />
-      <LocationControls 
+      <LocationControls
         centerOnUserLocation={centerOnUserLocation}
-        toggleReportMenu={toggleReportMenu}
-        followMode={followMode}
-        toggleFollowMode={toggleFollowMode}
+        followMode={false}
+        toggleFollowMode={() => {}}
+        toggleReportMenu={toggleReportMenu} // Added this prop
       />
     </>
   );
