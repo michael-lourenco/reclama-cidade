@@ -3,10 +3,10 @@ import { useMarkers } from "@/components/marker/use-markers";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useMarkerStyles } from "@/components/marker/use-marker-styles";
-import { handleLikeMarker, handleResolvedMarker } from "@/utils/marker-interactions";
+import { handleLikeMarker, handleResolvedMarker } from "@/components/marker/marker-interactions";
 import { initializeMap, setupLocationTracking } from "@/components/map/map-initializer";
-import { addLeafletCSS, addLikeStyles, setupCenterOnUserEvent, setupResizeHandler } from "@/utils/map-styles";
-import { createAndSaveMarker } from "@/utils/marker-creator";
+import { addLeafletCSS, addLikeStyles, setupCenterOnUserEvent, setupResizeHandler } from "@/components/map/map-styles";
+import { createAndSaveMarker } from "@/components/marker/marker-creator";
 import { LocationControls } from "@/components/location-controls/location-controls";
 
 // Componente interno que será carregado apenas no cliente

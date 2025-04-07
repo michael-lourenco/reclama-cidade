@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { MARKER_STYLES } from "@/config/marker-styles";
+import { MARKER_STYLES } from "@/components/marker/marker-styles";
 
 export const useMarkerStyles = () => {
   return useCallback(() => {

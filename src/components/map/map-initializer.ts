@@ -1,7 +1,7 @@
 import type React from "react"
-import { getProblemLabel } from "@/utils/map"
-import { createMapIcons } from "@/utils/marker-icons"
-import { convertToDate } from "@/utils/marker-interactions"
+import { getProblemLabel } from "@/components/map/map"
+import { createMapIcons } from "@/components/marker/marker-icons"
+import { convertToDate } from "@/components/marker/marker-interactions"
 
 type MapInitializerProps = {
   mapRef: React.RefObject<HTMLDivElement | null>

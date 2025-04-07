@@ -2,7 +2,7 @@
 "use client";
 import type { Marker } from "@/components/marker/types/marker";
 import { addMarker, updateMarkerStatus, dbFirestore } from "@/services/firebase/FirebaseService";
-import { getProblemLabel } from "@/utils/map";
+import { getProblemLabel } from "@/components/map/map";
 
 /**
  * Cria e salva um novo marcador no mapa e no Firebase
