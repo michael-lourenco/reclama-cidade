@@ -1,20 +1,22 @@
 "use client"
 
-import { MapFullScreen } from "@/components/map/map-fullscreen"
-import { TopMenu } from "@/components/menu/top-menu"
 import { DialogProblems } from "@/components/common/drawer-default"
+import { MapFullScreen } from "@/components/map/map-fullscreen"
 import { useMenuState } from "@/components/menu/use-menu-state"
 import { useProblemReport } from "@/components/problem/use-problem-report"
 
 export default function Home() {
-  const { menuOpen, reportMenuOpen, toggleMenu, toggleReportMenu } = useMenuState()
-  const { selectedProblemType, handleProblemSelect, handleConfirmProblem, userConfirmedProblem, resetConfirmation } =
-    useProblemReport()
+  const { reportMenuOpen, toggleReportMenu } = useMenuState()
+  const {
+    selectedProblemType,
+    handleProblemSelect,
+    handleConfirmProblem,
+    userConfirmedProblem,
+    resetConfirmation,
+  } = useProblemReport()
 
   return (
-    <div className="relative w-full h-screen">
-      <TopMenu menuOpen={menuOpen} toggleMenu={toggleMenu} />
-
+    <div className="relative h-screen w-full">
       <DialogProblems
         open={reportMenuOpen}
         onOpenChange={(open) => {

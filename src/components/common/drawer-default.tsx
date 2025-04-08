@@ -1,8 +1,17 @@
 "use client"
 
+import Image from "next/image"
 import { useState } from "react"
+
+import type { ProblemCategory } from "@/components/map/types/map"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Drawer,
   DrawerClose,
@@ -13,11 +22,12 @@ import {
   DrawerPortal,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import { useMediaQuery } from "@/hooks/use-media-query"
-import { X } from "lucide-react"
-import Image from "next/image"
+
 import { PROBLEM_CATEGORIES } from "@/config/problem-categories"
-import type { ProblemCategory } from "@/components/map/types/map"
+import { useMediaQuery } from "@/hooks/use-media-query"
+import { cn } from "@/lib/utils"
+import { X } from "lucide-react"
+import { Label } from "../ui/label"
 
 interface DialogProblemsProps {
   open: boolean
@@ -29,139 +39,217 @@ interface DialogProblemsProps {
   handleConfirmProblem: () => void
 }
 
+// Componente utilitário para exibir ícones
+const CategoryIcon = ({
+  src,
+  alt,
+  size = 70,
+  selected = false,
+}: {
+  src?: string
+  alt: string
+  size?: number
+  selected?: boolean
+}) => (
+  <div
+    className={cn(
+      "mb-2 flex h-20 w-20 items-center justify-center rounded-full outline-offset-2",
+      "bg-gray-700 dark:bg-gray-600",
+      "group-hover:outline-4 group-active:outline-sky-500",
+      { "outline-4 outline-sky-500 dark:outline-sky-500": selected },
+    )}
+  >
+    <Image
+      src={src || "/placeholder.png"}
+      alt={alt}
+      width={size}
+      height={size}
+      className="h-14 w-14 object-contain"
+    />
+  </div>
+)
+
 export function DialogProblems({
   open,
   onOpenChange,
   title = "Reportar Problema",
-  description = "Selecione o tipo de problema que deseja reportar",
+  description = "Selecione o tipo de problema que deseja marcar no mapa.",
   selectedProblemType,
   handleProblemSelect,
   handleConfirmProblem,
 }: DialogProblemsProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)")
-  const [currentView, setCurrentView] = useState<"categories" | "subcategories">("categories")
-  const [selectedCategory, setSelectedCategory] = useState<ProblemCategory | null>(null)
+  const [currentView, setCurrentView] = useState<
+    "categories" | "subcategories"
+  >("categories")
+  const [selectedCategory, setSelectedCategory] =
+    useState<ProblemCategory | null>(null)
 
-  const handleConfirmAndClose = () => {
+  const confirmAndClose = () => {
     handleConfirmProblem()
     onOpenChange(false)
   }
 
+  const itemClasses =
+    "flex flex-col items-center p-2 rounded cursor-pointer group"
+
   const renderCategories = () => (
-    <div className="grid grid-cols-3 gap-4 mb-4">
-      {PROBLEM_CATEGORIES.map((category) => (
-        <div
-          key={category.id}
-          className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer ${
-            selectedProblemType === category.type ? "bg-gray-100" : ""
-          }`}
-          onClick={() => {
-            if (category.subcategories && category.subcategories.length > 0) {
-              setCurrentView("subcategories")
-              setSelectedCategory(category)
-            } else {
-              handleProblemSelect(category.type)
-            }
-          }}
-        >
-          <div className={`${category.bgColor} p-2 rounded-full mb-2`}>
-            <Image
-              src={category.icon || "/placeholder.svg"}
-              alt={`Ícone de ${category.label}`}
-              width={20}
-              height={20}
-              className="h-5 w-5"
+    <div className="grid grid-cols-3 gap-4">
+      {PROBLEM_CATEGORIES.map(({ id, type, label, icon, subcategories }) => {
+        const isSelected = selectedProblemType === type
+
+        const handleClick = () => {
+          if (subcategories?.length) {
+            setSelectedCategory({
+              id,
+              type,
+              label,
+              icon,
+              subcategories,
+              bgColor: "defaultColor",
+            })
+            setCurrentView("subcategories")
+          } else {
+            handleProblemSelect(type)
+          }
+        }
+
+        return (
+          <div
+            key={id}
+            className={itemClasses}
+            onClick={handleClick}
+          >
+            <CategoryIcon
+              src={icon}
+              alt={`Ícone de ${label}`}
+              selected={isSelected}
             />
+            <Label className="text-center text-xs">{label}</Label>
           </div>
-          <span className="text-xs">{category.label}</span>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 
   const renderSubcategories = () => {
-    if (!selectedCategory || !selectedCategory.subcategories) return null
+    if (!selectedCategory?.subcategories) return null
 
     return (
-      <div className="grid grid-cols-3 gap-4 mb-4">
-        {selectedCategory.subcategories.map((subcategory) => (
-          <div
-            key={subcategory.id}
-            className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer ${
-              selectedProblemType === subcategory.type ? "bg-gray-100" : ""
-            }`}
-            onClick={() => {
-              handleProblemSelect(subcategory.type)
-            }}
-          >
-            <div className="bg-gray-100 p-2 rounded-full mb-2">
-              <Image
-                src={subcategory.icon || "/placeholder.svg"}
-                alt={`Ícone de ${subcategory.label}`}
-                width={20}
-                height={20}
-                className="h-5 w-5"
+      <div className="mb-4 grid grid-cols-3 gap-4">
+        {selectedCategory.subcategories.map(({ id, type, label, icon }) => {
+          const isSelected = selectedProblemType === type
+
+          return (
+            <div
+              key={id}
+              className={itemClasses}
+              onClick={() => handleProblemSelect(type)}
+            >
+              <CategoryIcon
+                src={icon}
+                alt={`Ícone de ${label}`}
+                selected={isSelected}
               />
+              <Label className="text-center text-xs">{label}</Label>
             </div>
-            <span className="text-xs">{subcategory.label}</span>
-          </div>
-        ))}
-        <div
-          className="flex flex-col items-center p-2 hover:bg-gray-100 rounded cursor-pointer"
-          onClick={() => {
-            setCurrentView("categories")
-            setSelectedCategory(null)
-          }}
-        >
-          <div className="bg-gray-100 p-2 rounded-full mb-2">
-            <X className="h-5 w-5" />
-          </div>
-          <span className="text-xs">Voltar</span>
-        </div>
+          )
+        })}
       </div>
     )
   }
 
-  const dialogContent = (
-    <>
-      <div className="mb-4">{currentView === "categories" ? renderCategories() : renderSubcategories()}</div>
-      <Button
-        className="w-full"
-        disabled={!selectedProblemType}
-        onClick={handleConfirmAndClose}
-      >
-        Confirmar Problema
-      </Button>
-    </>
-  )
+  const renderSelectedIcon = () => {
+    const selected = PROBLEM_CATEGORIES.find(
+      (c) => c.type === selectedProblemType,
+    )
+    if (!selected) return null
 
-  if (isDesktop) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{currentView === "categories" ? title : "Selecione a Subcategoria"}</DialogTitle>
-            <DialogDescription>{description}</DialogDescription>
-          </DialogHeader>
-          <div className="grid items-start gap-4">{dialogContent}</div>
-        </DialogContent>
-      </Dialog>
+      <div className="mb-4 flex items-center justify-center">
+        <CategoryIcon
+          src={selected.icon}
+          alt={`Ícone de ${selected.label}`}
+        />
+      </div>
     )
   }
 
-  return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+  const content = (
+    <>
+      {renderSelectedIcon()}
+      <div>
+        {currentView === "categories"
+          ? renderCategories()
+          : renderSubcategories()}
+      </div>
+
+      <div className="flex gap-2">
+        {selectedProblemType && currentView === "subcategories" && (
+          <>
+            <Button
+              className="flex-1"
+              variant="outline"
+              onClick={() => {
+                setCurrentView("categories")
+                setSelectedCategory(null)
+                handleProblemSelect("")
+              }}
+            >
+              Voltar
+            </Button>
+            <Button
+              className="flex-1"
+              onClick={confirmAndClose}
+            >
+              Relatar Problema
+            </Button>
+          </>
+        )}
+      </div>
+    </>
+  )
+
+  return isDesktop ? (
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+    >
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>
+            {currentView === "categories" ? title : "Qual o problema?"}
+          </DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+        <div className="grid items-start gap-4">{content}</div>
+      </DialogContent>
+    </Dialog>
+  ) : (
+    <Drawer
+      open={open}
+      onOpenChange={onOpenChange}
+    >
       <DrawerPortal>
         <DrawerContent>
           <DrawerHeader className="text-left">
-            <DrawerTitle>{currentView === "categories" ? title : "Selecione a Subcategoria"}</DrawerTitle>
+            <DrawerTitle>
+              {currentView === "categories"
+                ? title
+                : "Selecione a Subcategoria"}
+            </DrawerTitle>
             <DrawerDescription>{description}</DrawerDescription>
           </DrawerHeader>
-          <div className="px-4">{dialogContent}</div>
+          <div className="px-4">{content}</div>
           <DrawerFooter className="pt-2">
             <DrawerClose asChild>
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancelar
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => onOpenChange(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              >
+                <X />
               </Button>
             </DrawerClose>
           </DrawerFooter>
@@ -170,4 +258,3 @@ export function DialogProblems({
     </Drawer>
   )
 }
-
