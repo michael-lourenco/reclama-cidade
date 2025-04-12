@@ -336,6 +336,42 @@ async function getMarkerStatusHistory(markerId: string) {
   })) as StatusChange[];
 }
 
+async function removeAnonymousMarkers(db: Firestore): Promise<{ count: number, removedIds: string[] }> {
+  const markersRef = collection(db, "markers");
+  const querySnapshot = await getDocs(markersRef);
+  
+  const anonymousMarkers = querySnapshot.docs.filter(doc => {
+    const data = doc.data();
+    return data.userEmail && typeof data.userEmail === 'string' && 
+           data.userEmail.includes("Usuário anônimo");
+  });
+  
+  const removedIds: string[] = [];
+  
+  // Delete each anonymous marker
+  for (const markerDoc of anonymousMarkers) {
+    const markerId = markerDoc.id;
+    
+    // First delete all subcollections (statusHistory)
+    const statusHistoryRef = collection(db, 'markers', markerId, 'statusHistory');
+    const statusSnapshot = await getDocs(statusHistoryRef);
+    
+    for (const statusDoc of statusSnapshot.docs) {
+      await deleteDoc(doc(db, 'markers', markerId, 'statusHistory', statusDoc.id));
+    }
+    
+    // Then delete the marker document itself
+    await deleteDoc(doc(db, 'markers', markerId));
+    removedIds.push(markerId);
+  }
+  
+  return {
+    count: removedIds.length,
+    removedIds
+  };
+}
+
+
 export {
   authFirestore,
   dbFirestore,
@@ -358,6 +394,7 @@ export {
   addUserMarker,
   removeMarker,
   removeUserMarker,
+  removeAnonymousMarkers,
 }
 
 export type { UserData }
