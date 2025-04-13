@@ -1,11 +1,9 @@
 // app/api/markers/route.ts
 
 import { NextResponse } from "next/server";
-import { dbFirestore, addMarker, getMarkers } from "@/services/firebase/FirebaseService";
-import { verify } from "jsonwebtoken";
+import { dbFirestore, addMarker, getMarkers, ProblemStatus, addStatusChange } from "@/services/firebase/FirebaseService";
 import type { Marker } from "@/components/marker/types/marker";
-import { validateAuth, isAdmin } from "@/lib/auth/api-auth"
-
+import { validateAuth } from "@/lib/auth/api-auth";
 
 // GET - Obter todos os marcadores
 export async function GET() {
@@ -24,30 +22,37 @@ export async function GET() {
 // POST - Adicionar um novo marcador
 export async function POST(request: Request) {
   try {
-    // Validar autenticação
+
     const auth = await validateAuth(request);
     if (!auth.valid) {
       return NextResponse.json({ error: auth.error }, { status: 401 });
     }
 
-    // Obter dados do corpo da requisição
     const markerData = await request.json() as Marker;
     
-    // Verificar se os dados necessários foram fornecidos
     if (!markerData.id || !markerData.lat || !markerData.lng || !markerData.type) {
       return NextResponse.json({ 
         error: 'Dados incompletos. id, lat, lng e type são obrigatórios' 
       }, { status: 400 });
     }
     
-    // Definir o email do usuário a partir do token JWT
     markerData.userEmail = auth.user.email;
     
-    // Definir a data de criação
     markerData.createdAt = new Date();
     
-    // Adicionar marcador
+    markerData.likedBy = [];
+    markerData.resolvedBy = [];
+    
+    markerData.currentStatus = ProblemStatus.REPORTED;
+    
     await addMarker(dbFirestore, markerData);
+    
+    await addStatusChange(
+      markerData.id,
+      ProblemStatus.REPORTED,
+      "Problema reportado inicialmente",
+      auth.user.email
+    );
     
     return NextResponse.json({
       success: true,
