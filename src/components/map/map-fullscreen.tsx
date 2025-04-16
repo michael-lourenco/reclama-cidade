@@ -1,5 +1,5 @@
-// map-fullscreen.tsx
 "use client";
+import { useState, useCallback } from "react";
 import { useClientState } from "@/hooks/use-client-state";
 import type React from "react";
 import { MapContent } from "./map-content";
@@ -19,6 +19,14 @@ const MapFullScreen: React.FC<MapFullScreenProps> = ({
   toggleReportMenu,
 }) => {
   const { isLoading, setIsLoading, isClient } = useClientState();
+  
+  // Add state for selected filter types
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  
+  // Use useCallback to prevent unnecessary re-renders
+  const handleFilterChange = useCallback((types: string[]) => {
+    setSelectedTypes(types);
+  }, []);
 
   return (
     <>
@@ -35,6 +43,8 @@ const MapFullScreen: React.FC<MapFullScreenProps> = ({
           userConfirmedProblem={userConfirmedProblem}
           resetConfirmation={resetConfirmation}
           toggleReportMenu={toggleReportMenu}
+          selectedTypes={selectedTypes}
+          onFilterChange={handleFilterChange}
         />
       )}
     </>

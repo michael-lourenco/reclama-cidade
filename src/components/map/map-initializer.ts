@@ -18,7 +18,8 @@ type MapInitializerProps = {
   addLeafletCSS: () => void
   addMarkerStyles: () => void
   addLikeStyles: () => void
-  skipUserLocationSetView?: boolean // New prop to control whether to set view on user location
+  skipUserLocationSetView?: boolean // Prop to control whether to set view on user location
+  skipMarkersAddition?: boolean // Nova prop para controlar se os marcadores devem ser adicionados durante a inicialização
 }
 
 export const initializeMap = async ({
@@ -37,6 +38,7 @@ export const initializeMap = async ({
   addMarkerStyles,
   addLikeStyles,
   skipUserLocationSetView = false, // Default to false for backward compatibility
+  skipMarkersAddition = false, // Nova opção com valor padrão false para compatibilidade com código existente
 }: MapInitializerProps) => {
   try {
     // Verificar se o elemento do mapa existe
@@ -86,11 +88,12 @@ export const initializeMap = async ({
     // Store map instance
     mapInstanceRef.current = mapInstance
 
-    // Load markers from Firebase
+    // Carregar marcadores do Firebase
     const firebaseMarkers = await loadMarkersFromFirebase()
     let shouldCenterOnMarker = !skipUserLocationSetView; // Only center on marker if not centering on user
 
-    if (firebaseMarkers && firebaseMarkers.length > 0) {
+    // Adicionar marcadores ao mapa apenas se skipMarkersAddition for false
+    if (!skipMarkersAddition && firebaseMarkers && firebaseMarkers.length > 0) {
       // Add all saved markers to the map
       firebaseMarkers.forEach((marker) => {
         const icon = iconsRef.current[marker.type] || iconsRef.current.default
