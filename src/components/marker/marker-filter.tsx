@@ -10,7 +10,7 @@ interface MarkerFilterProps {
 
 export function MarkerFilter({ availableTypes, selectedTypes, onFilterChange }: MarkerFilterProps) {
   return (
-    <div className="p-3 bg-white rounded-lg shadow-md">
+    <div className="p-3 bg-secondary rounded-lg shadow-md">
       <h3 className="text-sm font-medium mb-2">Filtrar por tipo:</h3>
       <div className="flex flex-wrap gap-2">
         <Button

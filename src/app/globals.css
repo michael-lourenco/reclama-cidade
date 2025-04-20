@@ -145,6 +145,12 @@
   }
 }
 
+@layer components {
+  .btn-outline {
+    @apply text-foreground border-border hover:bg-accent hover:text-accent-foreground;
+  }
+}
+
 .leaflet-pane,
 .leaflet-control,
 .leaflet-top,
