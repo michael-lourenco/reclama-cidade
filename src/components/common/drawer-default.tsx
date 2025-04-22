@@ -26,7 +26,7 @@ import {
 import { PROBLEM_CATEGORIES } from "@/config/problem-categories"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { cn } from "@/lib/utils"
-import { X } from "lucide-react"
+import { CircleCheck, X } from "lucide-react"
 import { Label } from "../ui/label"
 
 interface DialogProblemsProps {
@@ -53,12 +53,18 @@ const CategoryIcon = ({
 }) => (
   <div
     className={cn(
-      "mb-2 flex h-20 w-20 items-center justify-center rounded-full outline-offset-2",
+      "relative mb-2 flex h-20 w-20 items-center justify-center rounded-full outline-offset-2",
       "bg-gray-700 dark:bg-gray-600",
       "group-hover:outline-4 group-active:outline-sky-500",
       { "outline-4 outline-sky-500 dark:outline-sky-500": selected },
     )}
   >
+    {selected && (
+      <CircleCheck
+        className="stroke-background absolute -top-2 -right-3 fill-sky-500"
+        size={32}
+      />
+    )}
     <Image
       src={src || "/placeholder.png"}
       alt={alt}
@@ -185,19 +191,21 @@ export function DialogProblems({
       </div>
 
       <div className="flex gap-2">
+        {currentView === "subcategories" && (
+          <Button
+            className="flex-1"
+            variant="outline"
+            onClick={() => {
+              setCurrentView("categories")
+              setSelectedCategory(null)
+              handleProblemSelect("")
+            }}
+          >
+            Voltar
+          </Button>
+        )}
         {selectedProblemType && currentView === "subcategories" && (
           <>
-            <Button
-              className="flex-1"
-              variant="outline"
-              onClick={() => {
-                setCurrentView("categories")
-                setSelectedCategory(null)
-                handleProblemSelect("")
-              }}
-            >
-              Voltar
-            </Button>
             <Button
               className="flex-1"
               onClick={confirmAndClose}
