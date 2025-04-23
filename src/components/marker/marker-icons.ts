@@ -1,5 +1,6 @@
-import { PROBLEM_CATEGORIES } from "@/config/problem-categories"
+
 import type { ProblemCategory, ProblemSubcategory } from "@/components/map/types/map"
+import { PROBLEM_CATEGORIES } from "@/constants/map-constants"
 
 // Refactored function to create icons dynamically using mapIcon config from each category/subcategory
 export const createMapIcons = (L: any) => {
@@ -16,13 +17,13 @@ export const createMapIcons = (L: any) => {
 
   // Default icon for unmapped cases
   const defaultIcon = new L.Icon(baseIconConfig)
-  
+
   // User location icon
   const userLocationIcon = new L.Icon({
     ...baseIconConfig,
     className: "user-location-icon",
   })
-  
+
   // Initialize the icons object with default icons
   const icons: Record<string, any> = {
     default: defaultIcon,
@@ -36,7 +37,7 @@ export const createMapIcons = (L: any) => {
       ...(category.mapIcon || baseIconConfig),
       className: `${category.id.toLowerCase()}-icon`,
     })
-    
+
     // Process subcategories if they exist
     if (category.subcategories && category.subcategories.length > 0) {
       category.subcategories.forEach((subCategory: ProblemSubcategory) => {

@@ -23,7 +23,10 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer"
 
-import { PROBLEM_CATEGORIES } from "@/config/problem-categories"
+import {
+  PROBLEM_CATEGORIES,
+  PROBLEM_TYPES
+} from "@/constants/map-constants"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { cn } from "@/lib/utils"
 import { CircleCheck, X } from "lucide-react"
@@ -34,8 +37,8 @@ interface DialogProblemsProps {
   onOpenChange: (open: boolean) => void
   title?: string
   description?: string
-  selectedProblemType: string | null
-  handleProblemSelect: (problemType: string) => void
+  selectedProblemType: (typeof PROBLEM_TYPES)[keyof typeof PROBLEM_TYPES]
+  handleProblemSelect: (ProblemType: string) => void
   handleConfirmProblem: () => void
 }
 
@@ -116,7 +119,7 @@ export function DialogProblems({
             })
             setCurrentView("subcategories")
           } else {
-            handleProblemSelect(type)
+            handleProblemSelect(type as unknown as string)
           }
         }
 
@@ -150,7 +153,7 @@ export function DialogProblems({
             <div
               key={id}
               className={itemClasses}
-              onClick={() => handleProblemSelect(type)}
+              onClick={() => handleProblemSelect(type as unknown as string)}
             >
               <CategoryIcon
                 src={icon}
