@@ -2,6 +2,10 @@
 
 import { ProblemCategory, ProblemType } from "@/components/map/types/map"
 
+export type TProblemType = keyof typeof PROBLEM_TYPES
+export type TProblemSubcategory =
+  keyof (typeof PROBLEM_TYPES)[keyof typeof PROBLEM_TYPES]["subcategories"]
+
 export const PROBLEM_TYPES = {
   POLICIA: {
     label: "Polícia",
@@ -149,17 +153,6 @@ export const PROBLEM_TYPES = {
   },
 } as const
 
-export const PROBLEM_TYPES_LIST = Object.entries(PROBLEM_TYPES).map(
-  ([key, value]) => ({
-    id: key,
-    ...value,
-  }),
-)
-
-export const PROBLEM_SUBCATEGORIES = Object.values(PROBLEM_TYPES).flatMap(
-  (category) => Object.values(category.subcategories),
-)
-
 export const PROBLEM_CATEGORIES: ProblemCategory[] = Object.entries(
   PROBLEM_TYPES,
 ).map(([key, value]) => ({
@@ -183,47 +176,20 @@ export const PROBLEM_CATEGORIES: ProblemCategory[] = Object.entries(
       type: subcategory.label,
       label: subcategory.label,
       icon: subcategory.icon,
-      iconUrl: value.icon,
-      iconRetinaUrl: value.icon,
+      iconUrl: subcategory.icon ?? value.icon,
+      iconRetinaUrl: subcategory.icon ?? value.icon,
+      mapIcon: {
+        iconUrl: subcategory.icon ?? value.icon,
+        iconRetinaUrl: subcategory.icon ?? value.icon,
+        shadowUrl: "/map-icons/sombra.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+      },
     }),
   ),
 }))
-
-export const PROBLEM_SUBCATEGORIES_MAP = Object.fromEntries(
-  PROBLEM_SUBCATEGORIES.map((subcategory) => [
-    subcategory.id,
-    {
-      ...subcategory,
-      type: subcategory.id,
-    },
-  ]),
-)
-
-export const PROBLEM_CATEGORIES_MAP = Object.fromEntries(
-  PROBLEM_CATEGORIES.map((category) => [
-    category.id,
-    {
-      ...category,
-      type: category.id,
-    },
-  ]),
-)
-
-export const PROBLEM_TYPES_MAP = Object.fromEntries(
-  Object.entries(PROBLEM_TYPES).map(([key, value]) => [
-    key,
-    {
-      ...value,
-      type: key,
-    },
-  ]),
-)
-
-export const LEAFLET_ICON_URLS = {
-  ICON: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  ICON_RETINA: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  SHADOW: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-}
 
 export const DEFAULT_LOCATION: [number, number] = [-23.5902, -48.0338]
 export const DEFAULT_ZOOM = 16

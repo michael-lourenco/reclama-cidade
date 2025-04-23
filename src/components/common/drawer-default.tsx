@@ -25,7 +25,8 @@ import {
 
 import {
   PROBLEM_CATEGORIES,
-  PROBLEM_TYPES
+  TProblemSubcategory,
+  TProblemType,
 } from "@/constants/map-constants"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { cn } from "@/lib/utils"
@@ -37,8 +38,8 @@ interface DialogProblemsProps {
   onOpenChange: (open: boolean) => void
   title?: string
   description?: string
-  selectedProblemType: (typeof PROBLEM_TYPES)[keyof typeof PROBLEM_TYPES]
-  handleProblemSelect: (ProblemType: string) => void
+  selectedProblemType: TProblemType | undefined
+  handleProblemSelect: (ProblemType: TProblemType) => void
   handleConfirmProblem: () => void
 }
 
@@ -119,7 +120,7 @@ export function DialogProblems({
             })
             setCurrentView("subcategories")
           } else {
-            handleProblemSelect(type as unknown as string)
+            handleProblemSelect(type as TProblemSubcategory)
           }
         }
 
@@ -153,7 +154,7 @@ export function DialogProblems({
             <div
               key={id}
               className={itemClasses}
-              onClick={() => handleProblemSelect(type as unknown as string)}
+              onClick={() => handleProblemSelect(type as TProblemSubcategory)}
             >
               <CategoryIcon
                 src={icon}
@@ -201,7 +202,7 @@ export function DialogProblems({
             onClick={() => {
               setCurrentView("categories")
               setSelectedCategory(null)
-              handleProblemSelect("")
+              handleProblemSelect()
             }}
           >
             Voltar
