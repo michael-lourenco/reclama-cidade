@@ -9,145 +9,145 @@ export type TProblemSubcategory =
 export const PROBLEM_TYPES = {
   POLICIA: {
     label: "Polícia",
-    icon: "/map-icons/policia.png",
+    icon: "/map-icons/policia.svg",
     subcategories: {
       POLICIA: {
         label: "Polícia",
-        icon: "/map-icons/policia.png",
+        icon: "/map-icons/policia.svg",
       },
       BAFOMETRO: {
         label: "Bafômetro",
-        icon: "/map-icons/bafometro.png",
+        icon: "/map-icons/bafometro.svg",
       },
       TIROTEIO: {
         label: "Tiroteio",
-        icon: "/map-icons/tiroteio.png",
+        icon: "/map-icons/tiroteio.svg",
       },
       BLITZ: {
         label: "Blitz",
-        icon: "/map-icons/blitz.png",
+        icon: "/map-icons/blitz.svg",
       },
       SOM_ALTO: {
         label: "SOM ALTO",
-        icon: "/map-icons/som-alto.png",
+        icon: "/map-icons/som-alto.svg",
       },
     },
   },
   INFRAESTRUTURA: {
     label: "Infraestrutura",
-    icon: "/map-icons/iluminacao.png",
+    icon: "/map-icons/iluminacao.svg",
     subcategories: {
       INFRAESTRUTURA: {
         label: "Infraestrutura",
-        icon: "/map-icons/iluminacao.png",
+        icon: "/map-icons/iluminacao.svg",
       },
       INFRAESTRUTURA_ILUMINACAO_PUBLICA: {
         label: "Iluminação Pública",
-        icon: "/map-icons/iluminacao-publica.png",
+        icon: "/map-icons/iluminacao-publica.svg",
       },
       INFRAESTRUTURA_SEMAFORO: {
         label: "Semáforo",
-        icon: "/map-icons/semaforo.png",
+        icon: "/map-icons/semaforo.svg",
       },
       INFRAESTRUTURA_PLACA_QUEBRADA: {
         label: "Placa Quebrada",
-        icon: "/map-icons/placa-quebrada.png",
+        icon: "/map-icons/placa-quebrada.svg",
       },
       INFRAESTRUTURA_MATO_ALTO: {
         label: "Mato Alto",
-        icon: "/map-icons/mato-alto.png",
+        icon: "/map-icons/mato-alto.svg",
       },
     },
   },
   PISTA: {
     label: "Pista",
-    icon: "/map-icons/pista.png",
+    icon: "/map-icons/pista.svg",
     subcategories: {
       PISTA: {
         label: "Pista",
-        icon: "/map-icons/pista.png",
+        icon: "/map-icons/pista.svg",
       },
       PISTA_OBJETO: {
         label: "Objeto na pista",
-        icon: "/map-icons/pista-objeto.png",
+        icon: "/map-icons/pista-objeto.svg",
       },
       PISTA_OLEO: {
         label: "Óleo na pista",
-        icon: "/map-icons/pista-oleo.png",
+        icon: "/map-icons/pista-oleo.svg",
       },
       PISTA_ARVORE: {
         label: "Árvore na pista",
-        icon: "/map-icons/pista-arvore.png",
+        icon: "/map-icons/pista-arvore.svg",
       },
       PISTA_ALERTA: {
         label: "Alerta na pista",
-        icon: "/map-icons/pista-alerta.png",
+        icon: "/map-icons/pista-alerta.svg",
       },
       PISTA_POSTE: {
         label: "Quebra de poste",
-        icon: "/map-icons/pista-poste.png",
+        icon: "/map-icons/pista-poste.svg",
       },
       PISTA_VEICULO_ABANDONADO: {
         label: "Veículo abandonado",
-        icon: "/map-icons/pista-veiculo-abandonado.png",
+        icon: "/map-icons/pista-veiculo-abandonado.svg",
       },
     },
   },
   AGUA: {
     label: "Água",
-    icon: "/map-icons/agua.png",
+    icon: "/map-icons/agua.svg",
     subcategories: {
       AGUA: {
         label: "Água",
-        icon: "/map-icons/agua.png",
-        iconUrl: "/map-icons-fixed/agua.png",
-        iconRetinaUrl: "/map-icons-fixed/agua.png",
+        icon: "/map-icons/agua.svg",
+        iconUrl: "/map-icons-fixed/agua.svg",
+        iconRetinaUrl: "/map-icons-fixed/agua.svg",
       },
       AGUA_BUEIRO_ABERTO: {
         label: "Bueiro aberto",
-        icon: "/map-icons/agua-bueiro-aberto.png",
+        icon: "/map-icons/agua-bueiro-aberto.svg",
       },
       AGUA_BOEIRO_VAZAMENTO: {
         label: "Bueiro vazando",
-        icon: "/map-icons/agua-bueiro-vazamento.png",
+        icon: "/map-icons/agua-bueiro-vazamento.svg",
       },
       AGUA_CANO_VAZAMENTO: {
         label: "Cano vazando",
-        icon: "/map-icons/agua-cano-vazamento.png",
+        icon: "/map-icons/agua-cano-vazamento.svg",
       },
       AGUA_BOEIRO_ALERTA: {
         label: "Alerta bueiro",
-        icon: "/map-icons/agua-bueiro-alerta.png",
+        icon: "/map-icons/agua-bueiro-alerta.svg",
       },
       AGUA_ENCHENTE: {
         label: "Enchente",
-        icon: "/map-icons/agua-enchente.png",
+        icon: "/map-icons/agua-enchente.svg",
       },
       AGUA_PISTA: {
         label: "Água na pista",
-        icon: "/map-icons/agua-pista-alagamento.png",
+        icon: "/map-icons/agua-pista-alagamento.svg",
       },
     },
   },
   FOGO: {
     label: "Fogo",
-    icon: "/map-icons/fogo.png",
+    icon: "/map-icons/fogo.svg",
     subcategories: {
       FOGO: {
         label: "Fogo",
-        icon: "/map-icons/fogo.png",
+        icon: "/map-icons/fogo.svg",
       },
       FOGO_VEICULO: {
         label: "Veículo pegando fogo",
-        icon: "/map-icons/fogo-veiculo.png",
+        icon: "/map-icons/fogo-veiculo.svg",
       },
       FOGO_CASA: {
         label: "Casa pegando fogo",
-        icon: "/map-icons/fogo-casa.png",
+        icon: "/map-icons/fogo-casa.svg",
       },
       FOGO_ARVORE: {
         label: "Árvore pegando fogo",
-        icon: "/map-icons/fogo-arvore.png",
+        icon: "/map-icons/fogo-arvore.svg",
       },
     },
   },
@@ -164,7 +164,7 @@ export const PROBLEM_CATEGORIES: ProblemCategory[] = Object.entries(
   mapIcon: {
     iconUrl: value.icon,
     iconRetinaUrl: value.icon,
-    shadowUrl: "/map-icons/sombra.png",
+    shadowUrl: "/map-icons/sombra.svg",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
@@ -181,7 +181,7 @@ export const PROBLEM_CATEGORIES: ProblemCategory[] = Object.entries(
       mapIcon: {
         iconUrl: subcategory.icon ?? value.icon,
         iconRetinaUrl: subcategory.icon ?? value.icon,
-        shadowUrl: "/map-icons/sombra.png",
+        shadowUrl: "/map-icons/sombra.svg",
         iconSize: [25, 41],
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],
