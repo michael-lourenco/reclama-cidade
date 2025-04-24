@@ -28,7 +28,7 @@ export const PROBLEM_TYPES = {
         icon: "blitz.svg",
       },
       SOM_ALTO: {
-        label: "SOM ALTO",
+        label: "Som alto",
         icon: "som-alto.svg",
       },
     },
@@ -60,11 +60,11 @@ export const PROBLEM_TYPES = {
     },
   },
   PISTA: {
-    label: "Pista",
+    label: "Em via",
     icon: "pista.svg",
     subcategories: {
       PISTA: {
-        label: "Pista",
+        label: "Em via",
         icon: "pista.svg",
       },
       PISTA_BURACO: {
@@ -72,23 +72,23 @@ export const PROBLEM_TYPES = {
         icon: "pista-buraco.svg",
       },
       PISTA_OBJETO: {
-        label: "Objeto na pista",
+        label: "Objeto na via",
         icon: "pista-objeto.svg",
       },
       PISTA_OLEO: {
-        label: "Óleo na pista",
+        label: "Óleo na via",
         icon: "pista-oleo.svg",
       },
       PISTA_ARVORE: {
-        label: "Árvore na pista",
+        label: "Árvore na via",
         icon: "pista-arvore.svg",
       },
       PISTA_ALERTA: {
-        label: "Alerta na pista",
+        label: "Alerta na via",
         icon: "pista-alerta.svg",
       },
       PISTA_POSTE: {
-        label: "Quebra de poste",
+        label: "Queda de poste",
         icon: "pista-poste.svg",
       },
       PISTA_VEICULO_ABANDONADO: {

@@ -28,9 +28,9 @@ export function MarkerFilter({
         title="Filtro"
         onClick={toggleFilter}
         className="relative"
-        size="icon"
+        size="icon-sm"
       >
-        <Filter />
+        <Filter className="size-6" />
         {selectedTypes.length > 0 && (
           <span className="bg-primary text-primary-foreground absolute -top-1 -right-2 ml-1 flex h-5 w-5 items-center justify-center rounded-full text-sm">
             {selectedTypes.length}
