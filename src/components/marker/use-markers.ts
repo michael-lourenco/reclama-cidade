@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
-import { dbFirestore, getMarkers, addMarker } from "@/services/firebase/FirebaseService"
 import type { Marker } from "@/components/marker/types/marker"
+import { addMarker, dbFirestore, getMarkers } from "@/services/firebase/FirebaseService"
+import { useCallback, useMemo, useState } from "react"
 
 export const useMarkers = () => {
   const [markers, setMarkers] = useState<Marker[]>([])
@@ -78,10 +78,10 @@ export const useMarkers = () => {
     return markers.filter(marker => selectedTypes.includes(marker.type))
   }, [markers])
 
-  return { 
-    markers, 
-    setMarkers, 
-    loadMarkersFromFirebase, 
+  return {
+    markers,
+    setMarkers,
+    loadMarkersFromFirebase,
     saveMarkerToFirebase,
     markerTypes,
     getFilteredMarkers

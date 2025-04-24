@@ -1,19 +1,25 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { dbFirestore, getMarkers } from "@/services/firebase/FirebaseService"
-import type { Marker } from "@/components/marker/types/marker"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DashboardStats } from "@/components/dashboard/dashboard-stats"
 import { ProblemStatusChart } from "@/components/dashboard/problem-status-chart"
+import { ProblemTimeline } from "@/components/dashboard/problem-timeline"
 import { ProblemTypeChart } from "@/components/dashboard/problem-type-chart"
 import { RecentProblemsTable } from "@/components/dashboard/recent-problems-table"
-import { DashboardStats } from "@/components/dashboard/dashboard-stats"
-import { ProblemTimeline } from "@/components/dashboard/problem-timeline"
-import { UserActivityChart } from "@/components/dashboard/user-activity-chart"
+import { ResolutionTimeChart } from "@/components/dashboard/resolution-time-chart"
 import { StatusTransitionChart } from "@/components/dashboard/status-transition-chart"
 import { TopReportersChart } from "@/components/dashboard/top-reporters-chart"
-import { ResolutionTimeChart } from "@/components/dashboard/resolution-time-chart"
+import { UserActivityChart } from "@/components/dashboard/user-activity-chart"
+import type { Marker } from "@/components/marker/types/marker"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { dbFirestore, getMarkers } from "@/services/firebase/FirebaseService"
+import { useEffect, useState } from "react"
 
 export default function DashboardContent() {
   const [markers, setMarkers] = useState<Marker[]>([])
@@ -28,7 +34,9 @@ export default function DashboardContent() {
         // Convert Firestore timestamps to Date objects
         const processedMarkers = markersData.map((marker: any) => ({
           ...marker,
-          createdAt: marker.createdAt?.toDate ? marker.createdAt.toDate() : new Date(marker.createdAt),
+          createdAt: marker.createdAt?.toDate
+            ? marker.createdAt.toDate()
+            : new Date(marker.createdAt),
         }))
 
         setMarkers(processedMarkers)
@@ -55,7 +63,10 @@ export default function DashboardContent() {
     <div className="space-y-6">
       <DashboardStats markers={markers} />
 
-      <Tabs defaultValue="overview" className="w-full">
+      <Tabs
+        defaultValue="overview"
+        className="w-full"
+      >
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="details">Detalhes</TabsTrigger>
@@ -63,8 +74,11 @@ export default function DashboardContent() {
           <TabsTrigger value="table">Tabela</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="mt-4 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TabsContent
+          value="overview"
+          className="mt-4 space-y-6"
+        >
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>Status dos Problemas</CardTitle>
@@ -89,7 +103,9 @@ export default function DashboardContent() {
           <Card>
             <CardHeader>
               <CardTitle>Evolução Temporal</CardTitle>
-              <CardDescription>Problemas reportados e resolvidos ao longo do tempo</CardDescription>
+              <CardDescription>
+                Problemas reportados e resolvidos ao longo do tempo
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ProblemTimeline markers={markers} />
@@ -97,8 +113,11 @@ export default function DashboardContent() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="details" className="mt-4 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TabsContent
+          value="details"
+          className="mt-4 space-y-6"
+        >
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>Transições de Status</CardTitle>
@@ -112,7 +131,9 @@ export default function DashboardContent() {
             <Card>
               <CardHeader>
                 <CardTitle>Tempo Médio de Resolução</CardTitle>
-                <CardDescription>Dias até resolução por tipo de problema</CardDescription>
+                <CardDescription>
+                  Dias até resolução por tipo de problema
+                </CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
                 <ResolutionTimeChart markers={markers} />
@@ -121,12 +142,17 @@ export default function DashboardContent() {
           </div>
         </TabsContent>
 
-        <TabsContent value="users" className="mt-4 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TabsContent
+          value="users"
+          className="mt-4 space-y-6"
+        >
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>Principais Usuários</CardTitle>
-                <CardDescription>Usuários que mais reportaram problemas</CardDescription>
+                <CardDescription>
+                  Usuários que mais reportaram problemas
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <TopReportersChart markers={markers} />
@@ -136,7 +162,9 @@ export default function DashboardContent() {
             <Card>
               <CardHeader>
                 <CardTitle>Atividade de Usuários</CardTitle>
-                <CardDescription>Interações por tipo (likes, resoluções)</CardDescription>
+                <CardDescription>
+                  Interações por tipo (likes, resoluções)
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <UserActivityChart markers={markers} />
@@ -145,11 +173,16 @@ export default function DashboardContent() {
           </div>
         </TabsContent>
 
-        <TabsContent value="table" className="mt-4">
+        <TabsContent
+          value="table"
+          className="mt-4"
+        >
           <Card>
             <CardHeader>
               <CardTitle>Problemas Reportados</CardTitle>
-              <CardDescription>Lista detalhada de todos os problemas</CardDescription>
+              <CardDescription>
+                Lista detalhada de todos os problemas
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <RecentProblemsTable markers={markers} />

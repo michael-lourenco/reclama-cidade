@@ -126,7 +126,7 @@ export const initializeMap = async ({
                 RESOLVIDO
               </button>
             `
-          } else{
+          } else {
             // Mostrar botão de verificação se tiver 1 ou mais likes
             popupHTML += `
               <button class="resolved-button">
@@ -181,7 +181,7 @@ export const initializeMap = async ({
     if ("geolocation" in navigator) {
       // Create user location marker
       const userIcon = iconsRef.current.userLocation
-      
+
       // First create marker at default location
       userLocationMarkerRef.current = L.marker(defaultLocation, {
         icon: userIcon,
@@ -189,7 +189,7 @@ export const initializeMap = async ({
       })
         .addTo(mapInstance)
         .bindPopup("Sua localização")
-      
+
       // Get position and update marker
       navigator.geolocation.getCurrentPosition(
         (position) => {

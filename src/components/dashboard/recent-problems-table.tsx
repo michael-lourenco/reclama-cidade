@@ -1,15 +1,37 @@
 "use client"
 
-import { useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ChevronDown, ChevronUp, MoreHorizontal, Search, Eye, Edit } from "lucide-react"
 import type { Marker } from "@/components/marker/types/marker"
 import { Badge } from "@/components/ui/badge"
-import { ProblemStatus, updateMarkerStatus } from "@/services/firebase/FirebaseService"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  ProblemStatus,
+  updateMarkerStatus,
+} from "@/services/firebase/FirebaseService"
+import {
+  ChevronDown,
+  ChevronUp,
+  Edit,
+  Eye,
+  MoreHorizontal,
+  Search,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 interface RecentProblemsTableProps {
   markers: Marker[]
@@ -26,22 +48,33 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
     (marker) =>
       marker.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
       marker.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (marker.currentStatus && marker.currentStatus.toLowerCase().includes(searchTerm.toLowerCase())),
+      (marker.currentStatus &&
+        marker.currentStatus.toLowerCase().includes(searchTerm.toLowerCase())),
   )
 
   // Ordenar marcadores
   const sortedMarkers = [...filteredMarkers].sort((a, b) => {
     if (sortField === "createdAt") {
-      const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt.toDate())
-      const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt.toDate())
+      const dateA =
+        a.createdAt instanceof Date
+          ? a.createdAt
+          : new Date(a.createdAt.toDate())
+      const dateB =
+        b.createdAt instanceof Date
+          ? b.createdAt
+          : new Date(b.createdAt.toDate())
 
-      return sortDirection === "asc" ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime()
+      return sortDirection === "asc"
+        ? dateA.getTime() - dateB.getTime()
+        : dateB.getTime() - dateA.getTime()
     }
 
     const valueA = String(a[sortField] || "")
     const valueB = String(b[sortField] || "")
 
-    return sortDirection === "asc" ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA)
+    return sortDirection === "asc"
+      ? valueA.localeCompare(valueB)
+      : valueB.localeCompare(valueA)
   })
 
   // Alternar a direção da ordenação
@@ -58,7 +91,11 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
   const renderSortIcon = (field: keyof Marker) => {
     if (field !== sortField) return null
 
-    return sortDirection === "asc" ? <ChevronUp className="ml-1 h-4 w-4" /> : <ChevronDown className="ml-1 h-4 w-4" />
+    return sortDirection === "asc" ? (
+      <ChevronUp className="ml-1 h-4 w-4" />
+    ) : (
+      <ChevronDown className="ml-1 h-4 w-4" />
+    )
   }
 
   // Formatar data
@@ -98,12 +135,20 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
   }
 
   // Atualizar status do problema
-  const handleStatusUpdate = async (markerId: string, newStatus: ProblemStatus) => {
+  const handleStatusUpdate = async (
+    markerId: string,
+    newStatus: ProblemStatus,
+  ) => {
     try {
       // Assumindo que temos o email do usuário atual
       const userEmail = "admin@example.com" // Substituir pelo email real do usuário logado
 
-      await updateMarkerStatus(markerId, newStatus, `Status atualizado para ${newStatus}`, userEmail)
+      await updateMarkerStatus(
+        markerId,
+        newStatus,
+        `Status atualizado para ${newStatus}`,
+        userEmail,
+      )
 
       // Recarregar a página para atualizar os dados
       router.refresh()
@@ -115,7 +160,7 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Search className="h-4 w-4 text-muted-foreground" />
+        <Search className="text-muted-foreground h-4 w-4" />
         <Input
           placeholder="Pesquisar problemas..."
           value={searchTerm}
@@ -128,14 +173,29 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="cursor-pointer" onClick={() => toggleSort("type")}>
-                <div className="flex items-center">Tipo {renderSortIcon("type")}</div>
+              <TableHead
+                className="cursor-pointer"
+                onClick={() => toggleSort("type")}
+              >
+                <div className="flex items-center">
+                  Tipo {renderSortIcon("type")}
+                </div>
               </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => toggleSort("currentStatus")}>
-                <div className="flex items-center">Status {renderSortIcon("currentStatus")}</div>
+              <TableHead
+                className="cursor-pointer"
+                onClick={() => toggleSort("currentStatus")}
+              >
+                <div className="flex items-center">
+                  Status {renderSortIcon("currentStatus")}
+                </div>
               </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => toggleSort("createdAt")}>
-                <div className="flex items-center">Data {renderSortIcon("createdAt")}</div>
+              <TableHead
+                className="cursor-pointer"
+                onClick={() => toggleSort("createdAt")}
+              >
+                <div className="flex items-center">
+                  Data {renderSortIcon("createdAt")}
+                </div>
               </TableHead>
               <TableHead>Reportado por</TableHead>
               <TableHead>Ações</TableHead>
@@ -144,7 +204,10 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
           <TableBody>
             {sortedMarkers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center">
+                <TableCell
+                  colSpan={5}
+                  className="text-center"
+                >
                   Nenhum problema encontrado
                 </TableCell>
               </TableRow>
@@ -162,7 +225,10 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                           <span className="sr-only">Abrir menu</span>
                         </Button>
@@ -178,32 +244,68 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
                         </DropdownMenuItem>
 
                         {/* Opções de status */}
-                        {marker.currentStatus !== ProblemStatus.UNDER_ANALYSIS && (
-                          <DropdownMenuItem onClick={() => handleStatusUpdate(marker.id, ProblemStatus.UNDER_ANALYSIS)}>
+                        {marker.currentStatus !==
+                          ProblemStatus.UNDER_ANALYSIS && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleStatusUpdate(
+                                marker.id,
+                                ProblemStatus.UNDER_ANALYSIS,
+                              )
+                            }
+                          >
                             Marcar como Em Análise
                           </DropdownMenuItem>
                         )}
 
                         {marker.currentStatus !== ProblemStatus.VERIFIED && (
-                          <DropdownMenuItem onClick={() => handleStatusUpdate(marker.id, ProblemStatus.VERIFIED)}>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleStatusUpdate(
+                                marker.id,
+                                ProblemStatus.VERIFIED,
+                              )
+                            }
+                          >
                             Marcar como Verificado
                           </DropdownMenuItem>
                         )}
 
                         {marker.currentStatus !== ProblemStatus.IN_PROGRESS && (
-                          <DropdownMenuItem onClick={() => handleStatusUpdate(marker.id, ProblemStatus.IN_PROGRESS)}>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleStatusUpdate(
+                                marker.id,
+                                ProblemStatus.IN_PROGRESS,
+                              )
+                            }
+                          >
                             Marcar como Em Andamento
                           </DropdownMenuItem>
                         )}
 
                         {marker.currentStatus !== ProblemStatus.RESOLVED && (
-                          <DropdownMenuItem onClick={() => handleStatusUpdate(marker.id, ProblemStatus.RESOLVED)}>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleStatusUpdate(
+                                marker.id,
+                                ProblemStatus.RESOLVED,
+                              )
+                            }
+                          >
                             Marcar como Resolvido
                           </DropdownMenuItem>
                         )}
 
                         {marker.currentStatus !== ProblemStatus.CLOSED && (
-                          <DropdownMenuItem onClick={() => handleStatusUpdate(marker.id, ProblemStatus.CLOSED)}>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleStatusUpdate(
+                                marker.id,
+                                ProblemStatus.CLOSED,
+                              )
+                            }
+                          >
                             Marcar como Fechado
                           </DropdownMenuItem>
                         )}

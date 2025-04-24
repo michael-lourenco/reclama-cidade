@@ -1,27 +1,27 @@
-"use client";
+"use client"
 
-import { Footer } from "@/components/common/footer";
-import { Card, CardContent } from "@/components/ui/card";
-import { UserInfo } from "@/components/common/user-info";
-import { UserLogout } from "@/components/common/user-logout";
-import UserStatistics from "@/components/user/user-statistics";
-import { useAuth } from "@/hooks/use-auth";
+import { Footer } from "@/components/common/footer"
+import { UserInfo } from "@/components/common/user-info"
+import { UserLogout } from "@/components/common/user-logout"
+import { Card, CardContent } from "@/components/ui/card"
+import UserStatistics from "@/components/user/user-statistics"
+import { useAuth } from "@/hooks/use-auth"
 
 export default function UserDashboard() {
-  const { user, loading, status, handleLogin, handleLogout } = useAuth();
+  const { user, loading, status, handleLogin, handleLogout } = useAuth()
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <p>Carregando...</p>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-primary">
-      <main className="flex-grow flex flex-col items-center justify-start pt-4">
-        <div className="max-w-4xl mx-auto">
+    <div className="bg-background text-primary flex min-h-screen flex-col">
+      <main className="flex flex-grow flex-col items-center justify-start pt-4">
+        <div className="mx-auto max-w-4xl">
           <UserInfo
             user={user}
             handleLogin={handleLogin}
@@ -51,5 +51,5 @@ export default function UserDashboard() {
       </main>
       <Footer />
     </div>
-  );
+  )
 }

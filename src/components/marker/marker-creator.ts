@@ -1,8 +1,8 @@
 // marker-creator.ts
 "use client";
-import type { Marker } from "@/components/marker/types/marker";
-import { addMarker, updateMarkerStatus, dbFirestore } from "@/services/firebase/FirebaseService";
 import { getProblemLabel } from "@/components/map/map";
+import type { Marker } from "@/components/marker/types/marker";
+import { addMarker, dbFirestore } from "@/services/firebase/FirebaseService";
 
 /**
  * Cria e salva um novo marcador no mapa e no Firebase
@@ -44,7 +44,7 @@ export const createAndSaveMarker = async ({
     };
 
     // Adicionar ao Firebase usando o FirebaseService
-    await addMarker(dbFirestore, newMarkerData); 
+    await addMarker(dbFirestore, newMarkerData);
     console.log("Marcador salvo com sucesso:", newMarkerData);
 
     // Atualizar o estado local de marcadores
@@ -72,7 +72,7 @@ export const createAndSaveMarker = async ({
     newMarker
       .bindPopup(popupContent)
       .openPopup();
-      
+
     return newMarker;
   } catch (error) {
     console.error("Erro ao salvar marcador no Firebase:", error);

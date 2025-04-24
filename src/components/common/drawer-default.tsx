@@ -39,7 +39,7 @@ interface DialogProblemsProps {
   title?: string
   description?: string
   selectedProblemType: TProblemType | undefined
-  handleProblemSelect: (ProblemType: TProblemType) => void
+  handleProblemSelect: (ProblemType: TProblemType | undefined) => void
   handleConfirmProblem: () => void
 }
 
@@ -70,7 +70,7 @@ const CategoryIcon = ({
       />
     )}
     <Image
-      src={src || "/placeholder.png"}
+      src={src || ""}
       alt={alt}
       width={size}
       height={size}
@@ -106,7 +106,8 @@ export function DialogProblems({
   const renderCategories = () => (
     <div className="grid grid-cols-3 gap-4">
       {PROBLEM_CATEGORIES.map(({ id, type, label, icon, subcategories }) => {
-        const isSelected = selectedProblemType === type
+        const isSelected =
+          selectedProblemType === (type as unknown as TProblemType)
 
         const handleClick = () => {
           if (subcategories?.length) {
@@ -148,7 +149,8 @@ export function DialogProblems({
     return (
       <div className="mb-4 grid grid-cols-3 gap-4">
         {selectedCategory.subcategories.map(({ id, type, label, icon }) => {
-          const isSelected = selectedProblemType === type
+          const isSelected =
+            selectedProblemType === (type as unknown as TProblemType)
 
           return (
             <div
@@ -171,8 +173,9 @@ export function DialogProblems({
 
   const renderSelectedIcon = () => {
     const selected = PROBLEM_CATEGORIES.find(
-      (c) => c.type === selectedProblemType,
+      (c) => (c.type as unknown as TProblemType) === selectedProblemType,
     )
+
     if (!selected) return null
 
     return (
@@ -203,7 +206,7 @@ export function DialogProblems({
             onClick={() => {
               setCurrentView("categories")
               setSelectedCategory(null)
-              handleProblemSelect()
+              handleProblemSelect(undefined)
             }}
           >
             Voltar

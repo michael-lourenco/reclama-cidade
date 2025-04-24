@@ -1,23 +1,35 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import type { Marker } from "@/components/marker/types/marker"
 import { ProblemStatus } from "@/services/firebase/FirebaseService"
+import { useEffect, useState } from "react"
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
 
 interface ResolutionTimeChartProps {
   markers: Marker[]
 }
 
 export function ResolutionTimeChart({ markers }: ResolutionTimeChartProps) {
-  const [chartData, setChartData] = useState<{ name: string; days: number }[]>([])
+  const [chartData, setChartData] = useState<{ name: string; days: number }[]>(
+    [],
+  )
 
   useEffect(() => {
     // Agrupar por tipo de problema
     const problemTypes: Record<string, { total: number; count: number }> = {}
 
     // Filtrar apenas problemas resolvidos
-    const resolvedMarkers = markers.filter((marker) => marker.currentStatus === ProblemStatus.RESOLVED)
+    const resolvedMarkers = markers.filter(
+      (marker) => marker.currentStatus === ProblemStatus.RESOLVED,
+    )
 
     // Calcular tempo médio de resolução (simulado)
     resolvedMarkers.forEach((marker) => {
@@ -47,18 +59,34 @@ export function ResolutionTimeChart({ markers }: ResolutionTimeChartProps) {
   }, [markers])
 
   if (chartData.length === 0) {
-    return <div className="flex justify-center items-center h-64">Sem dados disponíveis</div>
+    return (
+      <div className="flex h-64 items-center justify-center">
+        Sem dados disponíveis
+      </div>
+    )
   }
 
   return (
-    <div className="w-full h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+    <div className="h-64 w-full">
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+      >
+        <BarChart
+          data={chartData}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
-          <YAxis label={{ value: "Dias", angle: -90, position: "insideLeft" }} />
+          <YAxis
+            label={{ value: "Dias", angle: -90, position: "insideLeft" }}
+          />
           <Tooltip formatter={(value) => [`${value} dias`, "Tempo médio"]} />
-          <Bar dataKey="days" name="Dias até resolução" fill="#8884d8" />
+          <Bar
+            dataKey="days"
+            name="Dias até resolução"
+            fill="#8884d8"
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

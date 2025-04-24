@@ -1,9 +1,9 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
+import React from "react"
 
 export interface MenuButtonProps {
-  label: string;
-  onClick: () => void;
+  label: string
+  onClick: () => void
 }
 
 export const MenuButton: React.FC<MenuButtonProps> = ({ label, onClick }) => (
@@ -14,4 +14,4 @@ export const MenuButton: React.FC<MenuButtonProps> = ({ label, onClick }) => (
   >
     {label}
   </Button>
-);
+)

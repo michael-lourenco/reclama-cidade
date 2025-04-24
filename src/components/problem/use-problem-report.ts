@@ -8,7 +8,7 @@ export function useProblemReport() {
     const [selectedProblemType, setSelectedProblemType] = useState<TProblemType>()
     const [userConfirmedProblem, setUserConfirmedProblem] = useState(false)
 
-    const handleProblemSelect = (problemType: TProblemType) => {
+    const handleProblemSelect = (problemType: TProblemType | undefined) => {
         setSelectedProblemType(problemType)
     }
 

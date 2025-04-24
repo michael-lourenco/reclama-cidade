@@ -67,6 +67,10 @@ export const PROBLEM_TYPES = {
         label: "Pista",
         icon: "/map-icons/pista.svg",
       },
+      PISTA_BURACO: {
+        label: "Buraco na via",
+        icon: "/map-icons/pista-buraco.svg",
+      },
       PISTA_OBJETO: {
         label: "Objeto na pista",
         icon: "/map-icons/pista-objeto.svg",

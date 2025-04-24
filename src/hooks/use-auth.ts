@@ -11,9 +11,9 @@ import {
   UserData,
 } from "@/services/firebase/FirebaseService";
 import { Auth, onAuthStateChanged } from "firebase/auth";
+import { Firestore } from 'firebase/firestore';
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { Firestore } from 'firebase/firestore';
 
 export function useAuth() {
   const localStorageUser =
@@ -72,7 +72,7 @@ export function useAuth() {
     if (auth) {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
-          if(db !== null) {
+          if (db !== null) {
             const userData = await fetchUserData(db, user.email!);
             if (userData) {
               setUser(userData);
