@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { AlertTriangle, Locate, MapPin } from "lucide-react"
-import { SidebarTrigger } from "../ui/sidebar"
+import { Locate, MapPin } from "lucide-react"
+import Image from "next/image"
 
 interface LocationControlsProps {
   centerOnUserLocation: () => void
@@ -39,9 +39,13 @@ const LocationControls = ({
         onClick={toggleReportMenu}
         size="icon-lg"
       >
-        <AlertTriangle className="size-10" />
+        <Image
+          src="/map-icons/alerta.svg"
+          alt="map-icons"
+          width={40}
+          height={40}
+        />
       </Button>
-      <SidebarTrigger />
     </div>
   )
 }

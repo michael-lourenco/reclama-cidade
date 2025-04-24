@@ -198,6 +198,7 @@ export function DialogProblems({
         {currentView === "subcategories" && (
           <Button
             className="flex-1"
+            size="lg"
             variant="outline"
             onClick={() => {
               setCurrentView("categories")
@@ -211,6 +212,7 @@ export function DialogProblems({
         {selectedProblemType && currentView === "subcategories" && (
           <Button
             className="flex-1"
+            size="lg"
             onClick={confirmAndClose}
           >
             Relatar Problema

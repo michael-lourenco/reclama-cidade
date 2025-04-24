@@ -21,6 +21,7 @@ import { useMarkers } from "@/components/marker/use-markers"
 import { TProblemType } from "@/constants/map-constants"
 import type React from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { SidebarTrigger } from "../ui/sidebar"
 
 const MapContent = ({
   setIsLoading,
@@ -379,12 +380,13 @@ const MapContent = ({
       />
 
       {/* Componente de filtro de marcadores */}
-      <div className="absolute top-4 right-4 z-50">
+      <div className="absolute top-4 right-4 z-50 flex gap-2">
         <MarkerFilter
           availableTypes={markerTypes}
           selectedTypes={selectedTypes}
           onFilterChange={onFilterChange}
         />
+        <SidebarTrigger />
       </div>
     </>
   )
