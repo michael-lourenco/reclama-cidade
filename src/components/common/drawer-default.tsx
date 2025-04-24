@@ -132,7 +132,7 @@ export function DialogProblems({
             onClick={handleClick}
           >
             <CategoryIcon
-              src={icon}
+              src={`/map-icons/${icon}`}
               alt={`Ícone de ${label}`}
               selected={isSelected}
             />
@@ -159,7 +159,7 @@ export function DialogProblems({
               onClick={() => handleProblemSelect(type as TProblemSubcategory)}
             >
               <CategoryIcon
-                src={icon}
+                src={`/map-icons/${icon}`}
                 alt={`Ícone de ${label}`}
                 selected={isSelected}
               />

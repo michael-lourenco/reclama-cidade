@@ -70,12 +70,15 @@ export const createMapIcons = (L: any) => {
     // Process subcategories if they exist
     if (category.subcategories && category.subcategories.length > 0) {
       category.subcategories.forEach((subCategory: ProblemSubcategory) => {
-        // Create icon for each subcategory using its mapIcon configuration
-        icons[subCategory.icon] = new L.Icon({
-          ...(subCategory.mapIcon || category.mapIcon || baseIconConfig),
+        // Criar ícone para cada subcategoria, adicionando o prefixo da pasta
+        icons[subCategory.type as unknown as string] = new L.Icon({
+          ...baseIconConfig,
+          iconUrl: `/map-icons-fixed/${subCategory.icon.toLowerCase()}`,
+          iconRetinaUrl: `/map-icons-fixed/${subCategory.icon.toLowerCase()}`,
+          shadowUrl: baseIconConfig.shadowUrl,
           className: `${subCategory.id.toLowerCase()}-icon`,
-        })
-      })
+        });
+      });
     }
   })
 

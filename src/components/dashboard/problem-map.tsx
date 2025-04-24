@@ -6,7 +6,6 @@ import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 import { Loader } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-
 interface ProblemMapProps {
   markers: MarkerType[]
 }
@@ -44,8 +43,6 @@ export function ProblemMap({ markers }: ProblemMapProps) {
       "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
       {
         attribution: '© <a href="https://carto.com/attributions">CARTO</a>',
-        maxZoom: 18,
-        minZoom: 12,
       },
     ).addTo(leafletMap)
 

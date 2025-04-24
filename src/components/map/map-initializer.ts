@@ -82,7 +82,7 @@ export const initializeMap = async ({
 
     // Add tile layer
     L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-      maxZoom: 18,
+      maxZoom: 20,
       minZoom: 13,
     }).addTo(mapInstance)
 

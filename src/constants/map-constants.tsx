@@ -9,149 +9,149 @@ export type TProblemSubcategory =
 export const PROBLEM_TYPES = {
   POLICIA: {
     label: "Polícia",
-    icon: "/map-icons/policia.svg",
+    icon: "policia.svg",
     subcategories: {
       POLICIA: {
         label: "Polícia",
-        icon: "/map-icons/policia.svg",
+        icon: "policia.svg",
       },
       BAFOMETRO: {
         label: "Bafômetro",
-        icon: "/map-icons/bafometro.svg",
+        icon: "bafometro.svg",
       },
       TIROTEIO: {
         label: "Tiroteio",
-        icon: "/map-icons/tiroteio.svg",
+        icon: "tiroteio.svg",
       },
       BLITZ: {
         label: "Blitz",
-        icon: "/map-icons/blitz.svg",
+        icon: "blitz.svg",
       },
       SOM_ALTO: {
         label: "SOM ALTO",
-        icon: "/map-icons/som-alto.svg",
+        icon: "som-alto.svg",
       },
     },
   },
   INFRAESTRUTURA: {
     label: "Infraestrutura",
-    icon: "/map-icons/iluminacao.svg",
+    icon: "iluminacao.svg",
     subcategories: {
       INFRAESTRUTURA: {
         label: "Infraestrutura",
-        icon: "/map-icons/iluminacao.svg",
+        icon: "iluminacao.svg",
       },
       INFRAESTRUTURA_ILUMINACAO_PUBLICA: {
         label: "Iluminação Pública",
-        icon: "/map-icons/iluminacao-publica.svg",
+        icon: "iluminacao-publica.svg",
       },
       INFRAESTRUTURA_SEMAFORO: {
         label: "Semáforo",
-        icon: "/map-icons/semaforo.svg",
+        icon: "semaforo.svg",
       },
       INFRAESTRUTURA_PLACA_QUEBRADA: {
         label: "Placa Quebrada",
-        icon: "/map-icons/placa-quebrada.svg",
+        icon: "placa-quebrada.svg",
       },
       INFRAESTRUTURA_MATO_ALTO: {
         label: "Mato Alto",
-        icon: "/map-icons/mato-alto.svg",
+        icon: "mato-alto.svg",
       },
     },
   },
   PISTA: {
     label: "Pista",
-    icon: "/map-icons/pista.svg",
+    icon: "pista.svg",
     subcategories: {
       PISTA: {
         label: "Pista",
-        icon: "/map-icons/pista.svg",
+        icon: "pista.svg",
       },
       PISTA_BURACO: {
         label: "Buraco na via",
-        icon: "/map-icons/pista-buraco.svg",
+        icon: "pista-buraco.svg",
       },
       PISTA_OBJETO: {
         label: "Objeto na pista",
-        icon: "/map-icons/pista-objeto.svg",
+        icon: "pista-objeto.svg",
       },
       PISTA_OLEO: {
         label: "Óleo na pista",
-        icon: "/map-icons/pista-oleo.svg",
+        icon: "pista-oleo.svg",
       },
       PISTA_ARVORE: {
         label: "Árvore na pista",
-        icon: "/map-icons/pista-arvore.svg",
+        icon: "pista-arvore.svg",
       },
       PISTA_ALERTA: {
         label: "Alerta na pista",
-        icon: "/map-icons/pista-alerta.svg",
+        icon: "pista-alerta.svg",
       },
       PISTA_POSTE: {
         label: "Quebra de poste",
-        icon: "/map-icons/pista-poste.svg",
+        icon: "pista-poste.svg",
       },
       PISTA_VEICULO_ABANDONADO: {
         label: "Veículo abandonado",
-        icon: "/map-icons/pista-veiculo-abandonado.svg",
+        icon: "pista-veiculo-abandonado.svg",
       },
     },
   },
   AGUA: {
     label: "Água",
-    icon: "/map-icons/agua.svg",
+    icon: "agua.svg",
     subcategories: {
       AGUA: {
         label: "Água",
-        icon: "/map-icons/agua.svg",
-        iconUrl: "/map-icons-fixed/agua.svg",
-        iconRetinaUrl: "/map-icons-fixed/agua.svg",
+        icon: "agua.svg",
+        iconUrl: "fixed/agua.svg",
+        iconRetinaUrl: "fixed/agua.svg",
       },
       AGUA_BUEIRO_ABERTO: {
         label: "Bueiro aberto",
-        icon: "/map-icons/agua-bueiro-aberto.svg",
+        icon: "agua-bueiro-aberto.svg",
       },
       AGUA_BOEIRO_VAZAMENTO: {
         label: "Bueiro vazando",
-        icon: "/map-icons/agua-bueiro-vazamento.svg",
+        icon: "agua-bueiro-vazamento.svg",
       },
       AGUA_CANO_VAZAMENTO: {
         label: "Cano vazando",
-        icon: "/map-icons/agua-cano-vazamento.svg",
+        icon: "agua-cano-vazamento.svg",
       },
       AGUA_BOEIRO_ALERTA: {
         label: "Alerta bueiro",
-        icon: "/map-icons/agua-bueiro-alerta.svg",
+        icon: "agua-bueiro-alerta.svg",
       },
       AGUA_ENCHENTE: {
         label: "Enchente",
-        icon: "/map-icons/agua-enchente.svg",
+        icon: "agua-enchente.svg",
       },
       AGUA_PISTA: {
         label: "Água na pista",
-        icon: "/map-icons/agua-pista-alagamento.svg",
+        icon: "agua-pista-alagamento.svg",
       },
     },
   },
   FOGO: {
     label: "Fogo",
-    icon: "/map-icons/fogo.svg",
+    icon: "fogo.svg",
     subcategories: {
       FOGO: {
         label: "Fogo",
-        icon: "/map-icons/fogo.svg",
+        icon: "fogo.svg",
       },
       FOGO_VEICULO: {
         label: "Veículo pegando fogo",
-        icon: "/map-icons/fogo-veiculo.svg",
+        icon: "fogo-veiculo.svg",
       },
       FOGO_CASA: {
         label: "Casa pegando fogo",
-        icon: "/map-icons/fogo-casa.svg",
+        icon: "fogo-casa.svg",
       },
       FOGO_ARVORE: {
         label: "Árvore pegando fogo",
-        icon: "/map-icons/fogo-arvore.svg",
+        icon: "fogo-arvore.svg",
       },
     },
   },
@@ -168,7 +168,7 @@ export const PROBLEM_CATEGORIES: ProblemCategory[] = Object.entries(
   mapIcon: {
     iconUrl: value.icon,
     iconRetinaUrl: value.icon,
-    shadowUrl: "/map-icons/sombra.svg",
+    shadowUrl: "sombra.svg",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
@@ -185,7 +185,7 @@ export const PROBLEM_CATEGORIES: ProblemCategory[] = Object.entries(
       mapIcon: {
         iconUrl: subcategory.icon ?? value.icon,
         iconRetinaUrl: subcategory.icon ?? value.icon,
-        shadowUrl: "/map-icons/sombra.svg",
+        shadowUrl: "sombra.svg",
         iconSize: [25, 41],
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],
