@@ -369,7 +369,8 @@ const MapContent = ({
     <>
       <div
         ref={mapRef}
-        className="absolute inset-0 z-0 h-full w-full"
+        id="map"
+        className="bg-background absolute z-0 h-full w-full"
       />
       <LocationControls
         centerOnUserLocation={centerOnUserLocation}
@@ -378,7 +379,7 @@ const MapContent = ({
       />
 
       {/* Componente de filtro de marcadores */}
-      <div className="absolute top-4 right-4 z-[1000]">
+      <div className="absolute top-4 right-4 z-50">
         <MarkerFilter
           availableTypes={markerTypes}
           selectedTypes={selectedTypes}

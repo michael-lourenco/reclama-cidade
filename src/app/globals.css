@@ -167,3 +167,15 @@
   height: 100%;
   z-index: 1;
 }
+
+html.dark .leaflet-layer,
+html.dark .leaflet-control-zoom-in,
+html.dark .leaflet-control-zoom-out,
+html.dark .leaflet-control-attribution {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(85%);
+}
+
+html.dark .leaflet-container,
+html.dark #map {
+  background: #000
+}

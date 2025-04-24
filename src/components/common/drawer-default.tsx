@@ -209,14 +209,12 @@ export function DialogProblems({
           </Button>
         )}
         {selectedProblemType && currentView === "subcategories" && (
-          <>
-            <Button
-              className="flex-1"
-              onClick={confirmAndClose}
-            >
-              Relatar Problema
-            </Button>
-          </>
+          <Button
+            className="flex-1"
+            onClick={confirmAndClose}
+          >
+            Relatar Problema
+          </Button>
         )}
       </div>
     </>

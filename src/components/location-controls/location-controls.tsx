@@ -15,24 +15,31 @@ const LocationControls = ({
   toggleReportMenu,
 }: LocationControlsProps) => {
   return (
-    <div className="absolute bottom-24 right-4 flex flex-col gap-2 z-[9999]">
+    <div className="fixed right-4 bottom-5 z-50 flex flex-col gap-2">
       <Button
         variant={followMode ? "default" : "floating"}
-        size="icon"
-        className={`shadow-md rounded-full h-12 w-12 ${followMode ? "bg-blue-500 hover:bg-blue-600 text-white" : ""}`}
-        title={followMode ? "Desativar centralização automática" : "Ativar centralização automática"}
+        size="icon-lg"
+        className={`${followMode ? "bg-blue-500 text-white hover:bg-blue-600" : ""}`}
+        title={
+          followMode
+            ? "Desativar centralização automática"
+            : "Ativar centralização automática"
+        }
         onClick={centerOnUserLocation}
       >
-        {followMode ? <MapPin /> : <Locate />}
+        {followMode ? (
+          <MapPin className="size-10" />
+        ) : (
+          <Locate className="size-10" />
+        )}
       </Button>
       <Button
         variant="floating"
-        size="icon"
-        className="shadow-md rounded-full h-12 w-12"
         title="Reportar problema"
         onClick={toggleReportMenu}
+        size="icon-lg"
       >
-        <AlertTriangle />
+        <AlertTriangle className="size-10" />
       </Button>
       <SidebarTrigger />
     </div>
@@ -40,3 +47,4 @@ const LocationControls = ({
 }
 
 export { LocationControls }
+
