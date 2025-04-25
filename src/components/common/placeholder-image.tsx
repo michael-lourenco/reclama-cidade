@@ -1,7 +1,7 @@
 interface PlaceholderImageProps {
-  width: number;
-  height: number;
-  text?: string;
+  width: number
+  height: number
+  text?: string
 }
 
 export function PlaceholderImage({
@@ -16,5 +16,5 @@ export function PlaceholderImage({
     >
       <span className="text-sm font-medium">{text}</span>
     </div>
-  );
+  )
 }

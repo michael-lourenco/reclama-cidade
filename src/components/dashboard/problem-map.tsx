@@ -1,12 +1,11 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { Loader } from "lucide-react"
 import type { Marker as MarkerType } from "@/components/marker/types/marker"
 import { ProblemStatus } from "@/services/firebase/FirebaseService"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
-
+import { Loader } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 interface ProblemMapProps {
   markers: MarkerType[]
 }
@@ -25,9 +24,9 @@ export function ProblemMap({ markers }: ProblemMapProps) {
       delete (L.Icon.Default.prototype as any)._getIconUrl
 
       L.Icon.Default.mergeOptions({
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-        iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+        iconRetinaUrl: "/map-icons-fixed/padrao.svg",
+        iconUrl: "/map-icons-fixed/padrao.svg",
+        shadowUrl: "/map-icons-fixed/sombra.svg",
       })
     }
   }, [])
@@ -40,10 +39,12 @@ export function ProblemMap({ markers }: ProblemMapProps) {
     const leafletMap = L.map(mapRef.current).setView([-23.5505, -46.6333], 12)
 
     // Adicionar camada de tiles (OpenStreetMap)
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19,
-    }).addTo(leafletMap)
+    L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+      {
+        attribution: '© <a href="https://carto.com/attributions">CARTO</a>',
+      },
+    ).addTo(leafletMap)
 
     setMap(leafletMap)
     setMapLoaded(true)
@@ -90,7 +91,9 @@ export function ProblemMap({ markers }: ProblemMapProps) {
       })
 
       // Criar o marcador
-      const leafletMarker = L.marker([marker.lat, marker.lng], { icon: markerIcon }).addTo(map)
+      const leafletMarker = L.marker([marker.lat, marker.lng], {
+        icon: markerIcon,
+      }).addTo(map)
 
       // Adicionar popup com informações
       leafletMarker.bindPopup(`
@@ -109,19 +112,24 @@ export function ProblemMap({ markers }: ProblemMapProps) {
 
     // Ajustar o zoom para mostrar todos os marcadores
     if (newMarkers.length > 0 && markers.length > 0) {
-      const bounds = L.latLngBounds(markers.map((marker) => [marker.lat, marker.lng]))
+      const bounds = L.latLngBounds(
+        markers.map((marker) => [marker.lat, marker.lng]),
+      )
       map.fitBounds(bounds)
     }
   }, [map, mapLoaded, markers])
 
   return (
-    <div className="w-full h-full relative">
+    <div className="relative h-full w-full">
       {!mapLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <Loader className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader className="text-muted-foreground h-8 w-8 animate-spin" />
         </div>
       )}
-      <div ref={mapRef} className="w-full h-full" />
+      <div
+        ref={mapRef}
+        className="h-full w-full"
+      />
     </div>
   )
 }

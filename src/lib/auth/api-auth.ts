@@ -1,4 +1,4 @@
-import { verify } from "jsonwebtoken"
+import { verify } from "jsonwebtoken";
 
 // Define types for authentication results
 export type AuthSuccess = {

@@ -8,7 +8,7 @@ export interface INavigationService {
 }
 
 export class NavigationService implements INavigationService {
-  constructor(private router: IRouter) {}
+  constructor(private router: IRouter) { }
 
   navigateTo(path: string): void {
     this.router.push(path);

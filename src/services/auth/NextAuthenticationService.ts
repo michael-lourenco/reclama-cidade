@@ -1,8 +1,8 @@
-import {  doc, setDoc, updateDoc, Firestore } from "firebase/firestore";
+import { UserData } from "@/components/user/types/user";
+import { doc, Firestore, setDoc, updateDoc } from "firebase/firestore";
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { fetchUserData } from "../firebase/FirebaseService";
-import { UserData } from "@/components/user/types/user";
 
 async function signInWithGoogle(): Promise<void> {
   try {
@@ -58,9 +58,9 @@ async function handleAuthResponse(session: Session | null, db: Firestore): Promi
 }
 
 export {
-  signInWithGoogle,
-  signOutUser as signOutFromGoogle,
-  handleAuthResponse,
+  handleAuthResponse, signInWithGoogle,
+  signOutUser as signOutFromGoogle
 };
 
-export type { UserData };
+  export type { UserData };
+

@@ -1,8 +1,8 @@
-import type React from "react"
-import type { Metadata } from "next"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { BarChart3, Home, Settings, Users } from "lucide-react"
+import type { Metadata } from "next"
+import Link from "next/link"
+import type React from "react"
 
 export const metadata: Metadata = {
   title: "Dashboard | Urban Problems",
@@ -17,37 +17,61 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <div className="hidden md:flex w-64 flex-col bg-gray-100 border-r">
-        <div className="p-4 border-b">
+      <div className="hidden w-64 flex-col border-r bg-gray-100 md:flex">
+        <div className="border-b p-4">
           <h2 className="text-xl font-bold">Urban Problems</h2>
-          <p className="text-sm text-muted-foreground">Painel de Controle</p>
+          <p className="text-muted-foreground text-sm">Painel de Controle</p>
         </div>
 
         <div className="flex-1 py-4">
           <nav className="space-y-1 px-2">
-            <Link href="/" passHref>
-              <Button variant="ghost" className="w-full justify-start">
+            <Link
+              href="/"
+              passHref
+            >
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+              >
                 <Home className="mr-2 h-4 w-4" />
                 Página Inicial
               </Button>
             </Link>
 
-            <Link href="/dashboard" passHref>
-              <Button variant="secondary" className="w-full justify-start">
+            <Link
+              href="/dashboard"
+              passHref
+            >
+              <Button
+                variant="secondary"
+                className="w-full justify-start"
+              >
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Dashboard
               </Button>
             </Link>
 
-            <Link href="/users" passHref>
-              <Button variant="ghost" className="w-full justify-start">
+            <Link
+              href="/users"
+              passHref
+            >
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+              >
                 <Users className="mr-2 h-4 w-4" />
                 Usuários
               </Button>
             </Link>
 
-            <Link href="/settings" passHref>
-              <Button variant="ghost" className="w-full justify-start">
+            <Link
+              href="/settings"
+              passHref
+            >
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+              >
                 <Settings className="mr-2 h-4 w-4" />
                 Configurações
               </Button>
@@ -57,8 +81,8 @@ export default function DashboardLayout({
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col">
-        <header className="border-b bg-white p-4 flex items-center justify-between">
+      <div className="flex flex-1 flex-col">
+        <header className="flex items-center justify-between border-b bg-white p-4">
           <h1 className="text-xl font-bold md:hidden">Urban Problems</h1>
 
           <div className="flex items-center space-x-2">

@@ -1,16 +1,25 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
 import type { Marker } from "@/components/marker/types/marker"
 import { ProblemStatus } from "@/services/firebase/FirebaseService"
+import { useEffect, useState } from "react"
+import {
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts"
 
 interface ProblemStatusChartProps {
   markers: Marker[]
 }
 
 export function ProblemStatusChart({ markers }: ProblemStatusChartProps) {
-  const [chartData, setChartData] = useState<{ name: string; value: number }[]>([])
+  const [chartData, setChartData] = useState<{ name: string; value: number }[]>(
+    [],
+  )
 
   useEffect(() => {
     // Contagem de status
@@ -46,12 +55,19 @@ export function ProblemStatusChart({ markers }: ProblemStatusChartProps) {
   }
 
   if (chartData.length === 0) {
-    return <div className="flex justify-center items-center h-64">Sem dados disponíveis</div>
+    return (
+      <div className="flex h-64 items-center justify-center">
+        Sem dados disponíveis
+      </div>
+    )
   }
 
   return (
-    <div className="w-full h-64">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-64 w-full">
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+      >
         <PieChart>
           <Pie
             data={chartData}
@@ -61,13 +77,20 @@ export function ProblemStatusChart({ markers }: ProblemStatusChartProps) {
             outerRadius={80}
             fill="#8884d8"
             dataKey="value"
-            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+            label={({ name, percent }) =>
+              `${name}: ${(percent * 100).toFixed(0)}%`
+            }
           >
             {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={getStatusColor(entry.name)} />
+              <Cell
+                key={`cell-${index}`}
+                fill={getStatusColor(entry.name)}
+              />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => [`${value} problemas`, "Quantidade"]} />
+          <Tooltip
+            formatter={(value) => [`${value} problemas`, "Quantidade"]}
+          />
           <Legend />
         </PieChart>
       </ResponsiveContainer>

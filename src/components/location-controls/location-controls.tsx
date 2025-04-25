@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { AlertTriangle, Locate, MapPin } from "lucide-react"
-import { SidebarTrigger } from "../ui/sidebar"
+import { Locate, MapPin } from "lucide-react"
+import Image from "next/image"
 
 interface LocationControlsProps {
   centerOnUserLocation: () => void
@@ -15,28 +15,40 @@ const LocationControls = ({
   toggleReportMenu,
 }: LocationControlsProps) => {
   return (
-    <div className="absolute bottom-24 right-4 flex flex-col gap-2 z-[9999]">
+    <div className="fixed right-4 bottom-5 z-50 flex flex-col gap-2">
       <Button
         variant={followMode ? "default" : "floating"}
-        size="icon"
-        className={`shadow-md rounded-full h-12 w-12 ${followMode ? "bg-blue-500 hover:bg-blue-600 text-white" : ""}`}
-        title={followMode ? "Desativar centralização automática" : "Ativar centralização automática"}
+        size="icon-lg"
+        className={`${followMode ? "bg-blue-500 text-white hover:bg-blue-600" : ""}`}
+        title={
+          followMode
+            ? "Desativar centralização automática"
+            : "Ativar centralização automática"
+        }
         onClick={centerOnUserLocation}
       >
-        {followMode ? <MapPin /> : <Locate />}
+        {followMode ? (
+          <MapPin className="size-10" />
+        ) : (
+          <Locate className="size-10" />
+        )}
       </Button>
       <Button
         variant="floating"
-        size="icon"
-        className="shadow-md rounded-full h-12 w-12"
         title="Reportar problema"
         onClick={toggleReportMenu}
+        size="icon-lg"
       >
-        <AlertTriangle />
+        <Image
+          src="/map-icons/alerta.svg"
+          alt="map-icons"
+          width={40}
+          height={40}
+        />
       </Button>
-      <SidebarTrigger />
     </div>
   )
 }
 
 export { LocationControls }
+

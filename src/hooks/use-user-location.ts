@@ -1,8 +1,8 @@
 "use client"
 
-import { useCallback, useEffect, useRef } from "react"
 import { DEFAULT_ZOOM } from "@/constants/map-constants"
 import type { Map } from "leaflet"
+import { useCallback, useEffect, useRef } from "react"
 
 export const useUserLocation = (mapInstance: Map | null, setUserMarker: (lat: number, lng: number) => void) => {
   const watchIdRef = useRef<number | null>(null)

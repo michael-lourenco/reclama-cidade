@@ -1,11 +1,11 @@
-import { UserData } from "@/components/user/types/user";
-import { Button } from "@/components/ui/button";
-import React from "react";
+import { Button } from "@/components/ui/button"
+import { UserData } from "@/components/user/types/user"
+import React from "react"
 
 interface UserLogoutProps {
-  user: UserData | null;
-  handleLogin: () => void;
-  handleLogout: () => void;
+  user: UserData | null
+  handleLogin: () => void
+  handleLogout: () => void
 }
 
 export const UserLogout: React.FC<UserLogoutProps> = ({
@@ -15,12 +15,12 @@ export const UserLogout: React.FC<UserLogoutProps> = ({
   const localStorageUser =
     typeof window !== "undefined" && localStorage.getItem("user") !== null
       ? JSON.parse(localStorage.getItem("user") || "{}")
-      : null;
+      : null
 
   return (
     <>
       {user || (localStorageUser && localStorage.getItem("user") != null) ? (
-        <div className="flex flex-col text-primary mb-4 p-4 bg-background rounded-lg">
+        <div className="text-primary bg-background mb-4 flex flex-col rounded-lg p-4">
           <div className="grid grid-cols-[1fr,auto,auto] items-center gap-2">
             <Button
               onClick={handleLogout}
@@ -36,5 +36,5 @@ export const UserLogout: React.FC<UserLogoutProps> = ({
         <></>
       )}
     </>
-  );
-};
+  )
+}

@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
   Sidebar,
@@ -8,10 +8,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
-import Link from "next/link";
-import { SwitchTheme } from "../common/switch-theme";
+} from "@/components/ui/sidebar"
+import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
+import Link from "next/link"
+import { SwitchTheme } from "../common/switch-theme"
 
 const items = [
   {
@@ -39,7 +39,7 @@ const items = [
     url: "#",
     icon: Settings,
   },
-];
+]
 
 const AppSidebar = () => {
   return (
@@ -48,10 +48,13 @@ const AppSidebar = () => {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map(item => (
+              {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link href={item.url} className="flex items-center gap-2">
+                    <Link
+                      href={item.url}
+                      className="flex items-center gap-2"
+                    >
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
@@ -66,7 +69,7 @@ const AppSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  );
-};
+  )
+}
 
-export { AppSidebar };
+export { AppSidebar }

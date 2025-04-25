@@ -1,7 +1,12 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -16,9 +21,9 @@ export function Footer() {
 
   return (
     <TooltipProvider>
-      <footer className="sticky bottom-0 w-full bg-background border-dashed border-t ">
-        <nav className="max-w-md mx-auto px-0 py-0">
-          <div className="flex justify-between items-center">
+      <footer className="bg-background sticky bottom-0 w-full border-t border-dashed">
+        <nav className="mx-auto max-w-md px-0 py-0">
+          <div className="flex items-center justify-between">
             {menuItems.map((item) => {
               const isActive = pathname === item.href
               return (
@@ -27,10 +32,12 @@ export function Footer() {
                     <Button
                       asChild
                       variant={isActive ? "ghost" : "secondary"}
-                      className="flex-1 flex flex-col items-center justify-center h-16 space-y-1 rounded-none"
+                      className="flex h-16 flex-1 flex-col items-center justify-center space-y-1 rounded-none"
                     >
                       <Link href={item.href}>
-                        <span className="text-xs font-medium">{item.label}</span>
+                        <span className="text-xs font-medium">
+                          {item.label}
+                        </span>
                       </Link>
                     </Button>
                   </TooltipTrigger>

@@ -1,7 +1,6 @@
-import { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import { NextAuthOptions, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
-import { Session } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
 
 interface Token extends JWT {
   sub?: string;

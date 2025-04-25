@@ -23,7 +23,11 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer"
 
-import { PROBLEM_CATEGORIES } from "@/config/problem-categories"
+import {
+  PROBLEM_CATEGORIES,
+  TProblemSubcategory,
+  TProblemType,
+} from "@/constants/map-constants"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { cn } from "@/lib/utils"
 import { CircleCheck, X } from "lucide-react"
@@ -34,8 +38,8 @@ interface DialogProblemsProps {
   onOpenChange: (open: boolean) => void
   title?: string
   description?: string
-  selectedProblemType: string | null
-  handleProblemSelect: (problemType: string) => void
+  selectedProblemType: TProblemType | undefined
+  handleProblemSelect: (ProblemType: TProblemType | undefined) => void
   handleConfirmProblem: () => void
 }
 
@@ -66,7 +70,7 @@ const CategoryIcon = ({
       />
     )}
     <Image
-      src={src || "/placeholder.png"}
+      src={src || ""}
       alt={alt}
       width={size}
       height={size}
@@ -102,7 +106,8 @@ export function DialogProblems({
   const renderCategories = () => (
     <div className="grid grid-cols-3 gap-4">
       {PROBLEM_CATEGORIES.map(({ id, type, label, icon, subcategories }) => {
-        const isSelected = selectedProblemType === type
+        const isSelected =
+          selectedProblemType === (type as unknown as TProblemType)
 
         const handleClick = () => {
           if (subcategories?.length) {
@@ -116,7 +121,7 @@ export function DialogProblems({
             })
             setCurrentView("subcategories")
           } else {
-            handleProblemSelect(type)
+            handleProblemSelect(type as TProblemSubcategory)
           }
         }
 
@@ -127,7 +132,7 @@ export function DialogProblems({
             onClick={handleClick}
           >
             <CategoryIcon
-              src={icon}
+              src={`/map-icons/${icon}`}
               alt={`Ícone de ${label}`}
               selected={isSelected}
             />
@@ -144,16 +149,17 @@ export function DialogProblems({
     return (
       <div className="mb-4 grid grid-cols-3 gap-4">
         {selectedCategory.subcategories.map(({ id, type, label, icon }) => {
-          const isSelected = selectedProblemType === type
+          const isSelected =
+            selectedProblemType === (type as unknown as TProblemType)
 
           return (
             <div
               key={id}
               className={itemClasses}
-              onClick={() => handleProblemSelect(type)}
+              onClick={() => handleProblemSelect(type as TProblemSubcategory)}
             >
               <CategoryIcon
-                src={icon}
+                src={`/map-icons/${icon}`}
                 alt={`Ícone de ${label}`}
                 selected={isSelected}
               />
@@ -167,8 +173,9 @@ export function DialogProblems({
 
   const renderSelectedIcon = () => {
     const selected = PROBLEM_CATEGORIES.find(
-      (c) => c.type === selectedProblemType,
+      (c) => (c.type as unknown as TProblemType) === selectedProblemType,
     )
+
     if (!selected) return null
 
     return (
@@ -194,25 +201,25 @@ export function DialogProblems({
         {currentView === "subcategories" && (
           <Button
             className="flex-1"
+            size="lg"
             variant="outline"
             onClick={() => {
               setCurrentView("categories")
               setSelectedCategory(null)
-              handleProblemSelect("")
+              handleProblemSelect(undefined)
             }}
           >
             Voltar
           </Button>
         )}
         {selectedProblemType && currentView === "subcategories" && (
-          <>
-            <Button
-              className="flex-1"
-              onClick={confirmAndClose}
-            >
-              Relatar Problema
-            </Button>
-          </>
+          <Button
+            className="flex-1"
+            size="lg"
+            onClick={confirmAndClose}
+          >
+            Relatar Problema
+          </Button>
         )}
       </div>
     </>

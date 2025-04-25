@@ -1,47 +1,56 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+"use client"
+import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react"
 
 export default function CookieConsent() {
-  const [consent, setConsent] = useState<boolean | null>(null);
+  const [consent, setConsent] = useState<boolean | null>(null)
 
   useEffect(() => {
-    const storedConsent = localStorage.getItem("cookieConsent");
+    const storedConsent = localStorage.getItem("cookieConsent")
     if (storedConsent !== null) {
-      setConsent(storedConsent === "true");
+      setConsent(storedConsent === "true")
     }
-  }, []);
+  }, [])
 
   const handleAccept = () => {
-    localStorage.setItem("cookieConsent", "true");
-    setConsent(true);
-  };
+    localStorage.setItem("cookieConsent", "true")
+    setConsent(true)
+  }
 
   const handleReject = () => {
-    localStorage.setItem("cookieConsent", "false");
-    setConsent(false);
-  };
+    localStorage.setItem("cookieConsent", "false")
+    setConsent(false)
+  }
 
-  if (consent !== null) return null;
+  if (consent !== null) return null
 
   return (
-    <div className="fixed z-10 bottom-0 left-0 w-full bg-background text-foreground p-4 flex flex-col md:flex-row items-center justify-between shadow-md">
+    <div className="bg-background text-foreground fixed bottom-0 left-0 z-10 flex w-full flex-col items-center justify-between p-4 shadow-md md:flex-row">
       <p className="text-sm">
         Usamos cookies para melhorar sua experiência. Ao continuar, você
         concorda com nossa{" "}
-        <a href="/politica-de-cookies" className="underline text-blue-400">
+        <a
+          href="/politica-de-cookies"
+          className="text-blue-400 underline"
+        >
           Política de Cookies
         </a>
         .
       </p>
-      <div className="flex space-x-2 mt-2 md:mt-0">
-        <Button onClick={handleAccept} variant="default">
+      <div className="mt-2 flex space-x-2 md:mt-0">
+        <Button
+          onClick={handleAccept}
+          variant="default"
+        >
           Aceitar
         </Button>
-        <Button onClick={handleReject} variant="outline">
+        <Button
+          onClick={handleReject}
+          variant="outline"
+        >
           Recusar
         </Button>
       </div>
     </div>
-  );
+  )
 }

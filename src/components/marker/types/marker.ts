@@ -14,7 +14,7 @@ export interface Marker {
     createdAt: Date | FirestoreTimestamp;
     likedBy?: string[];
     resolvedBy?: string[];
-    currentStatus: string; 
+    currentStatus: string;
 }
 
 export interface StatusChange {

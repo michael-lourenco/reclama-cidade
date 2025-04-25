@@ -1,7 +1,7 @@
-import type React from "react"
 import { getProblemLabel } from "@/components/map/map"
 import { createMapIcons } from "@/components/marker/marker-icons"
 import { convertToDate } from "@/components/marker/marker-interactions"
+import type React from "react"
 
 type MapInitializerProps = {
   mapRef: React.RefObject<HTMLDivElement | null>
@@ -81,8 +81,9 @@ export const initializeMap = async ({
     }).setView(defaultLocation, defaultZoom)
 
     // Add tile layer
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      maxZoom: 20,
+      minZoom: 13,
     }).addTo(mapInstance)
 
     // Store map instance
@@ -125,7 +126,7 @@ export const initializeMap = async ({
                 RESOLVIDO
               </button>
             `
-          } else{
+          } else {
             // Mostrar botão de verificação se tiver 1 ou mais likes
             popupHTML += `
               <button class="resolved-button">
@@ -180,7 +181,7 @@ export const initializeMap = async ({
     if ("geolocation" in navigator) {
       // Create user location marker
       const userIcon = iconsRef.current.userLocation
-      
+
       // First create marker at default location
       userLocationMarkerRef.current = L.marker(defaultLocation, {
         icon: userIcon,
@@ -188,7 +189,7 @@ export const initializeMap = async ({
       })
         .addTo(mapInstance)
         .bindPopup("Sua localização")
-      
+
       // Get position and update marker
       navigator.geolocation.getCurrentPosition(
         (position) => {

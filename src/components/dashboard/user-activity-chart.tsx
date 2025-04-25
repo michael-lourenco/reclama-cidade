@@ -1,19 +1,31 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import type { Marker } from "@/components/marker/types/marker"
+import { useEffect, useState } from "react"
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
 
 interface UserActivityChartProps {
   markers: Marker[]
 }
 
 export function UserActivityChart({ markers }: UserActivityChartProps) {
-  const [chartData, setChartData] = useState<{ name: string; likes: number; resolutions: number }[]>([])
+  const [chartData, setChartData] = useState<
+    { name: string; likes: number; resolutions: number }[]
+  >([])
 
   useEffect(() => {
     // Contagem de likes e resoluções por usuário
-    const userActivity: Record<string, { likes: number; resolutions: number }> = {}
+    const userActivity: Record<string, { likes: number; resolutions: number }> =
+      {}
 
     // Contar likes
     markers.forEach((marker) => {
@@ -51,7 +63,11 @@ export function UserActivityChart({ markers }: UserActivityChartProps) {
   }, [markers])
 
   if (chartData.length === 0) {
-    return <div className="flex justify-center items-center h-64">Sem dados disponíveis</div>
+    return (
+      <div className="flex h-64 items-center justify-center">
+        Sem dados disponíveis
+      </div>
+    )
   }
 
   // Função para truncar emails longos
@@ -63,16 +79,33 @@ export function UserActivityChart({ markers }: UserActivityChartProps) {
   }
 
   return (
-    <div className="w-full h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+    <div className="h-64 w-full">
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+      >
+        <BarChart
+          data={chartData}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" tickFormatter={truncateEmail} />
+          <XAxis
+            dataKey="name"
+            tickFormatter={truncateEmail}
+          />
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="likes" name="Likes" fill="#8884d8" />
-          <Bar dataKey="resolutions" name="Resoluções" fill="#82ca9d" />
+          <Bar
+            dataKey="likes"
+            name="Likes"
+            fill="#8884d8"
+          />
+          <Bar
+            dataKey="resolutions"
+            name="Resoluções"
+            fill="#82ca9d"
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

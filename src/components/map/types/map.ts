@@ -1,7 +1,6 @@
 // src/types/map.ts
-import type React from "react";
-import { Marker } from "@/components/marker/types/marker";
 import { PROBLEM_TYPES } from "@/constants/map-constants";
+import type React from "react";
 
 // Reuse your existing type interfaces
 export interface MapIcon {
@@ -49,8 +48,7 @@ export interface MapContentProps {
 }
 
 // Add the new type definitions for the problem categories system
-export type ProblemType = typeof PROBLEM_TYPES[keyof typeof PROBLEM_TYPES];
-
+export type ProblemType = (typeof PROBLEM_TYPES)[keyof typeof PROBLEM_TYPES]
 export interface ProblemCategory {
   id: string;
   type: ProblemType;

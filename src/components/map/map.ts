@@ -2,38 +2,8 @@ import { PROBLEM_TYPES } from "@/constants/map-constants"
 
 export const getProblemLabel = (type: string): string => {
   switch (type) {
-    case PROBLEM_TYPES.ALERTA:
+    case PROBLEM_TYPES.AGUA.label:
       return "Alerta"
-    case PROBLEM_TYPES.BURACO:
-      return "Buraco"
-    case PROBLEM_TYPES.CANO_QUEBRADO:
-      return "Cano Quebrado"
-      // case PROBLEM_TYPES.ALAGAMENTO:
-    //   return "Alagamento"
-    case PROBLEM_TYPES.ILUMINACAO:
-      return "Iluminação"
-    case PROBLEM_TYPES.INCENDIO:
-      return "Incendio"
-    case PROBLEM_TYPES.INCENDIO_CARRO:
-      return "Incendio Carro"
-    case PROBLEM_TYPES.INCENDIO_CASA:
-      return "Incendio Casa"
-    case PROBLEM_TYPES.INCENDIO_FLORESTA:
-      return "Incendio Floresta"
-    case PROBLEM_TYPES.HIDRAULICA:
-      return "Hidráulica"
-      case PROBLEM_TYPES.BLITZ:
-      return "Blitz"
-    case PROBLEM_TYPES.PISTA:
-      return "Pista"
-    case PROBLEM_TYPES.BUEIRO_ABERTO:
-      return "Bueiro Aberto"
-    case PROBLEM_TYPES.BUEIRO_VAZAMENTO:
-      return "bueiro Vazamento"
-    case PROBLEM_TYPES.SEMAFARO:
-      return "Semafaro"
-    case PROBLEM_TYPES.TIROTEIO:
-      return "Tiroteio"
     default:
       return "Desconhecido"
   }

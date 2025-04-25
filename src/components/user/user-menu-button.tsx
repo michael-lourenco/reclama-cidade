@@ -1,9 +1,9 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
+import React from "react"
 
 export interface UserMenuButtonProps {
-  label: React.ReactNode;
-  onClick: () => void;
+  label: React.ReactNode
+  onClick: () => void
 }
 
 export const UserMenuButton: React.FC<UserMenuButtonProps> = ({
@@ -11,11 +11,11 @@ export const UserMenuButton: React.FC<UserMenuButtonProps> = ({
   onClick,
 }) => (
   <Button
-    className="flex items-center justify-centerbg-slate-800 text-white hover:bg-slate-700"
+    className="justify-centerbg-slate-800 flex items-center text-white hover:bg-slate-700"
     onClick={onClick}
   >
     {label}
   </Button>
-);
+)
 
-export default UserMenuButton;
+export default UserMenuButton
