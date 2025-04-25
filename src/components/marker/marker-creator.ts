@@ -60,7 +60,7 @@ export const createAndSaveMarker = async ({
     const popupContent = document.createElement('div');
     popupContent.classList.add('marker-popup');
     popupContent.innerHTML = `
-      <strong>Problema: ${getProblemLabel(selectedProblemType)}</strong><br>
+      <strong>Problema: ${selectedProblemType}</strong><br>
       Reportado em: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}<br>
       Por: ${userEmail}<br>
       <button class="like-button">
