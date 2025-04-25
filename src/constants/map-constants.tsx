@@ -177,7 +177,7 @@ export const PROBLEM_CATEGORIES: ProblemCategory[] = Object.entries(
   subcategories: Object.entries(value.subcategories).map(
     ([key, subcategory]) => ({
       id: key,
-      type: subcategory.label,
+      type: key as any,
       label: subcategory.label,
       icon: subcategory.icon,
       iconUrl: subcategory.icon ?? value.icon,
