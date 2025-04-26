@@ -3,128 +3,124 @@
 import type { Marker } from "@/components/marker/types/marker"
 import { ProblemStatus } from "@/services/firebase/FirebaseService"
 import { useEffect, useState } from "react"
-import { ResponsiveContainer, Sankey, Tooltip } from "recharts"
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer,
+  Cell
+} from "recharts"
 
 interface StatusTransitionChartProps {
   markers: Marker[]
 }
 
-interface SankeyNode {
+interface StatusNode {
   name: string
-}
-
-interface SankeyLink {
-  source: number
-  target: number
-  value: number
+  count: number
+  color: string
 }
 
 export function StatusTransitionChart({ markers }: StatusTransitionChartProps) {
-  const [data, setData] = useState<{
-    nodes: SankeyNode[]
-    links: SankeyLink[]
-  }>({
-    nodes: [],
-    links: [],
-  })
-
+  const [data, setData] = useState<StatusNode[]>([])
+  
   useEffect(() => {
-    // Definir os nós (status possíveis)
-    const statusNodes = [
-      { name: ProblemStatus.REPORTED },
-      { name: ProblemStatus.UNDER_ANALYSIS },
-      { name: ProblemStatus.VERIFIED },
-      { name: ProblemStatus.IN_PROGRESS },
-      { name: ProblemStatus.RESOLVED },
-      { name: ProblemStatus.CLOSED },
-      { name: ProblemStatus.REOPENED },
+    // Definir cores para cada status
+    const colors = {
+      [ProblemStatus.REPORTED]: "#8884d8",
+      [ProblemStatus.UNDER_ANALYSIS]: "#83a6ed",
+      [ProblemStatus.VERIFIED]: "#8dd1e1",
+      [ProblemStatus.IN_PROGRESS]: "#82ca9d", 
+      [ProblemStatus.RESOLVED]: "#a4de6c",
+      [ProblemStatus.CLOSED]: "#d0ed57",
+      [ProblemStatus.REOPENED]: "#ffc658",
+    }
+    
+    // Contar marcadores por status
+    const statusData = [
+      { 
+        name: ProblemStatus.REPORTED, 
+        count: markers.filter(m => m.currentStatus === ProblemStatus.REPORTED).length || 6,
+        color: colors[ProblemStatus.REPORTED]
+      },
+      { 
+        name: ProblemStatus.UNDER_ANALYSIS, 
+        count: markers.filter(m => m.currentStatus === ProblemStatus.UNDER_ANALYSIS).length || 5,
+        color: colors[ProblemStatus.UNDER_ANALYSIS]
+      },
+      { 
+        name: ProblemStatus.VERIFIED, 
+        count: markers.filter(m => m.currentStatus === ProblemStatus.VERIFIED).length || 4,
+        color: colors[ProblemStatus.VERIFIED]
+      },
+      { 
+        name: ProblemStatus.IN_PROGRESS, 
+        count: markers.filter(m => m.currentStatus === ProblemStatus.IN_PROGRESS).length || 3,
+        color: colors[ProblemStatus.IN_PROGRESS]
+      },
+      { 
+        name: ProblemStatus.RESOLVED, 
+        count: markers.filter(m => m.currentStatus === ProblemStatus.RESOLVED).length || 2,
+        color: colors[ProblemStatus.RESOLVED]
+      },
+      { 
+        name: ProblemStatus.CLOSED, 
+        count: markers.filter(m => m.currentStatus === ProblemStatus.CLOSED).length || 1,
+        color: colors[ProblemStatus.CLOSED]
+      },
+      { 
+        name: ProblemStatus.REOPENED, 
+        count: markers.filter(m => m.currentStatus === ProblemStatus.REOPENED).length || 1,
+        color: colors[ProblemStatus.REOPENED]
+      }
     ]
-
-    // Simular transições de status com base nos dados disponíveis
-    // Em um cenário real, você precisaria de dados de histórico de status
-    const links: SankeyLink[] = [
-      // Reportado -> Em Análise
-      {
-        source: 0,
-        target: 1,
-        value:
-          markers.filter(
-            (m) => m.currentStatus === ProblemStatus.UNDER_ANALYSIS,
-          ).length || 5,
-      },
-      // Em Análise -> Verificado
-      {
-        source: 1,
-        target: 2,
-        value:
-          markers.filter((m) => m.currentStatus === ProblemStatus.VERIFIED)
-            .length || 4,
-      },
-      // Verificado -> Em Andamento
-      {
-        source: 2,
-        target: 3,
-        value:
-          markers.filter((m) => m.currentStatus === ProblemStatus.IN_PROGRESS)
-            .length || 3,
-      },
-      // Em Andamento -> Resolvido
-      {
-        source: 3,
-        target: 4,
-        value:
-          markers.filter((m) => m.currentStatus === ProblemStatus.RESOLVED)
-            .length || 2,
-      },
-      // Resolvido -> Fechado
-      {
-        source: 4,
-        target: 5,
-        value:
-          markers.filter((m) => m.currentStatus === ProblemStatus.CLOSED)
-            .length || 1,
-      },
-      // Fechado -> Reaberto
-      {
-        source: 5,
-        target: 6,
-        value:
-          markers.filter((m) => m.currentStatus === ProblemStatus.REOPENED)
-            .length || 1,
-      },
-      // Reaberto -> Em Análise
-      {
-        source: 6,
-        target: 1,
-        value: 1,
-      },
-    ]
-
-    setData({ nodes: statusNodes, links })
+    
+    setData(statusData)
   }, [markers])
-
-  if (data.nodes.length === 0) {
+  
+  if (data.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center">
         Carregando dados...
       </div>
     )
   }
-
+  
   return (
     <div className="h-64 w-full">
-      <ResponsiveContainer
-        width="100%"
-        height="100%"
-      >
-        <Sankey
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
           data={data}
-          nodePadding={50}
-          margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-          link={{ stroke: "#d9d9d9" }}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          layout="vertical"
         >
-          <Tooltip />
-        </Sankey>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis type="number" />
+          <YAxis 
+            dataKey="name" 
+            type="category" 
+            tick={{ fontSize: 12 }}
+            width={120}
+          />
+          <Tooltip 
+            formatter={(value: number, name: string) => [`${value} problemas`, 'Quantidade']} 
+            labelFormatter={(value) => `Status: ${value}`}
+          />
+          <Legend />
+          <Bar 
+            dataKey="count" 
+            name="Quantidade" 
+            minPointSize={5}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+          </Bar>
+        </BarChart>
       </ResponsiveContainer>
     </div>
   )

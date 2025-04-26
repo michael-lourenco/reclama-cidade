@@ -29,11 +29,24 @@ export function ProblemTimeline({ markers }: ProblemTimelineProps) {
   useEffect(() => {
     if (markers.length === 0) return
 
+    const today = new Date()
+
+    // Filtrar apenas marcadores com data até hoje
+    const validMarkers = markers.filter((marker) => {
+      const date =
+        marker.createdAt instanceof Date
+          ? marker.createdAt
+          : new Date(marker.createdAt.toDate())
+      return date <= today
+    })
+
+    if (validMarkers.length === 0) return
+
     // Agrupar marcadores por data
     const dateGroups: Record<string, { total: number; resolved: number }> = {}
 
     // Ordenar marcadores por data
-    const sortedMarkers = [...markers].sort((a, b) => {
+    const sortedMarkers = [...validMarkers].sort((a, b) => {
       const dateA =
         a.createdAt instanceof Date
           ? a.createdAt
@@ -51,16 +64,15 @@ export function ProblemTimeline({ markers }: ProblemTimelineProps) {
         ? sortedMarkers[0].createdAt
         : new Date(sortedMarkers[0].createdAt.toDate())
 
-    const endDate = new Date()
     const dateRange: Date[] = []
-
     const currentDate = new Date(startDate)
-    while (currentDate <= endDate) {
+
+    while (currentDate <= today) {
       dateRange.push(new Date(currentDate))
       currentDate.setDate(currentDate.getDate() + 1)
     }
 
-    // Inicializar todas as datas com zero
+    // Inicializar todas as datas no grupo
     dateRange.forEach((date) => {
       const dateStr = date.toISOString().split("T")[0]
       dateGroups[dateStr] = { total: 0, resolved: 0 }
@@ -77,6 +89,10 @@ export function ProblemTimeline({ markers }: ProblemTimelineProps) {
           : new Date(marker.createdAt.toDate())
 
       const dateStr = date.toISOString().split("T")[0]
+
+      if (!dateGroups[dateStr]) {
+        dateGroups[dateStr] = { total: 0, resolved: 0 }
+      }
 
       totalProblems++
       dateGroups[dateStr].total = totalProblems
