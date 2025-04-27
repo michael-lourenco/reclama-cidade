@@ -11,7 +11,7 @@ export const PROBLEM_TYPES = {
     label: "Polícia",
     icon: "policia.svg",
     subcategories: {
-      POLICIA: {
+      POLICIA_SUBCATEGORY: {
         label: "Polícia",
         icon: "policia.svg",
       },
@@ -37,7 +37,7 @@ export const PROBLEM_TYPES = {
     label: "Infraestrutura",
     icon: "iluminacao.svg",
     subcategories: {
-      INFRAESTRUTURA: {
+      INFRAESTRUTURA_SUBCATEGORY: {
         label: "Infraestrutura",
         icon: "iluminacao.svg",
       },
@@ -63,7 +63,7 @@ export const PROBLEM_TYPES = {
     label: "Em via",
     icon: "pista.svg",
     subcategories: {
-      PISTA: {
+      PISTA_SUBCATEGORY: {
         label: "Em via",
         icon: "pista.svg",
       },
@@ -101,7 +101,7 @@ export const PROBLEM_TYPES = {
     label: "Água",
     icon: "agua.svg",
     subcategories: {
-      AGUA: {
+      AGUA_SUBCATEGORY: {
         label: "Água",
         icon: "agua.svg",
         iconUrl: "fixed/agua.svg",
@@ -137,7 +137,7 @@ export const PROBLEM_TYPES = {
     label: "Fogo",
     icon: "fogo.svg",
     subcategories: {
-      FOGO: {
+      FOGO_SUBCATEGORY: {
         label: "Fogo",
         icon: "fogo.svg",
       },

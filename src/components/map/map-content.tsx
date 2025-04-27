@@ -18,7 +18,7 @@ import {
 } from "@/components/marker/marker-interactions"
 import { useMarkerStyles } from "@/components/marker/use-marker-styles"
 import { useMarkers } from "@/components/marker/use-markers"
-import { TProblemType } from "@/constants/map-constants"
+import { PROBLEM_CATEGORIES, TProblemType } from "@/constants/map-constants"
 import type React from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { SidebarTrigger } from "../ui/sidebar"
@@ -57,19 +57,14 @@ const MapContent = ({
   const defaultZoom = 16
   const watchIdRef = useRef<number | null>(null)
 
-  // Referência para armazenar os marcadores do Leaflet
   const markersLayerRef = useRef<any>(null)
 
-  // Flag to track if initial centering on user has happened
   const initialCenteringDoneRef = useRef<boolean>(false)
 
-  // Track if location follow mode is active
   const [followMode, setFollowMode] = useState<boolean>(true)
 
-  // Add CSS for marker icons
   const addMarkerStyles = useMarkerStyles()
 
-  // Filter markers based on selected types
   const filteredMarkers = useMemo(() => {
     return getFilteredMarkers(selectedTypes)
   }, [getFilteredMarkers, selectedTypes, markers])
@@ -92,7 +87,6 @@ const MapContent = ({
     )
   }
 
-  // Center on user location manually (one-time centering)
   const centerOnUserLocation = () => {
     if (userLocationMarkerRef.current && mapInstanceRef.current) {
       const position = userLocationMarkerRef.current.getLatLng()
@@ -103,7 +97,6 @@ const MapContent = ({
     }
   }
 
-  // Função para atualizar os marcadores no mapa com base nos filtros
   const updateMapMarkers = () => {
     if (
       !mapInstanceRef.current ||
@@ -114,38 +107,51 @@ const MapContent = ({
       return
     }
 
-    // Se já existe uma camada de marcadores, remova-a completamente
     if (markersLayerRef.current) {
       mapInstanceRef.current.removeLayer(markersLayerRef.current)
     }
 
-    // Crie uma nova camada de grupo para os marcadores
     markersLayerRef.current = new leafletRef.current.LayerGroup()
 
-    // Adicione apenas os marcadores filtrados à nova camada
     filteredMarkers.forEach((marker) => {
       const { lat, lng, type } = marker
 
-      // Skip if we don't have coordinates or type
       if (lat === undefined || lng === undefined || !type) {
         return
       }
 
-      // Get the appropriate icon for this marker type
       const icon = iconsRef.current[type] || iconsRef.current.default
 
-      // Create the marker with the icon
       const leafletMarker = leafletRef.current.marker([lat, lng], { icon })
 
-      // Store the marker data with the Leaflet marker
       leafletMarker.markerData = marker
 
-      // Add popup with marker info and interaction buttons
       const popupContent = document.createElement("div")
       popupContent.className = "marker-popup"
+      
+      // Find the category or subcategory that matches the type
+      let categoryLabel = type
+      
+      for (const category of PROBLEM_CATEGORIES) {
+        if (category.type as unknown as TProblemType === type) {
+          categoryLabel = category.label
+          break
+        }
+        
+        // Check subcategories
+        const subcategory = category.subcategories?.find(
+          sub => sub.type as unknown as TProblemType === type
+        )
+        
+        if (subcategory) {
+          categoryLabel = subcategory.label
+          break
+        }
+      }
+      
       popupContent.innerHTML = `
         <div class="marker-info">
-          <p><strong>Tipo:</strong> ${type}</p>
+          <p><strong>Tipo:</strong> ${categoryLabel}</p>
           <p><strong>Reportado por:</strong> ${marker.userEmail || "Anônimo"}</p>
           <p><strong>Status:</strong> ${marker.currentStatus || "Reportado"}</p>
           <div class="marker-actions">
@@ -155,11 +161,9 @@ const MapContent = ({
         </div>
       `
 
-      // Create and bind popup
       const popup = leafletRef.current.popup().setContent(popupContent)
       leafletMarker.bindPopup(popup)
 
-      // Add event listeners for the buttons
       leafletMarker.on("popupopen", () => {
         const likeButton = document.querySelector(".like-button")
         const resolvedButton = document.querySelector(".resolved-button")
@@ -175,34 +179,27 @@ const MapContent = ({
         }
       })
 
-      // Adicione o marcador à camada de grupo
       leafletMarker.addTo(markersLayerRef.current)
     })
 
-    // Adicione a camada de grupo ao mapa
     markersLayerRef.current.addTo(mapInstanceRef.current)
   }
 
-  // Atualizar marcadores quando os filtros mudarem ou quando os marcadores forem carregados
   useEffect(() => {
     if (mapInstanceRef.current && leafletRef.current && iconsRef.current) {
       updateMapMarkers()
     }
   }, [filteredMarkers])
 
-  // Initialize map only once
   useEffect(() => {
-    // Verificação principal para evitar múltiplas inicializações
     if (!mapRef.current || mapInitializedRef.current) {
       return
     }
 
-    // Marcar que a inicialização começou
     mapInitializedRef.current = true
 
     async function initMap() {
       try {
-        // Get user location first, with a short timeout
         const userLocationPromise = new Promise<[number, number]>(
           (resolve, reject) => {
             navigator.geolocation.getCurrentPosition(
@@ -218,7 +215,6 @@ const MapContent = ({
           },
         )
 
-        // Try to get user location first, but don't wait too long
         let initialLocation = defaultLocation
         try {
           initialLocation = await Promise.race([
@@ -235,7 +231,6 @@ const MapContent = ({
           )
         }
 
-        // Modificar o objeto de opções para inicialização do mapa para não adicionar marcadores
         const initOptions = {
           mapRef,
           mapInstanceRef,
@@ -252,21 +247,18 @@ const MapContent = ({
           addMarkerStyles,
           addLikeStyles,
           skipUserLocationSetView: initialCenteringDoneRef.current,
-          skipMarkersAddition: true, // Adicione esta opção para pular a adição de marcadores na inicialização
+          skipMarkersAddition: true,
         }
 
-        // Initialize map with the best available location (user or default)
         await initializeMap(initOptions)
 
-        // Set up location tracking with auto-centering based on initial follow mode state
         watchIdRef.current = setupLocationTracking(
           mapInstanceRef,
           userLocationMarkerRef,
           defaultZoom,
-          followMode, // Center map on location updates if follow mode is on
+          followMode,
         )
 
-        // If we didn't get user location initially, try again with a longer timeout
         if (!initialCenteringDoneRef.current) {
           navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -286,18 +278,15 @@ const MapContent = ({
           )
         }
 
-        // Após a inicialização do mapa, atualize os marcadores com base nos filtros
         updateMapMarkers()
       } catch (error) {
         console.error("Erro ao inicializar o mapa:", error)
-        // Resetar flag se houver erro para permitir tentar novamente
         mapInitializedRef.current = false
       }
     }
 
     initMap()
 
-    // Configure event for centering on user (original code)
     const cleanupCenterOnUserEvent = setupCenterOnUserEvent(
       mapInstanceRef,
       userLocationMarkerRef,
@@ -307,13 +296,11 @@ const MapContent = ({
     return () => {
       cleanupCenterOnUserEvent()
 
-      // Clean up location tracking
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current)
         watchIdRef.current = null
       }
 
-      // Limpar a camada de marcadores
       if (markersLayerRef.current && mapInstanceRef.current) {
         mapInstanceRef.current.removeLayer(markersLayerRef.current)
         markersLayerRef.current = null
@@ -329,10 +316,9 @@ const MapContent = ({
   }, [
     loadMarkersFromFirebase,
     addMarkerStyles,
-    followMode, // Add followMode as dependency to react to initial state
+    followMode,
   ])
 
-  // Handle confirmed problem selection and marker update
   useEffect(() => {
     if (
       !userConfirmedProblem ||
@@ -344,10 +330,8 @@ const MapContent = ({
       return
     }
 
-    // Get current position of user marker
     const markerPosition = userLocationMarkerRef.current.getLatLng()
 
-    // Criar e salvar marcador
     createAndSaveMarker({
       markerPosition,
       selectedProblemType,
@@ -357,11 +341,9 @@ const MapContent = ({
       setMarkers,
     })
 
-    // Reset confirmation flag
     resetConfirmation()
   }, [userConfirmedProblem, selectedProblemType, resetConfirmation, setMarkers])
 
-  // Handle window resize
   useEffect(() => {
     return setupResizeHandler(mapInstanceRef)
   }, [])
@@ -379,7 +361,6 @@ const MapContent = ({
         toggleReportMenu={toggleReportMenu}
       />
 
-      {/* Componente de filtro de marcadores */}
       <div className="absolute top-4 right-4 z-50 flex gap-2">
         <MarkerFilter
           availableTypes={markerTypes}
