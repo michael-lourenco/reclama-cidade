@@ -393,4 +393,3 @@ const MapContent = ({
 }
 
 export { MapContent }
-

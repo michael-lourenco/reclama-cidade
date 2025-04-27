@@ -40,7 +40,6 @@ export function StatusTransitionChart({ markers }: StatusTransitionChartProps) {
       [ProblemStatus.REOPENED]: "#ffc658",
     }
     
-    // Contar marcadores por status
     const statusData = [
       { 
         name: ProblemStatus.REPORTED, 

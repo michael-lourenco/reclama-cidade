@@ -268,7 +268,6 @@ const updateMarkerResolved = async (dbFirestore: Firestore, markerId: string, us
     const markerSnapshot = await getDoc(markerRef)
     const markerData = markerSnapshot.data()
 
-    // Verificar se o array 'resolvedBy' existe e tem pelo menos um item
     if (markerData?.resolvedBy?.length >= 1) {
       await addStatusChange(markerId, ProblemStatus.RESOLVED, "Problema resolvido", userEmail)
     }
@@ -278,7 +277,6 @@ const updateMarkerResolved = async (dbFirestore: Firestore, markerId: string, us
   }
 }
 
-// Função separada para adicionar entrada ao histórico de status
 async function addStatusChange(
   markerId: string,
   status: ProblemStatus,
@@ -302,7 +300,6 @@ async function addStatusChange(
   return docRef.id;
 }
 
-// Atualizar status e registrar no histórico
 async function updateMarkerStatus(
   markerId: string,
   newStatus: ProblemStatus,
@@ -311,21 +308,17 @@ async function updateMarkerStatus(
 ): Promise<void> {
   const db = getFirestore();
 
-  // Atualizar status atual no marcador
   await updateDoc(doc(db, 'markers', markerId), {
     currentStatus: newStatus
   });
 
-  // Chamar a função separada para adicionar ao histórico
   await addStatusChange(markerId, newStatus, comment, updatedBy);
 }
 
-// Obter histórico de um marcador
 async function getMarkerStatusHistory(markerId: string) {
   const db = getFirestore();
   const historyRef = collection(db, 'markers', markerId, 'statusHistory');
 
-  // Ordenar por timestamp decrescente (mais recente primeiro)
   const q = query(historyRef, orderBy('timestamp', 'desc'));
   const snapshot = await getDocs(q);
 
@@ -370,6 +363,41 @@ async function removeAnonymousMarkers(db: Firestore): Promise<{ count: number, r
   };
 }
 
+async function removeMarkersByEmail(db: Firestore, email: string): Promise<{ count: number, removedIds: string[] }> {
+  if (!email || typeof email !== 'string') {
+    throw new Error('E-mail inválido: deve ser uma string não vazia');
+  }
+
+  const markersRef = collection(db, "markers");
+  const querySnapshot = await getDocs(markersRef);
+
+  const targetMarkers = querySnapshot.docs.filter(doc => {
+    const data = doc.data();
+    return data.userEmail && typeof data.userEmail === 'string' &&
+      data.userEmail === email;
+  });
+
+  const removedIds: string[] = [];
+
+  for (const markerDoc of targetMarkers) {
+    const markerId = markerDoc.id;
+
+    const statusHistoryRef = collection(db, 'markers', markerId, 'statusHistory');
+    const statusSnapshot = await getDocs(statusHistoryRef);
+
+    for (const statusDoc of statusSnapshot.docs) {
+      await deleteDoc(doc(db, 'markers', markerId, 'statusHistory', statusDoc.id));
+    }
+
+    await deleteDoc(doc(db, 'markers', markerId));
+    removedIds.push(markerId);
+  }
+
+  return {
+    count: removedIds.length,
+    removedIds
+  };
+}
 
 export {
   addMarker, addStatusChange, addUserMarker, authFirestore,
@@ -380,7 +408,7 @@ export {
   getMarkerStatusHistory,
   getUserMarkers,
   initFirebase,
-  initUserFirebase, removeAnonymousMarkers, removeMarker,
+  initUserFirebase, removeAnonymousMarkers, removeMarker, removeMarkersByEmail,
   removeUserMarker, updateMarkerLikes,
   updateMarkerResolved, updateMarkers, updateMarkerStatus, updateUserCredits,
   updateUserCurrency, updateUserMarker

@@ -1,8 +1,8 @@
+// app/api/markers/remove-by-email/route.ts
 
 import { NextResponse } from "next/server";
-import { dbFirestore, removeAnonymousMarkers } from "@/services/firebase/FirebaseService";
+import { dbFirestore, removeMarkersByEmail } from "@/services/firebase/FirebaseService";
 import { verify } from "jsonwebtoken";
-
 
 const JWT_SECRET = process.env.JWT_SECRET || process.env.NEXT_PUBLIC_NEXTAUTH_SECRET || "seu_segredo_temporario";
 
@@ -29,6 +29,16 @@ export async function DELETE(request: Request) {
     
     const token = authHeader.split(' ')[1];
     
+    const url = new URL(request.url);
+    const targetEmail = url.searchParams.get('email');
+    
+    if (!targetEmail) {
+      return NextResponse.json({ 
+        error: 'Parâmetro de email não fornecido',
+        help: 'Adicione o parâmetro email na URL: /api/markers/remove-by-email?email=exemplo@dominio.com'
+      }, { status: 400 });
+    }
+    
     try {
       const decoded = verify(token, JWT_SECRET) as { email: string, name: string };
       
@@ -44,12 +54,13 @@ export async function DELETE(request: Request) {
         }, { status: 403 });
       }
       
-      const result = await removeAnonymousMarkers(dbFirestore);
+      const result = await removeMarkersByEmail(dbFirestore, targetEmail);
       
       return NextResponse.json({
         success: true,
-        message: `Removidos com sucesso ${result.count} marcadores anônimos`,
+        message: `Removidos com sucesso ${result.count} marcadores do email: ${targetEmail}`,
         removedMarkers: result,
+        targetEmail: targetEmail,
         requestedBy: decoded.email
       }, { status: 200 });
     } catch (error) {
@@ -60,10 +71,10 @@ export async function DELETE(request: Request) {
       }, { status: 401 });
     }
   } catch (error) {
-    console.error("Erro ao remover marcadores anônimos:", error);
+    console.error("Erro ao remover marcadores por email:", error);
     return NextResponse.json({ 
       success: false, 
-      error: "Falha ao remover marcadores anônimos",
+      error: "Falha ao remover marcadores por email",
       details: (error as Error).message
     }, { status: 500 });
   }
