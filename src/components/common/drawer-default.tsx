@@ -97,6 +97,7 @@ export function DialogProblems({
 
   const confirmAndClose = () => {
     handleConfirmProblem()
+    setCurrentView("categories")
     onOpenChange(false)
   }
 
