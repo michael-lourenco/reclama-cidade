@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils"
 import { CircleCheck, X } from "lucide-react"
 import { Label } from "../ui/label"
 
-interface DialogProblemsProps {
+interface DialogProblemsInfosProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   title?: string
@@ -79,7 +79,7 @@ const CategoryIcon = ({
   </div>
 )
 
-export function DialogProblems({
+export function DialogProblemsInfos({
   open,
   onOpenChange,
   title = "Reportar Problema",
@@ -87,7 +87,7 @@ export function DialogProblems({
   selectedProblemType,
   handleProblemSelect,
   handleConfirmProblem,
-}: DialogProblemsProps) {
+}: DialogProblemsInfosProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)")
   const [currentView, setCurrentView] = useState<
     "categories" | "subcategories"

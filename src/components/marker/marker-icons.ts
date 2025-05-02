@@ -8,10 +8,10 @@ export const createMapIcons = (L: any) => {
     iconUrl: "/map-icons-fixed/padrao.svg",
     iconRetinaUrl: "/map-icons-fixed/padrao.svg",
     shadowUrl: "/map-icons-fixed/sombra.svg",
-    iconSize: [40, 40],
+    iconSize: [52, 52],
     iconAnchor: [2, 50],
     popupAnchor: [1, -34],
-    shadowSize: [40, 40],
+    shadowSize: [52, 52],
   }
 
   // Default icon for unmapped cases
