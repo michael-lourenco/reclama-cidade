@@ -292,13 +292,21 @@ async function addStatusChange(
     updatedBy
   };
 
+  // Adiciona ao subcollection 'statusHistory'
   const docRef = await addDoc(
     collection(db, 'markers', markerId, 'statusHistory'),
     statusChangeData
   );
 
+  // Atualiza o campo currentStatus no documento principal do marcador
+  const markerRef = doc(db, 'markers', markerId);
+  await updateDoc(markerRef, {
+    currentStatus: status
+  });
+
   return docRef.id;
 }
+
 
 async function updateMarkerStatus(
   markerId: string,
