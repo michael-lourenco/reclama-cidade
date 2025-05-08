@@ -61,6 +61,8 @@ export const handleLikeMarker = async (
     // Atualizar likes no Firebase
     await updateMarkerLikes(dbFirestore, marker.id, userEmail)
 
+    await updateMarkerResolved(dbFirestore, marker.id, userEmail)
+
     // Atualizar estado local dos marcadores
     const updatedMarkers = markers.map((m) =>
       m.id === marker.id ? { ...m, likedBy: m.likedBy ? [...m.likedBy, userEmail] : [userEmail] } : m,
