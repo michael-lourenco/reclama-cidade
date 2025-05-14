@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { UserData } from "@/components/user/types/user"
+import { useEffect, useState } from "react"
 
 interface LoginModalProps {
   open: boolean
@@ -24,13 +25,40 @@ export function LoginModal({
   handleLogin,
   user 
 }: LoginModalProps) {
-  // Se o usuário estiver logado, não mostramos o modal
-  if (user) return null
+  const [isMounted, setIsMounted] = useState(false)
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
 
-  // Intercepta a tentativa de fechar o modal para mantê-lo aberto
+  // Verifica se o componente foi montado (lado do cliente)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // Se o usuário estiver logado ou o componente não estiver montado, não mostramos o modal
+  if (!isMounted || user) return null
+
+  // Função para lidar com o login e exibir estado de carregamento
+  const handleLoginClick = async () => {
+    try {
+      setIsLoggingIn(true)
+      await handleLogin()
+    } catch (error) {
+      console.error("Erro durante o login:", error)
+    } finally {
+      setIsLoggingIn(false)
+    }
+  }
+
+  // Intercepta a tentativa de fechar o modal para mantê-lo aberto quando necessário
   const handleOpenChange = (newOpen: boolean) => {
-    // Se o usuário tentar fechar, mantemos aberto
-    if (!newOpen) return
+    // Se o usuário estiver logado, permitimos fechar
+    if (user) {
+      onOpenChange(false)
+      return
+    }
+    
+    // Se o usuário tentar fechar e não estiver logado, mantemos aberto
+    if (!newOpen && !user) return
+    
     // Caso contrário, passamos o valor para o callback
     onOpenChange(newOpen)
   }
@@ -59,10 +87,11 @@ export function LoginModal({
         <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-center">
           <Button 
             variant="default" 
-            onClick={handleLogin}
+            onClick={handleLoginClick}
+            disabled={isLoggingIn}
             className="w-full sm:w-auto"
           >
-            Entrar com Google
+            {isLoggingIn ? "Entrando..." : "Entrar com Google"}
           </Button>
         </DialogFooter>
       </DialogContent>

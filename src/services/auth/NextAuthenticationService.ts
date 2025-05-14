@@ -4,6 +4,9 @@ import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { fetchUserData } from "../firebase/FirebaseService";
 
+/**
+ * Inicia o processo de login com o Google
+ */
 async function signInWithGoogle(): Promise<void> {
   try {
     await signIn("google", { callbackUrl: "/user" });
@@ -13,16 +16,25 @@ async function signInWithGoogle(): Promise<void> {
   }
 }
 
+/**
+ * Realiza o logout e remove os dados do usuário do localStorage
+ */
 async function signOutUser(): Promise<void> {
   try {
+    // Garantir que os dados do usuário sejam removidos do localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("user");
+    }
     await signOut({ callbackUrl: "/" });
-    localStorage.removeItem("user");
   } catch (error) {
     console.error("Error during sign out:", error);
     throw error;
   }
 }
 
+/**
+ * Processa a resposta de autenticação e salva os dados do usuário
+ */
 async function handleAuthResponse(session: Session | null, db: Firestore): Promise<UserData | null> {
   if (!session?.user?.email) return null;
 
@@ -31,6 +43,7 @@ async function handleAuthResponse(session: Session | null, db: Firestore): Promi
     let userData = await fetchUserData(db, email);
 
     if (!userData) {
+      // Criar novo usuário se não existir
       userData = {
         displayName: session.user.name || "",
         email: email,
@@ -41,15 +54,18 @@ async function handleAuthResponse(session: Session | null, db: Firestore): Promi
 
       const userRef = doc(db, process.env.NEXT_PUBLIC_USERS_COLLECTION!, email);
       await setDoc(userRef, userData);
-    }
-
-    if (session.user.image && userData.photoURL !== session.user.image) {
+    } else if (session.user.image && userData.photoURL !== session.user.image) {
+      // Atualizar a foto de perfil se mudar
       const userRef = doc(db, process.env.NEXT_PUBLIC_USERS_COLLECTION!, email);
       await updateDoc(userRef, { photoURL: session.user.image });
       userData.photoURL = session.user.image;
     }
 
-    localStorage.setItem("user", JSON.stringify(userData));
+    // Persistir dados no localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("user", JSON.stringify(userData));
+    }
+    
     return userData;
   } catch (error) {
     console.error("Error handling auth response:", error);
@@ -62,5 +78,5 @@ export {
   signOutUser as signOutFromGoogle
 };
 
-  export type { UserData };
+export type { UserData };
 

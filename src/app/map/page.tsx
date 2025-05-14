@@ -20,14 +20,20 @@ export default function Home() {
     resetConfirmation,
   } = useProblemReport()
 
-  // Mostra o modal de login se o usuário não estiver autenticado
+  // Estado para controlar a montagem da página no cliente
+  const [isMounted, setIsMounted] = useState(false)
+  
   useEffect(() => {
-    if (!loading && !user) {
-      setShowLoginModal(true)
-    } else {
-      setShowLoginModal(false)
+    setIsMounted(true)
+  }, [])
+
+  // Mostra o modal de login somente quando sabemos que o usuário não está autenticado
+  // e o componente já está montado no cliente
+  useEffect(() => {
+    if (isMounted && !loading) {
+      setShowLoginModal(!user)
     }
-  }, [user, loading])
+  }, [user, loading, isMounted])
 
   // Tentativa de fechar o modal: ignoramos se o usuário não está logado
   const handleModalOpenChange = (open: boolean) => {
@@ -36,7 +42,8 @@ export default function Home() {
     setShowLoginModal(open)
   }
 
-  if (loading) {
+  // Quando está carregando, mostra um indicador de carregamento
+  if (!isMounted || loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="text-center">
@@ -49,7 +56,7 @@ export default function Home() {
 
   return (
     <div className="relative h-screen w-full">
-      {/* Modal de login - sempre visível se o usuário não estiver logado */}
+      {/* Modal de login - apenas visível se o usuário não estiver logado */}
       <LoginModal
         open={showLoginModal}
         onOpenChange={handleModalOpenChange}
