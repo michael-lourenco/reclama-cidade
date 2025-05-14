@@ -26,6 +26,8 @@ import { SidebarTrigger } from "../ui/sidebar"
 const MapContent = ({
   setIsLoading,
   selectedProblemType,
+  handleProblemSelect,
+  handleConfirmProblem,
   userConfirmedProblem,
   resetConfirmation,
   toggleReportMenu,
@@ -34,6 +36,8 @@ const MapContent = ({
 }: {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
   selectedProblemType: TProblemType | undefined
+  handleProblemSelect: (problemType: TProblemType) => void
+  handleConfirmProblem: () => void
   userConfirmedProblem: boolean
   resetConfirmation: () => void
   toggleReportMenu: () => void
@@ -320,6 +324,14 @@ const MapContent = ({
   ])
 
   useEffect(() => {
+    console.log("Verificando condições para criar marcador:", {
+      userConfirmedProblem,
+      selectedProblemType,
+      mapInitialized: !!mapInstanceRef.current,
+      userLocationInitialized: !!userLocationMarkerRef.current,
+      leafletInitialized: !!leafletRef.current
+    })
+
     if (
       !userConfirmedProblem ||
       !selectedProblemType ||
@@ -330,6 +342,7 @@ const MapContent = ({
       return
     }
 
+    console.log("Todas as condições atendidas, criando marcador para o tipo:", selectedProblemType)
     const markerPosition = userLocationMarkerRef.current.getLatLng()
 
     createAndSaveMarker({

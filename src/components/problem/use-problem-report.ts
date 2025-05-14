@@ -13,6 +13,7 @@ export function useProblemReport() {
     }
 
     const handleConfirmProblem = () => {
+        console.log("Confirmando problema:", selectedProblemType)
         setUserConfirmedProblem(true)
     }
 
@@ -23,7 +24,8 @@ export function useProblemReport() {
     // Reset confirmation state after it's been processed
     useEffect(() => {
         if (userConfirmedProblem) {
-            const timer = setTimeout(resetConfirmation, 500)
+            console.log("useEffect detectou userConfirmedProblem como true")
+            const timer = setTimeout(resetConfirmation, 1000)
             return () => clearTimeout(timer)
         }
     }, [userConfirmedProblem])

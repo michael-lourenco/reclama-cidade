@@ -15,6 +15,8 @@ interface MapFullScreenProps {
 }
 const MapFullScreen: React.FC<MapFullScreenProps> = ({
   selectedProblemType,
+  handleProblemSelect,
+  handleConfirmProblem,
   userConfirmedProblem,
   resetConfirmation,
   toggleReportMenu,
@@ -41,6 +43,8 @@ const MapFullScreen: React.FC<MapFullScreenProps> = ({
         <MapContent
           setIsLoading={setIsLoading}
           selectedProblemType={selectedProblemType}
+          handleProblemSelect={handleProblemSelect}
+          handleConfirmProblem={handleConfirmProblem}
           userConfirmedProblem={userConfirmedProblem}
           resetConfirmation={resetConfirmation}
           toggleReportMenu={toggleReportMenu}

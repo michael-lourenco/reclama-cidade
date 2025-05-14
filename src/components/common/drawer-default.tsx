@@ -103,8 +103,10 @@ export function DialogProblems({
 
   const confirmAndClose = () => {
     handleConfirmProblem()
-    resetState()
-    onOpenChange(false)
+    setTimeout(() => {
+      resetState()
+      onOpenChange(false)
+    }, 100)
   }
 
   useEffect(() => {
