@@ -19,6 +19,7 @@ import {
 import { useMarkerStyles } from "@/components/marker/use-marker-styles"
 import { useMarkers } from "@/components/marker/use-markers"
 import { PROBLEM_CATEGORIES, TProblemType } from "@/constants/map-constants"
+import type { Marker } from "@/components/marker/types/marker"
 import type React from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { SidebarTrigger } from "../ui/sidebar"
@@ -33,6 +34,7 @@ const MapContent = ({
   toggleReportMenu,
   selectedTypes,
   onFilterChange,
+  onNeedLogin,
 }: {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
   selectedProblemType: TProblemType | undefined
@@ -43,6 +45,7 @@ const MapContent = ({
   toggleReportMenu: () => void
   selectedTypes: string[]
   onFilterChange: (selectedTypes: string[]) => void
+  onNeedLogin: () => void
 }) => {
   const {
     markers,
@@ -73,7 +76,15 @@ const MapContent = ({
     return getFilteredMarkers(selectedTypes)
   }, [getFilteredMarkers, selectedTypes, markers])
 
-  const onLikeMarker = async (marker: any) => {
+  const onLikeMarker = async (marker: Marker) => {
+    const userDataString = localStorage.getItem("user")
+    const userData = userDataString ? JSON.parse(userDataString) : null
+
+    if (!userData) {
+      onNeedLogin()
+      return
+    }
+
     await handleLikeMarker(
       marker,
       userLocationMarkerRef.current,
@@ -82,13 +93,33 @@ const MapContent = ({
     )
   }
 
-  const onResolvedMarker = async (marker: any) => {
+  const onResolvedMarker = async (marker: Marker) => {
+    const userDataString = localStorage.getItem("user")
+    const userData = userDataString ? JSON.parse(userDataString) : null
+
+    if (!userData) {
+      onNeedLogin()
+      return
+    }
+
     await handleResolvedMarker(
       marker,
       userLocationMarkerRef.current,
       markers,
       setMarkers,
     )
+  }
+
+  const handleReportProblem = () => {
+    const userDataString = localStorage.getItem("user")
+    const userData = userDataString ? JSON.parse(userDataString) : null
+
+    if (!userData) {
+      onNeedLogin()
+      return
+    }
+
+    toggleReportMenu()
   }
 
   const centerOnUserLocation = () => {
@@ -362,18 +393,13 @@ const MapContent = ({
   }, [])
 
   return (
-    <>
-      <div
-        ref={mapRef}
-        id="map"
-        className="bg-background absolute z-0 h-full w-full"
-      />
+    <div className="relative h-screen w-full">
+      <div ref={mapRef} className="h-full w-full" />
       <LocationControls
         centerOnUserLocation={centerOnUserLocation}
-        followMode={false}
-        toggleReportMenu={toggleReportMenu}
+        followMode={followMode}
+        toggleReportMenu={handleReportProblem}
       />
-
       <div className="absolute top-4 right-4 z-50 flex gap-2">
         <MarkerFilter
           availableTypes={markerTypes}
@@ -382,7 +408,7 @@ const MapContent = ({
         />
         <SidebarTrigger />
       </div>
-    </>
+    </div>
   )
 }
 

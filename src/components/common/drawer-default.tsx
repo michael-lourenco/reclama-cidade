@@ -11,6 +11,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog"
 import {
   Drawer,
@@ -41,6 +42,7 @@ interface DialogProblemsProps {
   selectedProblemType: TProblemType | undefined
   handleProblemSelect: (ProblemType: TProblemType | undefined) => void
   handleConfirmProblem: () => void
+  onNeedLogin: () => void
 }
 
 // Componente utilitário para exibir ícones
@@ -87,6 +89,7 @@ export function DialogProblems({
   selectedProblemType,
   handleProblemSelect,
   handleConfirmProblem,
+  onNeedLogin,
 }: DialogProblemsProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)")
   const [currentView, setCurrentView] = useState<
@@ -101,12 +104,16 @@ export function DialogProblems({
     handleProblemSelect(undefined)
   }
 
-  const confirmAndClose = () => {
+  const handleConfirm = () => {
+    const userDataString = localStorage.getItem("user")
+    const userData = userDataString ? JSON.parse(userDataString) : null
+
+    if (!userData) {
+      onNeedLogin()
+      return
+    }
+
     handleConfirmProblem()
-    setTimeout(() => {
-      resetState()
-      onOpenChange(false)
-    }, 100)
   }
 
   useEffect(() => {
@@ -231,7 +238,7 @@ export function DialogProblems({
           <Button
             className="flex-1"
             size="lg"
-            onClick={confirmAndClose}
+            onClick={handleConfirm}
           >
             Relatar Problema
           </Button>
