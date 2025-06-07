@@ -40,6 +40,11 @@ export function LoginModal({
   const handleLoginClick = async () => {
     try {
       setIsLoggingIn(true)
+      // Salvar a página atual antes do login
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname;
+        localStorage.setItem('redirectAfterLogin', currentPath);
+      }
       await handleLogin()
     } catch (error) {
       console.error("Erro durante o login:", error)

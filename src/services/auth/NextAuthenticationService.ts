@@ -9,6 +9,12 @@ import { fetchUserData } from "../firebase/FirebaseService";
  */
 async function signInWithGoogle(): Promise<void> {
   try {
+    // Salvar a página atual no localStorage
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname;
+      localStorage.setItem('redirectAfterLogin', currentPath);
+    }
+    
     await signIn("google", { callbackUrl: "/user" });
   } catch (error) {
     console.error("Error during sign in:", error);
@@ -24,6 +30,7 @@ async function signOutUser(): Promise<void> {
     // Garantir que os dados do usuário sejam removidos do localStorage
     if (typeof window !== 'undefined') {
       localStorage.removeItem("user");
+      localStorage.removeItem("redirectAfterLogin");
     }
     await signOut({ callbackUrl: "/" });
   } catch (error) {
@@ -64,6 +71,13 @@ async function handleAuthResponse(session: Session | null, db: Firestore): Promi
     // Persistir dados no localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem("user", JSON.stringify(userData));
+      
+      // Redirecionar para a página anterior se existir
+      const redirectPath = localStorage.getItem('redirectAfterLogin');
+      if (redirectPath && redirectPath !== '/user') {
+        localStorage.removeItem('redirectAfterLogin');
+        window.location.href = redirectPath;
+      }
     }
     
     return userData;

@@ -43,6 +43,12 @@ export function useAuth() {
   const handleLogin = async () => {
     setLoading(true);
     try {
+      // Salvar a página atual antes do login
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname;
+        localStorage.setItem('redirectAfterLogin', currentPath);
+      }
+      
       await signInWithGoogle();
     } catch (error) {
       console.error("Erro ao fazer login:", error);
@@ -56,6 +62,7 @@ export function useAuth() {
       await signOutFromGoogle();
       setUser(null);
       localStorage.removeItem("user");
+      localStorage.removeItem("redirectAfterLogin");
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
     } finally {
@@ -75,6 +82,15 @@ export function useAuth() {
             setUser(userData);
             // Salvar no localStorage para persistência entre navegações
             localStorage.setItem("user", JSON.stringify(userData));
+            
+            // Redirecionar para a página anterior se existir
+            if (typeof window !== 'undefined') {
+              const redirectPath = localStorage.getItem('redirectAfterLogin');
+              if (redirectPath && redirectPath !== '/user') {
+                localStorage.removeItem('redirectAfterLogin');
+                window.location.href = redirectPath;
+              }
+            }
           }
         } catch (error) {
           console.error("Erro ao processar autenticação:", error);
@@ -136,6 +152,15 @@ export function useAuth() {
             if (userData) {
               setUser(userData);
               localStorage.setItem("user", JSON.stringify(userData));
+              
+              // Redirecionar para a página anterior se existir
+              if (typeof window !== 'undefined') {
+                const redirectPath = localStorage.getItem('redirectAfterLogin');
+                if (redirectPath && redirectPath !== '/user') {
+                  localStorage.removeItem('redirectAfterLogin');
+                  window.location.href = redirectPath;
+                }
+              }
             }
           } catch (error) {
             console.error("Erro ao obter dados do usuário:", error);
