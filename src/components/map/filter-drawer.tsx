@@ -1,7 +1,6 @@
 "use client";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { PROBLEM_CATEGORIES } from "@/constants/map-constants";
 
 export function FilterDrawer({

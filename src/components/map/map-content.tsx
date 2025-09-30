@@ -1,5 +1,6 @@
 "use client"
 import { LocationControls } from "@/components/location-controls/location-controls"
+import { FilterDrawer } from "@/components/map/filter-drawer"
 import {
   initializeMap,
   setupLocationTracking,
@@ -11,15 +12,14 @@ import {
   setupResizeHandler,
 } from "@/components/map/map-styles"
 import { createAndSaveMarker } from "@/components/marker/marker-creator"
-import { FilterDrawer } from "@/components/map/filter-drawer"
 import {
   handleLikeMarker,
   handleResolvedMarker,
 } from "@/components/marker/marker-interactions"
 import type { Marker } from "@/components/marker/types/marker"
 import { useMarkerStyles } from "@/components/marker/use-marker-styles"
-import { Button } from "@/components/ui/button"
 import { useMarkers } from "@/components/marker/use-markers"
+import { Button } from "@/components/ui/button"
 import { PROBLEM_CATEGORIES, TProblemType } from "@/constants/map-constants"
 import type React from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
