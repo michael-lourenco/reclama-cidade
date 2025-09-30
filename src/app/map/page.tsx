@@ -20,8 +20,9 @@ export default function Home() {
     resetConfirmation,
   } = useProblemReport()
 
-  // Estado para controlar a montagem da página no cliente
+  // Estado para controlar a montagem da página no cliente novo
   const [isMounted, setIsMounted] = useState(false)
+  const subir = true; // remover pois nao signifivca nada
   
   useEffect(() => {
     setIsMounted(true)
