@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import type { ProblemCategory } from "@/components/map/types/map"
 import { Button } from "@/components/ui/button"
@@ -95,11 +95,11 @@ export function DialogProblemsInfos({
   const [selectedCategory, setSelectedCategory] =
     useState<ProblemCategory | null>(null)
 
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setCurrentView("categories")
     setSelectedCategory(null)
     handleProblemSelect(undefined)
-  }
+  }, [handleProblemSelect])
 
   const confirmAndClose = () => {
     handleConfirmProblem()
@@ -111,7 +111,7 @@ export function DialogProblemsInfos({
     if (open) {
       resetState()
     }
-  }, [open])
+  }, [open, resetState])
 
   const itemClasses =
     "flex flex-col items-center p-2 rounded cursor-pointer group"

@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { UserData } from "@/services/auth/NextAuthenticationService"
 import React, { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 interface UserStatisticsProps {
   user: UserData | null
@@ -20,7 +21,7 @@ export const UserStatistics: React.FC<UserStatisticsProps> = ({ user }) => {
         const cleanPhotoUrl = user.photoURL.split("=")[0]
         setAvatarUrl(`${cleanPhotoUrl}=s150`)
       } catch (error) {
-        console.error("Erro ao formatar a URL da imagem:", error)
+        toast.error("Erro ao carregar avatar do usuário.")
         setAvatarUrl(null)
       }
     } else {

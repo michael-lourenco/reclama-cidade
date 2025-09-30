@@ -17,7 +17,7 @@ const LocationControls = ({
   return (
     <div className="fixed right-4 bottom-5 z-50 flex flex-col gap-2">
       <Button
-        variant={followMode ? "default" : "floating"}
+        variant={followMode ? "floating" : "floating"}
         size="icon-lg"
         className={`${followMode ? "bg-blue-500 text-white hover:bg-blue-600" : ""}`}
         title={
@@ -44,6 +44,8 @@ const LocationControls = ({
           alt="map-icons"
           width={40}
           height={40}
+          style={{ width: 40, height: 40, objectFit: 'contain' }}
+          sizes="40px"
         />
       </Button>
     </div>

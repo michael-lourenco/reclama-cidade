@@ -20,7 +20,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster />
+          <Toaster position="top-center" />
           <CookieConsent />
           <SidebarProvider defaultOpen={false}>
             <AppSidebar />

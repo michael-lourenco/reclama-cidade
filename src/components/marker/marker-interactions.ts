@@ -1,6 +1,7 @@
 import type { Marker } from "@/components/marker/types/marker"
 import { dbFirestore, updateMarkerLikes, updateMarkerResolved } from "@/services/firebase/FirebaseService"
 import { getDistance } from "@/utils/distance"
+import { toast } from "sonner"
 
 // Função para obter o email do usuário atual
 export const getCurrentUserEmail = () => {
@@ -25,14 +26,15 @@ export const handleLikeMarker = async (
   try {
     const userEmail = getCurrentUserEmail()
 
+
     if (!userEmail) {
-      alert("Por favor, faça login para curtir um marcador.")
+      toast.error("Por favor, faça login para curtir um marcador.")
       return
     }
 
     // Verificar distância do usuário ao marcador
     if (!userLocationMarker) {
-      alert("Localização do usuário não disponível.")
+      toast.error("Localização do usuário não disponível.")
       return
     }
 
@@ -42,19 +44,19 @@ export const handleLikeMarker = async (
 
     // Verificar se o usuário está dentro de 100 metros
     if (distance > 100) {
-      alert("Você precisa estar a até 100 metros do marcador para curtir.")
+      toast("Você precisa estar a até 100 metros do marcador para curtir.", { icon: "📍" })
       return
     }
 
     // Verificar se o usuário está tentando curtir seu próprio marcador
     if (marker.userEmail === userEmail) {
-      alert("Você não pode curtir seu próprio marcador.")
+      toast("Você não pode curtir seu próprio marcador.", { icon: "🚫" })
       return
     }
 
     // Verificar se o usuário já curtiu o marcador
     if (marker.likedBy?.includes(userEmail)) {
-      alert("Você já curtiu este marcador.")
+      toast("Você já curtiu este marcador.", { icon: "👍" })
       return
     }
 
@@ -72,7 +74,7 @@ export const handleLikeMarker = async (
     return true // Retorna true se o like foi bem-sucedido
   } catch (error) {
     console.error("Erro ao curtir marcador:", error)
-    alert("Não foi possível curtir o marcador. Tente novamente.")
+    toast.error("Não foi possível curtir o marcador. Tente novamente.")
     return false
   }
 }
@@ -87,14 +89,15 @@ export const handleResolvedMarker = async (
   try {
     const userEmail = getCurrentUserEmail()
 
+
     if (!userEmail) {
-      alert("Por favor, faça login para curtir um marcador.")
+      toast.error("Por favor, faça login para confirmar resolução.")
       return
     }
 
     // Verificar distância do usuário ao marcador
     if (!userLocationMarker) {
-      alert("Localização do usuário não disponível.")
+      toast.error("Localização do usuário não disponível.")
       return
     }
 
@@ -104,13 +107,13 @@ export const handleResolvedMarker = async (
 
     // Verificar se o usuário está dentro de 100 metros
     if (distance > 100) {
-      alert("Você precisa estar a até 100 metros do marcador para curtir.")
+      toast("Você precisa estar a até 100 metros do marcador para confirmar.", { icon: "📍" })
       return
     }
 
-    // Verificar se o usuário já curtiu o marcador
+    // Verificar se o usuário já confirmou resolução
     if (marker.resolvedBy?.includes(userEmail)) {
-      alert("Você já confirmou que este problema foi solucionado.")
+      toast("Você já confirmou que este problema foi solucionado.", { icon: "✅" })
       return
     }
 
@@ -126,7 +129,7 @@ export const handleResolvedMarker = async (
     return true // Retorna true se o like foi bem-sucedido
   } catch (error) {
     console.error("Erro ao curtir marcador:", error)
-    alert("Não foi possível curtir o marcador. Tente novamente.")
+    toast.error("Não foi possível confirmar resolução. Tente novamente.")
     return false
   }
 }

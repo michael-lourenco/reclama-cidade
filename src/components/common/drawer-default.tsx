@@ -1,7 +1,16 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+
+// Hook para sincronizar seleção local e prop
+function useSelectedProblemTypeLocal(selectedProblemTypeProp: TProblemType | undefined) {
+  const [selectedProblemTypeLocal, setSelectedProblemTypeLocal] = useState<TProblemType | undefined>(selectedProblemTypeProp)
+  useEffect(() => {
+    setSelectedProblemTypeLocal(selectedProblemTypeProp)
+  }, [selectedProblemTypeProp])
+  return [selectedProblemTypeLocal, setSelectedProblemTypeLocal] as const
+}
 
 import type { ProblemCategory } from "@/components/map/types/map"
 import { Button } from "@/components/ui/button"
@@ -10,8 +19,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  DialogTitle
 } from "@/components/ui/dialog"
 import {
   Drawer,
@@ -86,11 +94,12 @@ export function DialogProblems({
   onOpenChange,
   title = "Reportar Problema",
   description = "Selecione o tipo de problema que deseja marcar no mapa.",
-  selectedProblemType,
+  selectedProblemType: selectedProblemTypeProp,
   handleProblemSelect,
   handleConfirmProblem,
   onNeedLogin,
 }: DialogProblemsProps) {
+  const [selectedProblemType, setSelectedProblemTypeLocal] = useSelectedProblemTypeLocal(selectedProblemTypeProp)
   const isDesktop = useMediaQuery("(min-width: 768px)")
   const [currentView, setCurrentView] = useState<
     "categories" | "subcategories"
@@ -98,11 +107,11 @@ export function DialogProblems({
   const [selectedCategory, setSelectedCategory] =
     useState<ProblemCategory | null>(null)
 
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setCurrentView("categories")
     setSelectedCategory(null)
     handleProblemSelect(undefined)
-  }
+  }, [handleProblemSelect])
 
   const handleConfirm = () => {
     const userDataString = localStorage.getItem("user")
@@ -114,13 +123,16 @@ export function DialogProblems({
     }
 
     handleConfirmProblem()
+    onOpenChange(false)
   }
 
+  const prevOpenRef = useRef(open)
   useEffect(() => {
-    if (open) {
+    if (!prevOpenRef.current && open) {
       resetState()
     }
-  }, [open])
+    prevOpenRef.current = open
+  }, [open, resetState])
 
   const itemClasses =
     "flex flex-col items-center p-2 rounded cursor-pointer group"
@@ -143,6 +155,7 @@ export function DialogProblems({
             })
             setCurrentView("subcategories")
           } else {
+            setSelectedProblemTypeLocal(type as TProblemSubcategory)
             handleProblemSelect(type as TProblemSubcategory)
           }
         }
@@ -174,11 +187,16 @@ export function DialogProblems({
           const isSelected =
             selectedProblemType === (type as unknown as TProblemType)
 
+          const handleSubcategoryClick = () => {
+            setSelectedProblemTypeLocal(type as TProblemSubcategory)
+            handleProblemSelect(type as TProblemSubcategory)
+          }
+
           return (
             <div
               key={id}
               className={itemClasses}
-              onClick={() => handleProblemSelect(type as TProblemSubcategory)}
+              onClick={handleSubcategoryClick}
             >
               <CategoryIcon
                 src={`/map-icons/${icon}`}

@@ -11,18 +11,33 @@ import {
   setupResizeHandler,
 } from "@/components/map/map-styles"
 import { createAndSaveMarker } from "@/components/marker/marker-creator"
-import { MarkerFilter } from "@/components/marker/marker-filter"
+import { FilterDrawer } from "@/components/map/filter-drawer"
 import {
   handleLikeMarker,
   handleResolvedMarker,
 } from "@/components/marker/marker-interactions"
+import type { Marker } from "@/components/marker/types/marker"
 import { useMarkerStyles } from "@/components/marker/use-marker-styles"
+import { Button } from "@/components/ui/button"
 import { useMarkers } from "@/components/marker/use-markers"
 import { PROBLEM_CATEGORIES, TProblemType } from "@/constants/map-constants"
-import type { Marker } from "@/components/marker/types/marker"
 import type React from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import { SidebarTrigger } from "../ui/sidebar"
+
+interface MapContentProps {
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  selectedProblemType: TProblemType | undefined
+  handleProblemSelect: (problemType: TProblemType) => void
+  handleConfirmProblem: () => void
+  userConfirmedProblem: boolean
+  resetConfirmation: () => void
+  toggleReportMenu: () => void
+  selectedTypes: string[]
+  onFilterChange: (selectedTypes: string[]) => void
+  onNeedLogin: () => void
+}
 
 const MapContent = ({
   setIsLoading,
@@ -35,18 +50,8 @@ const MapContent = ({
   selectedTypes,
   onFilterChange,
   onNeedLogin,
-}: {
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-  selectedProblemType: TProblemType | undefined
-  handleProblemSelect: (problemType: TProblemType) => void
-  handleConfirmProblem: () => void
-  userConfirmedProblem: boolean
-  resetConfirmation: () => void
-  toggleReportMenu: () => void
-  selectedTypes: string[]
-  onFilterChange: (selectedTypes: string[]) => void
-  onNeedLogin: () => void
-}) => {
+}: MapContentProps) => {
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
   const {
     markers,
     setMarkers,
@@ -74,7 +79,7 @@ const MapContent = ({
 
   const filteredMarkers = useMemo(() => {
     return getFilteredMarkers(selectedTypes)
-  }, [getFilteredMarkers, selectedTypes, markers])
+  }, [getFilteredMarkers, selectedTypes])
 
   const onLikeMarker = async (marker: Marker) => {
     const userDataString = localStorage.getItem("user")
@@ -185,13 +190,26 @@ const MapContent = ({
       }
       
       popupContent.innerHTML = `
-        <div class="marker-info">
-          <p><strong>Tipo:</strong> ${categoryLabel}</p>
-          <p><strong>Reportado por:</strong> ${marker.userEmail || "Anônimo"}</p>
-          <p><strong>Status:</strong> ${marker.currentStatus || "Reportado"}</p>
-          <div class="marker-actions">
-            <button class="like-button">👍 ${marker.likedBy?.length || 0}</button>
-            <button class="resolved-button">✅ ${marker.resolvedBy?.length || 0}</button>
+        <div class="marker-info" style="font-family: 'Segoe UI', Arial, sans-serif; min-width:220px; padding: 12px 8px; border-radius: 12px; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.10);">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span style="font-size: 1.3em; color: #2563eb;">📍</span>
+            <span style="font-weight: 600; font-size: 1.1em;">${categoryLabel}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+            <span style="font-size: 1.1em; color: #6366f1;">👤</span>
+            <span style="font-size: 0.98em;">${marker.userEmail || "Anônimo"}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 10px;">
+            <span style="font-size: 1.1em; color: #22c55e;">📋</span>
+            <span style="font-size: 0.98em;">${marker.currentStatus || "Reportado"}</span>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <button class="like-button" style="display: flex; align-items: center; gap: 4px; background: #f1f5f9; border: none; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 1em; transition: background 0.2s;">
+              <span style="color: #f59e42; font-size: 1.1em;">👍</span> <span>${marker.likedBy?.length || 0}</span>
+            </button>
+            <button class="resolved-button" style="display: flex; align-items: center; gap: 4px; background: #f1f5f9; border: none; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 1em; transition: background 0.2s;">
+              <span style="color: #22c55e; font-size: 1.1em;">✅</span> <span>${marker.resolvedBy?.length || 0}</span>
+            </button>
           </div>
         </div>
       `
@@ -224,7 +242,7 @@ const MapContent = ({
     if (mapInstanceRef.current && leafletRef.current && iconsRef.current) {
       updateMapMarkers()
     }
-  }, [filteredMarkers])
+  }, [filteredMarkers, updateMapMarkers])
 
   useEffect(() => {
     if (!mapRef.current || mapInitializedRef.current) {
@@ -242,7 +260,7 @@ const MapContent = ({
                 resolve([position.coords.latitude, position.coords.longitude])
               },
               (error) => {
-                console.warn("Erro ao obter localização do usuário:", error)
+                toast.error("Erro ao obter localização do usuário. Permita o acesso à localização no navegador.")
                 reject(error)
               },
               { timeout: 3000, maximumAge: 0 },
@@ -260,10 +278,10 @@ const MapContent = ({
           ])
           initialCenteringDoneRef.current = true
         } catch (error) {
-          console.warn(
-            "Usando localização padrão para inicialização inicial:",
-            error,
-          )
+          toast("Usando localização padrão para inicialização inicial.", {
+            description: error instanceof Error ? error.message : String(error),
+            icon: "📍"
+          })
         }
 
         const initOptions = {
@@ -307,7 +325,7 @@ const MapContent = ({
               }
             },
             (error) => {
-              console.error("Erro secundário ao obter localização:", error)
+              toast.error("Erro ao tentar centralizar no usuário. Permita o acesso à localização.")
             },
             { timeout: 10000, maximumAge: 0 },
           )
@@ -315,8 +333,8 @@ const MapContent = ({
 
         updateMapMarkers()
       } catch (error) {
-        console.error("Erro ao inicializar o mapa:", error)
-        mapInitializedRef.current = false
+  toast.error("Erro ao inicializar o mapa.")
+  mapInitializedRef.current = false
       }
     }
 
@@ -352,6 +370,17 @@ const MapContent = ({
     loadMarkersFromFirebase,
     addMarkerStyles,
     followMode,
+    onLikeMarker,
+    onResolvedMarker,
+    setIsLoading,
+    addLeafletCSS,
+    addLikeStyles,
+    defaultLocation,
+    defaultZoom,
+    initializeMap,
+    setupLocationTracking,
+    setupCenterOnUserEvent,
+    updateMapMarkers
   ])
 
   useEffect(() => {
@@ -386,7 +415,7 @@ const MapContent = ({
     })
 
     resetConfirmation()
-  }, [userConfirmedProblem, selectedProblemType, resetConfirmation, setMarkers])
+  }, [userConfirmedProblem, selectedProblemType, resetConfirmation, setMarkers, createAndSaveMarker, iconsRef, mapInstanceRef, leafletRef])
 
   useEffect(() => {
     return setupResizeHandler(mapInstanceRef)
@@ -400,16 +429,28 @@ const MapContent = ({
         followMode={followMode}
         toggleReportMenu={handleReportProblem}
       />
+      <FilterDrawer
+        open={filterDrawerOpen}
+        onOpenChange={setFilterDrawerOpen}
+        availableTypes={markerTypes}
+        selectedTypes={selectedTypes}
+        onFilterChange={onFilterChange}
+      />
       <div className="absolute top-4 right-4 z-50 flex gap-2">
-        <MarkerFilter
-          availableTypes={markerTypes}
-          selectedTypes={selectedTypes}
-          onFilterChange={onFilterChange}
-        />
+        <Button
+          variant="floating"
+          size="icon-sm"
+          onClick={() => setFilterDrawerOpen(true)}
+          title="Abrir filtros"
+        >
+          <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-filter"><line x1="22" x2="2" y1="3" y2="3"/><line x1="16" x2="8" y1="9" y2="9"/><line x1="21" x2="3" y1="15" y2="15"/><line x1="12" x2="12" y1="21" y2="3"/></svg>
+        </Button>
         <SidebarTrigger />
       </div>
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
     </div>
   )
 }
 
 export { MapContent }
+
