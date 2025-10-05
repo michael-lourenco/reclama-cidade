@@ -22,7 +22,7 @@ import { useMarkers } from "@/components/marker/use-markers"
 import { Button } from "@/components/ui/button"
 import { PROBLEM_CATEGORIES, TProblemType } from "@/constants/map-constants"
 import type React from "react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { SidebarTrigger } from "../ui/sidebar"
 
@@ -137,7 +137,7 @@ const MapContent = ({
     }
   }
 
-  const updateMapMarkers = () => {
+  const updateMapMarkers = useCallback(() => {
     if (
       !mapInstanceRef.current ||
       !leafletRef.current ||
@@ -236,7 +236,7 @@ const MapContent = ({
     })
 
     markersLayerRef.current.addTo(mapInstanceRef.current)
-  }
+  }, [filteredMarkers, leafletRef, iconsRef, onLikeMarker, onResolvedMarker])
 
   useEffect(() => {
     if (mapInstanceRef.current && leafletRef.current && iconsRef.current) {
@@ -373,13 +373,8 @@ const MapContent = ({
     onLikeMarker,
     onResolvedMarker,
     setIsLoading,
-    addLeafletCSS,
-    addLikeStyles,
     defaultLocation,
     defaultZoom,
-    initializeMap,
-    setupLocationTracking,
-    setupCenterOnUserEvent,
     updateMapMarkers
   ])
 
@@ -415,7 +410,7 @@ const MapContent = ({
     })
 
     resetConfirmation()
-  }, [userConfirmedProblem, selectedProblemType, resetConfirmation, setMarkers, createAndSaveMarker, iconsRef, mapInstanceRef, leafletRef])
+  }, [userConfirmedProblem, selectedProblemType, resetConfirmation, setMarkers, iconsRef, mapInstanceRef, leafletRef])
 
   useEffect(() => {
     return setupResizeHandler(mapInstanceRef)

@@ -21,6 +21,11 @@ export function ProblemStatusChart({ markers }: ProblemStatusChartProps) {
     [],
   )
 
+  const formatPercent = (value: unknown): string => {
+    const num = Number(value);
+    return isNaN(num) ? '0' : (num * 100).toFixed(0);
+  }
+
   useEffect(() => {
     // Contagem de status
     const statusCounts: Record<string, number> = {}
@@ -78,7 +83,7 @@ export function ProblemStatusChart({ markers }: ProblemStatusChartProps) {
             fill="#8884d8"
             dataKey="value"
             label={({ name, percent }) =>
-              `${name}: ${(percent * 100).toFixed(0)}%`
+              `${name}: ${formatPercent(percent)}%`
             }
           >
             {chartData.map((entry, index) => (
