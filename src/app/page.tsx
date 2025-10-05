@@ -23,7 +23,7 @@ import { useTheme } from "next-themes"
 
 import Image from "next/image"
 import Link from "next/link"
-import React, { useState } from "react"
+import React from "react"
 import { FiLogIn } from "react-icons/fi"
 
 function ThemeToggleDropdown() {
@@ -61,9 +61,6 @@ function ThemeToggleDropdown() {
 }
 
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { setTheme, theme } = useTheme()
-
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 fixed top-0 z-50 flex w-full flex-col items-center border-b backdrop-blur">
@@ -99,7 +96,7 @@ export default function LandingPage() {
             </Link>
           </nav>
           <div className="flex items-center gap-4">
-            <Link href="/login">
+            <Link href="/map">
               <Button
                 variant="outline"
                 className="hidden bg-emerald-500 hover:bg-emerald-600 md:flex"
@@ -713,7 +710,7 @@ export default function LandingPage() {
               </div>
               <div className="flex flex-col gap-3 pt-6 sm:flex-row">
                 <Link
-                  href="/login"
+                  href="/map"
                   className="focus-visible:ring-ring inline-flex h-12 items-center justify-center rounded-md bg-white px-6 text-sm font-medium text-emerald-500 shadow transition-colors hover:bg-gray-100 focus-visible:ring-1 focus-visible:outline-none"
                 >
                   <FiLogIn className="mr-2 h-5 w-5" />
