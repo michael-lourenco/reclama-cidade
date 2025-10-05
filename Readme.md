@@ -64,10 +64,9 @@ O projeto utiliza um stack moderno de desenvolvimento web:
   - [React Query](https://tanstack.com/query/latest) - Gerenciamento de estado para dados assíncronos
 
 - **Backend/Serviços**:
-  - [Firebase](https://firebase.google.com/)
-    - Authentication - Autenticação de usuários
-    - Firestore - Banco de dados NoSQL
-  - [Next Auth](https://next-auth.js.org/) - Autenticação para Next.js
+  - [NextAuth.js](https://next-auth.js.org/) - Autenticação para Next.js
+  - [Neon](https://neon.tech/) - Banco de dados PostgreSQL Serverless
+  - [Drizzle ORM](https://orm.drizzle.team/) - ORM TypeScript para SQL
 
 - **Ferramentas de Desenvolvimento**:
   - [TypeScript](https://www.typescriptlang.org/) - Tipagem estática para JavaScript
@@ -137,12 +136,14 @@ NEXTAUTH_SECRET=seu_segredo_nextauth
 ## 🚀 Como Executar
 
 1. Clone o repositório:
+
    ```
    git clone https://github.com/seu-usuario/me-arrume.git
    cd me-arrume
    ```
 
 2. Instale as dependências:
+
    ```
    npm install
    # ou
@@ -150,6 +151,7 @@ NEXTAUTH_SECRET=seu_segredo_nextauth
    ```
 
 3. Execute o servidor de desenvolvimento:
+
    ```
    npm run dev
    # ou

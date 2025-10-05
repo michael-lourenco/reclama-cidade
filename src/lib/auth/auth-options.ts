@@ -1,26 +1,31 @@
-import { NextAuthOptions, Session } from "next-auth";
-import { JWT } from "next-auth/jwt";
+import { prisma } from "@/lib/prisma";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-interface Token extends JWT {
-  sub?: string;
-}
-
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
-      clientId: process.env.NEXT_PUBLIC_GOOGLE_CREDENTIALS_OAUTH_CLIENT_ID!,
-      clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CREDENTIALS_OAUTH_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
-  secret: process.env.NEXT_PUBLIC_NEXTAUTH_SECRET,
+  session: {
+    strategy: "jwt", // Use JWT para que os callbacks jwt e session sejam chamados
+  },
   callbacks: {
-    async jwt({ token }: { token: Token }) {
+    // O callback jwt é chamado primeiro, e seu retorno é passado para o callback session
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
       return token;
     },
-    async session({ session, token }: { session: Session; token: Token }) {
-      if (session.user && token.sub) {
-        (session.user as { id?: string }).id = token.sub;
+    // O callback session recebe o token do callback jwt
+    async session({ session, token }) {
+      if (session.user && token.id) {
+        session.user.id = token.id as string;
       }
       return session;
     },

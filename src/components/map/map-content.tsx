@@ -21,6 +21,7 @@ import { useMarkerStyles } from "@/components/marker/use-marker-styles"
 import { useMarkers } from "@/components/marker/use-markers"
 import { Button } from "@/components/ui/button"
 import { PROBLEM_CATEGORIES, TProblemType } from "@/constants/map-constants"
+import { useSession } from "next-auth/react"
 import type React from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
@@ -81,11 +82,10 @@ const MapContent = ({
     return getFilteredMarkers(selectedTypes)
   }, [getFilteredMarkers, selectedTypes])
 
-  const onLikeMarker = async (marker: Marker) => {
-    const userDataString = localStorage.getItem("user")
-    const userData = userDataString ? JSON.parse(userDataString) : null
+  const { data: session } = useSession()
 
-    if (!userData) {
+  const onLikeMarker = async (marker: Marker) => {
+    if (!session?.user) {
       onNeedLogin()
       return
     }
@@ -99,10 +99,7 @@ const MapContent = ({
   }
 
   const onResolvedMarker = async (marker: Marker) => {
-    const userDataString = localStorage.getItem("user")
-    const userData = userDataString ? JSON.parse(userDataString) : null
-
-    if (!userData) {
+    if (!session?.user) {
       onNeedLogin()
       return
     }
@@ -116,10 +113,7 @@ const MapContent = ({
   }
 
   const handleReportProblem = () => {
-    const userDataString = localStorage.getItem("user")
-    const userData = userDataString ? JSON.parse(userDataString) : null
-
-    if (!userData) {
+    if (!session?.user) {
       onNeedLogin()
       return
     }

@@ -1,12 +1,12 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Bell,
   ChevronRight,
@@ -18,16 +18,48 @@ import {
   Navigation,
   Sun,
   Users,
-} from "lucide-react"
-import { useTheme } from "next-themes"
+} from "lucide-react";
+import { useTheme } from "next-themes";
 
-import Image from "next/image"
-import Link from "next/link"
-import React, { useState } from "react"
-import { FiLogIn } from "react-icons/fi"
+import Image from "next/image";
+import Link from "next/link";
+import React, { useState } from "react";
+import { FiLogIn } from "react-icons/fi";
 
+const navLinks = [
+  { href: "#features", label: "Funcionalidades" },
+  { href: "#benefits", label: "Benefícios" },
+  { href: "#showcase", label: "Demonstração" },
+  { href: "#download", label: "Download" },
+]
+
+function NavLink({
+  href,
+  children,
+  className,
+}: {
+  href: string
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  )
+}
 function ThemeToggleDropdown() {
   const { setTheme, theme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    // Render a placeholder or null on the server to avoid mismatch
+    return <Button variant="ghost" size="icon" aria-label="Alternar tema" disabled />;
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -62,41 +94,27 @@ function ThemeToggleDropdown() {
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { setTheme, theme } = useTheme()
 
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 fixed top-0 z-50 flex w-full flex-col items-center border-b backdrop-blur">
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2">
-            <MapPin className="h-6 w-6 text-emerald-500" />
-            <span className="text-xl font-bold">CityFix</span>
+            <Link href="/" className="flex items-center gap-2">
+              <MapPin className="h-6 w-6 text-emerald-500" />
+              <span className="text-xl font-bold">CityFix</span>
+            </Link>
           </div>
           <nav className="hidden gap-6 md:flex">
-            <Link
-              href="#features"
-              className="text-sm font-medium transition-colors hover:text-emerald-500"
-            >
-              Funcionalidades
-            </Link>
-            <Link
-              href="#benefits"
-              className="text-sm font-medium transition-colors hover:text-emerald-500"
-            >
-              Benefícios
-            </Link>
-            <Link
-              href="#showcase"
-              className="text-sm font-medium transition-colors hover:text-emerald-500"
-            >
-              Demonstração
-            </Link>
-            <Link
-              href="#download"
-              className="text-sm font-medium transition-colors hover:text-emerald-500"
-            >
-              Download
-            </Link>
+            {navLinks.map(({ href, label }) => (
+              <NavLink
+                key={href}
+                href={href}
+                className="text-sm font-medium transition-colors hover:text-emerald-500"
+              >
+                {label}
+              </NavLink>
+            ))}
           </nav>
           <div className="flex items-center gap-4">
             <Link href="/login">
@@ -110,52 +128,28 @@ export default function LandingPage() {
             <div className="flex items-center gap-2">
               <ThemeToggleDropdown />
 
-              <DropdownMenu>
+              <DropdownMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
                     aria-label="Abrir menu"
+                    className="md:hidden"
                   >
                     <Menu className="h-6 w-6" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="flex w-56 flex-col gap-2 p-2"
+                  className="w-56 flex-col gap-2 p-2 md:hidden"
                 >
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="#features"
-                      className="w-full text-lg font-medium"
-                    >
-                      Funcionalidades
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="#benefits"
-                      className="w-full text-lg font-medium"
-                    >
-                      Benefícios
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="#showcase"
-                      className="w-full text-lg font-medium"
-                    >
-                      Demonstração
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="#download"
-                      className="w-full text-lg font-medium"
-                    >
-                      Faça a diferença
-                    </Link>
-                  </DropdownMenuItem>
+                  {navLinks.map(({ href, label }) => (
+                    <DropdownMenuItem key={href} asChild>
+                      <NavLink href={href} className="w-full text-lg font-medium">
+                        {label === "Download" ? "Faça a diferença" : label}
+                      </NavLink>
+                    </DropdownMenuItem>
+                  ))}
                   <DropdownMenuItem asChild>
                     <Link
                       href="/login"
@@ -170,9 +164,11 @@ export default function LandingPage() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Button className="w-full bg-emerald-500 hover:bg-emerald-600">
-                      Baixar App
-                    </Button>
+                    <Link href="#download" className="w-full">
+                      <Button className="w-full bg-emerald-500 hover:bg-emerald-600">
+                        Baixar App
+                      </Button>
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

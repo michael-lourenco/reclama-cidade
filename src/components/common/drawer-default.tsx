@@ -40,6 +40,7 @@ import {
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { cn } from "@/lib/utils"
 import { CircleCheck, X } from "lucide-react"
+import { useSession } from "next-auth/react"
 import { Label } from "../ui/label"
 
 interface DialogProblemsProps {
@@ -113,11 +114,10 @@ export function DialogProblems({
     handleProblemSelect(undefined)
   }, [handleProblemSelect])
 
-  const handleConfirm = () => {
-    const userDataString = localStorage.getItem("user")
-    const userData = userDataString ? JSON.parse(userDataString) : null
+  const { data: session } = useSession()
 
-    if (!userData) {
+  const handleConfirm = () => {
+    if (!session?.user) {
       onNeedLogin()
       return
     }
