@@ -1,5 +1,6 @@
 "use client"
 
+import ThemeToggle from "@/components/toggle-mode"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,63 +12,66 @@ import {
   Bell,
   ChevronRight,
   Download,
-  Laptop,
   MapPin,
   Menu,
-  Moon,
   Navigation,
-  Sun,
   Users,
 } from "lucide-react"
-import { useTheme } from "next-themes"
 
 import Image from "next/image"
 import Link from "next/link"
 import React from "react"
 import { FiLogIn } from "react-icons/fi"
 
-function ThemeToggleDropdown() {
-  const { setTheme, theme } = useTheme()
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Alternar tema"
-        >
-          {theme === "dark" ? (
-            <Moon className="h-5 w-5" />
-          ) : theme === "light" ? (
-            <Sun className="h-5 w-5" />
-          ) : (
-            <Laptop className="h-5 w-5" />
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          <Sun className="mr-2 h-4 w-4" /> Claro{" "}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          <Moon className="mr-2 h-4 w-4" /> Escuro{" "}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          <Laptop className="mr-2 h-4 w-4" /> Sistema{" "}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
+const featuresSection = [
+  {
+    title: "Reporte Inteligente",
+    description:
+      "Obtenha relatórios detalhados sobre a sua cidade com apenas alguns cliques.",
+    icon: <Bell className="h-6 w-6 text-emerald-500" />,
+  },
+  {
+    title: "Mapa Interativo",
+    description:
+      "Visualize todos os problemas reportados em um mapa dinâmico, com filtros e ícones personalizados.",
+    icon: <MapPin className="h-6 w-6 text-emerald-500" />,
+  },
+  {
+    title: "Engajamento Comunitário",
+    description:
+      "Participe ativamente: vote nos problemas mais urgentes, comente, compartilhe ideias e motive seus vizinhos a também contribuir.",
+    icon: <Users className="h-6 w-6 text-emerald-500" />,
+  },
+  {
+    title: "Notificações em Tempo Real",
+    description:
+      "Receba atualizações sobre o andamento dos problemas reportados e fique por dentro das melhorias na sua região.",
+    icon: <Bell className="h-6 w-6 text-emerald-500" />,
+  },
+  {
+    title: "Acesso Rápido",
+    description:
+      "Acesse rapidamente as funcionalidades mais importantes e receba suporte em tempo real.",
+    icon: <Navigation className="h-6 w-6 text-emerald-500" />,
+  },
+  {
+    title: "Acompanhamento Visual",
+    description:
+      "Monitore o progresso dos problemas reportados com gráficos e visualizações interativas.",
+    icon: <MapPin className="h-6 w-6 text-emerald-500" />,
+  },
+]
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 fixed top-0 z-50 flex w-full flex-col items-center border-b backdrop-blur">
+    <div className="flex min-h-screen w-full flex-col bg-white dark:bg-slate-950">
+      <header className="bg-background/95 dark:bg-background/80 supports-[backdrop-filter]:bg-background/60 fixed top-0 z-50 flex w-full flex-col items-center border-b backdrop-blur">
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2">
             <MapPin className="h-6 w-6 text-emerald-500" />
-            <span className="text-xl font-bold">CityFix</span>
+            <span className="text-xl font-bold text-slate-900 dark:text-slate-100">
+              CityFix
+            </span>
           </div>
           <nav className="hidden gap-6 md:flex">
             <Link
@@ -105,7 +109,7 @@ export default function LandingPage() {
               </Button>
             </Link>
             <div className="flex items-center gap-2">
-              <ThemeToggleDropdown />
+              <ThemeToggle />
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -179,17 +183,19 @@ export default function LandingPage() {
       </header>
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative flex w-full flex-col items-center overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-slate-50 py-16 md:py-28 lg:py-36">
+        <section className="relative flex w-full flex-col items-center overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-slate-50 py-16 md:py-28 lg:py-36 dark:from-emerald-900 dark:via-slate-900 dark:to-slate-900">
           <div className="relative z-10 container px-4 md:px-6">
             <div className="grid min-h-[60vh] items-center justify-center gap-12 lg:grid-cols-2">
               <div className="mx-auto flex flex-col items-center justify-center space-y-8 text-center lg:items-start lg:text-left">
                 <div className="space-y-6">
-                  <h1 className="text-4xl font-extrabold tracking-tight text-emerald-700 drop-shadow-sm md:text-5xl xl:text-6xl">
+                  <h1 className="text-4xl font-extrabold tracking-tight text-emerald-700 drop-shadow-sm md:text-5xl xl:text-6xl dark:text-emerald-400">
                     Sua Cidade, Seu Poder de Transformar
                   </h1>
-                  <p className="max-w-xl text-lg font-medium text-slate-700 md:text-2xl">
+                  <p className="max-w-xl text-lg font-medium text-slate-700 md:text-2xl dark:text-slate-200">
                     O{" "}
-                    <span className="font-bold text-emerald-600">CityFix</span>{" "}
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                      CityFix
+                    </span>{" "}
                     conecta cidadãos e prefeituras para resolver problemas
                     urbanos de forma rápida, transparente e colaborativa.
                   </p>
@@ -234,117 +240,43 @@ export default function LandingPage() {
         {/* Features Section */}
         <section
           id="features"
-          className="flex w-full flex-col items-center bg-white py-16 md:py-28 lg:py-36"
+          className="flex w-full flex-col items-center bg-emerald-50 py-16 md:py-28 lg:py-36 dark:bg-slate-900"
         >
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h2 className="text-4xl font-extrabold tracking-tight text-emerald-700">
+                <h2 className="text-4xl font-extrabold tracking-tight text-emerald-700 dark:text-emerald-400">
                   Funcionalidades Poderosas
                 </h2>
-                <p className="text-muted-foreground max-w-[900px] md:text-xl/relaxed">
+                <p className="text-muted-foreground max-w-[900px] md:text-xl/relaxed dark:text-slate-300">
                   O CityFix oferece recursos inovadores para transformar a
                   gestão urbana e a participação cidadã.
                 </p>
               </div>
             </div>
             <div className="mt-16 grid gap-10 md:grid-cols-3">
-              <div className="flex flex-col items-center gap-6 rounded-3xl border border-emerald-100 bg-emerald-50 p-8 text-center shadow-lg transition hover:shadow-2xl">
-                <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-white">
-                  <MapPin className="h-10 w-10 text-emerald-500" />
+              {featuresSection.map((feature, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col items-center gap-6 rounded-3xl border-3 border-emerald-100 bg-emerald-50 p-8 text-center shadow-lg transition hover:shadow-2xl dark:border-slate-800 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800"
+                >
+                  <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-white dark:bg-slate-700">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-emerald-700 dark:text-emerald-400">
+                    {feature.title}
+                  </h3>
+                  <p className="text-base text-slate-700 dark:text-slate-200">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold text-emerald-700">
-                  Reporte Inteligente
-                </h3>
-                <p className="text-base text-slate-700">
-                  Registre problemas urbanos em segundos, com foto, localização
-                  e categoria. Simples, rápido e eficiente.
-                </p>
-              </div>
-              <div className="flex flex-col items-center gap-6 rounded-3xl border border-emerald-100 bg-emerald-50 p-8 text-center shadow-lg transition hover:shadow-2xl">
-                <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-white">
-                  <Navigation className="h-10 w-10 text-emerald-500" />
-                </div>
-                <h3 className="text-xl font-bold text-emerald-700">
-                  Mapa Interativo
-                </h3>
-                <p className="text-base text-slate-700">
-                  Visualize todos os problemas reportados em um mapa dinâmico,
-                  com filtros e ícones personalizados.
-                </p>
-              </div>
-              <div className="flex flex-col items-center gap-6 rounded-3xl border border-emerald-100 bg-emerald-50 p-8 text-center shadow-lg transition hover:shadow-2xl">
-                <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-white">
-                  <Users className="h-10 w-10 text-emerald-500" />
-                </div>
-                <h3 className="text-xl font-bold text-emerald-700">
-                  Engajamento Comunitário
-                </h3>
-                <p className="text-base text-slate-700">
-                  Vote, comente e colabore com vizinhos e poder público para
-                  priorizar e resolver os problemas da cidade.
-                </p>
-              </div>
-              <div className="flex flex-col items-center gap-6 rounded-3xl border border-emerald-100 bg-emerald-50 p-8 text-center shadow-lg transition hover:shadow-2xl">
-                <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-white">
-                  <Bell className="h-10 w-10 text-emerald-500" />
-                </div>
-                <h3 className="text-xl font-bold text-emerald-700">
-                  Notificações em Tempo Real
-                </h3>
-                <p className="text-base text-slate-700">
-                  Receba atualizações sobre o andamento dos problemas reportados
-                  e fique por dentro das melhorias na sua região.
-                </p>
-              </div>
-              <div className="flex flex-col items-center gap-6 rounded-3xl border border-emerald-100 bg-emerald-50 p-8 text-center shadow-lg transition hover:shadow-2xl">
-                <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-white">
-                  <svg
-                    className="h-10 w-10 text-emerald-500"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 2v20" />
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-emerald-700">
-                  Priorização Inteligente
-                </h3>
-                <p className="text-base text-slate-700">
-                  A comunidade ajuda a priorizar os problemas mais urgentes,
-                  tornando a gestão pública mais eficiente.
-                </p>
-              </div>
-              <div className="flex flex-col items-center gap-6 rounded-3xl border border-emerald-100 bg-emerald-50 p-8 text-center shadow-lg transition hover:shadow-2xl">
-                <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-white">
-                  <svg
-                    className="h-10 w-10 text-emerald-500"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M3 3v18h18" />
-                    <path d="m19 9-5 5-4-4-3 3" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-emerald-700">
-                  Acompanhamento Visual
-                </h3>
-                <p className="text-base text-slate-700">
-                  Monitore o progresso das soluções e veja como sua cidade
-                  evolui com a participação de todos.
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
         {/* Testimonials Section */}
-        <section className="flex w-full flex-col items-center bg-emerald-50 py-16 md:py-28 lg:py-36">
+        <section className="flex w-full flex-col items-center bg-slate-100 py-16 md:py-28 lg:py-36 dark:bg-slate-800">
           <div className="container px-4 md:px-6">
             <div className="mb-12 flex flex-col items-center justify-center space-y-4 text-center">
               <h2 className="text-4xl font-extrabold tracking-tight text-emerald-700">
@@ -356,7 +288,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="grid gap-10 md:grid-cols-3">
-              <div className="flex flex-col items-center rounded-2xl border border-emerald-100 bg-white p-8 text-center shadow-lg">
+              <div className="flex flex-col items-center rounded-2xl border border-emerald-100 bg-white p-8 text-center shadow-lg dark:border-slate-800 dark:bg-slate-900">
                 <Image
                   src="https://randomuser.me/api/portraits/men/32.jpg"
                   width={72}
@@ -364,16 +296,16 @@ export default function LandingPage() {
                   alt="Depoimento usuário 1"
                   className="mb-4 rounded-full"
                 />
-                <p className="text-lg text-slate-700 italic">
+                <p className="text-lg text-slate-700 italic dark:text-slate-200">
                   “Com o CityFix, consegui reportar um buraco na minha rua e em
                   poucos dias já estava resolvido. Nunca foi tão fácil ser
                   ouvido!”
                 </p>
-                <span className="mt-4 font-semibold text-emerald-700">
+                <span className="mt-4 font-semibold text-emerald-700 dark:text-emerald-400">
                   Carlos, morador de São Paulo
                 </span>
               </div>
-              <div className="flex flex-col items-center rounded-2xl border border-emerald-100 bg-white p-8 text-center shadow-lg">
+              <div className="flex flex-col items-center rounded-2xl border border-emerald-100 bg-white p-8 text-center shadow-lg dark:border-slate-800 dark:bg-slate-900">
                 <Image
                   src="https://randomuser.me/api/portraits/women/44.jpg"
                   width={72}
@@ -381,15 +313,15 @@ export default function LandingPage() {
                   alt="Depoimento usuária 2"
                   className="mb-4 rounded-full"
                 />
-                <p className="text-lg text-slate-700 italic">
+                <p className="text-lg text-slate-700 italic dark:text-slate-200">
                   “Acompanhar o status dos problemas e votar nas prioridades do
                   bairro me faz sentir parte da solução!”
                 </p>
-                <span className="mt-4 font-semibold text-emerald-700">
+                <span className="mt-4 font-semibold text-emerald-700 dark:text-emerald-400">
                   Juliana, líder comunitária
                 </span>
               </div>
-              <div className="flex flex-col items-center rounded-2xl border border-emerald-100 bg-white p-8 text-center shadow-lg">
+              <div className="flex flex-col items-center rounded-2xl border border-emerald-100 bg-white p-8 text-center shadow-lg dark:border-slate-800 dark:bg-slate-900">
                 <Image
                   src="https://randomuser.me/api/portraits/men/65.jpg"
                   width={72}
@@ -397,11 +329,11 @@ export default function LandingPage() {
                   alt="Depoimento gestor público"
                   className="mb-4 rounded-full"
                 />
-                <p className="text-lg text-slate-700 italic">
+                <p className="text-lg text-slate-700 italic dark:text-slate-200">
                   “O CityFix facilitou muito a gestão das demandas da cidade.
                   Agora priorizamos o que realmente importa para a população.”
                 </p>
-                <span className="mt-4 font-semibold text-emerald-700">
+                <span className="mt-4 font-semibold text-emerald-700 dark:text-emerald-400">
                   Roberto, gestor público
                 </span>
               </div>
@@ -410,7 +342,7 @@ export default function LandingPage() {
         </section>
 
         {/* Gráficos Antes/Depois Section */}
-        <section className="flex w-full flex-col items-center bg-white py-16 md:py-28 lg:py-36">
+        <section className="flex w-full flex-col items-center bg-white py-16 md:py-28 lg:py-36 dark:bg-slate-950">
           <div className="container px-4 md:px-6">
             <div className="mb-12 flex flex-col items-center justify-center space-y-4 text-center">
               <h2 className="text-4xl font-extrabold tracking-tight text-emerald-700">
@@ -422,7 +354,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="grid gap-10 md:grid-cols-2">
-              <div className="flex flex-col items-center rounded-2xl border border-emerald-100 bg-emerald-50 p-8 text-center shadow-lg">
+              <div className="flex flex-col items-center rounded-2xl border border-emerald-100 bg-emerald-50 p-8 text-center shadow-lg dark:border-slate-800 dark:bg-slate-900">
                 <h3 className="mb-4 text-xl font-bold text-emerald-700">
                   Antes do CityFix
                 </h3>
@@ -433,13 +365,13 @@ export default function LandingPage() {
                   alt="Gráfico antes do CityFix"
                   className="mb-4 rounded-lg object-cover"
                 />
-                <p className="text-base text-slate-700">
+                <p className="text-base text-slate-700 dark:text-slate-200">
                   Problemas demoravam semanas para serem reportados e
                   resolvidos. Falta de transparência e comunicação dificultava a
                   vida do cidadão.
                 </p>
               </div>
-              <div className="flex flex-col items-center rounded-2xl border border-emerald-100 bg-emerald-50 p-8 text-center shadow-lg">
+              <div className="flex flex-col items-center rounded-2xl border border-emerald-100 bg-emerald-50 p-8 text-center shadow-lg dark:border-slate-800 dark:bg-slate-900">
                 <h3 className="mb-4 text-xl font-bold text-emerald-700">
                   Depois do CityFix
                 </h3>
@@ -450,7 +382,7 @@ export default function LandingPage() {
                   alt="Gráfico depois do CityFix"
                   className="mb-4 rounded-lg object-cover"
                 />
-                <p className="text-base text-slate-700">
+                <p className="text-base text-slate-700 dark:text-slate-200">
                   Respostas rápidas, acompanhamento em tempo real e participação
                   ativa da população. A cidade se torna mais eficiente, limpa e
                   segura.
@@ -463,7 +395,7 @@ export default function LandingPage() {
         {/* Benefits Section */}
         <section
           id="benefits"
-          className="flex w-full flex-col items-center bg-slate-50 py-16 md:py-28 lg:py-36"
+          className="flex w-full flex-col items-center bg-slate-50 py-16 md:py-28 lg:py-36 dark:bg-slate-900"
         >
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -480,7 +412,7 @@ export default function LandingPage() {
             </div>
             <div className="mt-16 grid gap-10 md:grid-cols-2">
               {/* Card Cidadãos */}
-              <div className="flex flex-col items-center gap-6 rounded-3xl border border-emerald-100 bg-white p-8 text-center shadow-xl transition hover:shadow-2xl">
+              <div className="flex flex-col items-center gap-6 rounded-3xl border border-emerald-100 bg-white p-8 text-center shadow-xl transition hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900">
                 <div className="mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50">
                   <svg
                     className="h-12 w-12 text-emerald-500"
@@ -499,10 +431,10 @@ export default function LandingPage() {
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-emerald-700">
+                <h3 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
                   Para Cidadãos
                 </h3>
-                <ul className="list-none space-y-2 text-base text-slate-700">
+                <ul className="list-none space-y-2 text-base text-slate-700 dark:text-slate-200">
                   <li>
                     <span className="font-semibold text-emerald-600">
                       ✔ Reporte instantâneo:
@@ -534,7 +466,7 @@ export default function LandingPage() {
                 </ul>
               </div>
               {/* Card Funcionários Públicos */}
-              <div className="flex flex-col items-center gap-6 rounded-3xl border border-emerald-100 bg-white p-8 text-center shadow-xl transition hover:shadow-2xl">
+              <div className="flex flex-col items-center gap-6 rounded-3xl border border-emerald-100 bg-white p-8 text-center shadow-xl transition hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900">
                 <div className="mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50">
                   <svg
                     className="h-12 w-12 text-emerald-500"
@@ -554,10 +486,10 @@ export default function LandingPage() {
                     <path d="M8 21v-4a1 1 0 0 0-1-1H3" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-emerald-700">
+                <h3 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
                   Para Funcionários Públicos
                 </h3>
-                <ul className="list-none space-y-2 text-base text-slate-700">
+                <ul className="list-none space-y-2 text-base text-slate-700 dark:text-slate-200">
                   <li>
                     <span className="font-semibold text-emerald-600">
                       ✔ Gestão centralizada:
@@ -594,7 +526,7 @@ export default function LandingPage() {
         {/* Visual Showcase Section */}
         <section
           id="showcase"
-          className="flex w-full flex-col items-center py-12 md:py-24 lg:py-32"
+          className="flex w-full flex-col items-center bg-gradient-to-b from-white to-slate-50 py-12 md:py-24 lg:py-32 dark:bg-gradient-to-b dark:from-slate-950 dark:to-slate-900"
         >
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -613,7 +545,7 @@ export default function LandingPage() {
             </div>
             <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
               <div className="flex flex-col space-y-4">
-                <div className="bg-background overflow-hidden rounded-lg border shadow">
+                <div className="bg-background overflow-hidden rounded-lg border shadow dark:border-slate-800 dark:bg-slate-900">
                   <Image
                     src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80"
                     width={600}
@@ -622,10 +554,10 @@ export default function LandingPage() {
                     className="aspect-video w-full object-cover"
                   />
                 </div>
-                <h3 className="text-xl font-bold">
+                <h3 className="text-xl font-bold dark:text-emerald-400">
                   Reporte Problemas em Segundos
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground dark:text-slate-200">
                   Identificou um buraco, lâmpada queimada ou lixo acumulado? Com
                   o CityFix, você registra o problema em poucos cliques,
                   ajudando a prefeitura a agir mais rápido e tornando sua
@@ -633,7 +565,7 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="flex flex-col space-y-4">
-                <div className="bg-background overflow-hidden rounded-lg border shadow">
+                <div className="bg-background overflow-hidden rounded-lg border shadow dark:border-slate-800 dark:bg-slate-900">
                   <Image
                     src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
                     width={600}
@@ -642,17 +574,17 @@ export default function LandingPage() {
                     className="aspect-video w-full object-cover"
                   />
                 </div>
-                <h3 className="text-xl font-bold">
+                <h3 className="text-xl font-bold dark:text-emerald-400">
                   Mapa Interativo de Problemas
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground dark:text-slate-200">
                   Veja em tempo real os pontos críticos da cidade, acompanhe as
                   demandas do seu bairro e colabore indicando locais que
                   precisam de atenção. Transparência e participação para todos!
                 </p>
               </div>
               <div className="flex flex-col space-y-4">
-                <div className="bg-background overflow-hidden rounded-lg border shadow">
+                <div className="bg-background overflow-hidden rounded-lg border shadow dark:border-slate-800 dark:bg-slate-900">
                   <Image
                     src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
                     width={600}
@@ -661,17 +593,17 @@ export default function LandingPage() {
                     className="aspect-video w-full object-cover"
                   />
                 </div>
-                <h3 className="text-xl font-bold">
+                <h3 className="text-xl font-bold dark:text-emerald-400">
                   Acompanhe o Progresso das Soluções
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground dark:text-slate-200">
                   Receba notificações sobre cada etapa: do recebimento do seu
                   reporte até a solução. Sinta-se parte do processo de melhoria
                   e veja o impacto da sua participação na cidade.
                 </p>
               </div>
               <div className="flex flex-col space-y-4">
-                <div className="bg-background overflow-hidden rounded-lg border shadow">
+                <div className="bg-background overflow-hidden rounded-lg border shadow dark:border-slate-800 dark:bg-slate-900">
                   <Image
                     src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80"
                     width={600}
@@ -680,8 +612,10 @@ export default function LandingPage() {
                     className="aspect-video w-full object-cover"
                   />
                 </div>
-                <h3 className="text-xl font-bold">Engajamento Comunitário</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl font-bold dark:text-emerald-400">
+                  Engajamento Comunitário
+                </h3>
+                <p className="text-muted-foreground dark:text-slate-200">
                   Participe ativamente: vote nos problemas mais urgentes,
                   comente, compartilhe ideias e motive seus vizinhos a também
                   contribuir. Juntos, criamos uma cidade mais humana, conectada
@@ -695,7 +629,7 @@ export default function LandingPage() {
         {/* Call to Action Section */}
         <section
           id="download"
-          className="flex w-full flex-col items-center bg-emerald-500 py-12 text-white md:py-24 lg:py-32"
+          className="flex w-full flex-col items-center bg-emerald-500 py-12 text-white md:py-24 lg:py-32 dark:bg-gradient-to-r dark:from-emerald-700 dark:to-emerald-900"
         >
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -711,7 +645,7 @@ export default function LandingPage() {
               <div className="flex flex-col gap-3 pt-6 sm:flex-row">
                 <Link
                   href="/map"
-                  className="focus-visible:ring-ring inline-flex h-12 items-center justify-center rounded-md bg-white px-6 text-sm font-medium text-emerald-500 shadow transition-colors hover:bg-gray-100 focus-visible:ring-1 focus-visible:outline-none"
+                  className="focus-visible:ring-ring inline-flex h-12 items-center justify-center rounded-md bg-white px-6 text-sm font-medium text-emerald-500 shadow transition-colors hover:bg-gray-100 focus-visible:ring-1 focus-visible:outline-none dark:bg-slate-900 dark:text-emerald-400 dark:hover:bg-slate-800"
                 >
                   <FiLogIn className="mr-2 h-5 w-5" />
                   Entrar agora
@@ -722,7 +656,7 @@ export default function LandingPage() {
         </section>
       </main>
       {/* CityFix em Números Section */}
-      <section className="flex w-full flex-col items-center bg-white py-16 md:py-28 lg:py-36">
+      <section className="flex w-full flex-col items-center bg-slate-100 py-16 md:py-28 lg:py-36 dark:bg-slate-800">
         <div className="container px-4 md:px-6">
           <div className="mb-12 flex flex-col items-center justify-center space-y-4 text-center">
             <h2 className="text-4xl font-extrabold tracking-tight text-emerald-700">
@@ -736,30 +670,30 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="flex w-full flex-col items-center border-t py-6 md:py-0">
+      <footer className="flex w-full flex-col items-center border-t bg-white py-6 md:py-0 dark:border-slate-800 dark:bg-slate-900">
         <div className="container flex flex-col items-center justify-between gap-4 py-4 md:h-24 md:flex-row md:py-0">
           <div className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-emerald-500" />
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm dark:text-slate-300">
               © 2023 CityFix. Todos os direitos reservados.
             </p>
           </div>
           <div className="flex gap-4">
             <Link
               href="#"
-              className="text-muted-foreground text-sm hover:text-emerald-500"
+              className="text-muted-foreground text-sm hover:text-emerald-500 dark:text-slate-400 dark:hover:text-emerald-400"
             >
               Política de Privacidade
             </Link>
             <Link
               href="#"
-              className="text-muted-foreground text-sm hover:text-emerald-500"
+              className="text-muted-foreground text-sm hover:text-emerald-500 dark:text-slate-400 dark:hover:text-emerald-400"
             >
               Termos de Serviço
             </Link>
             <Link
               href="#"
-              className="text-muted-foreground text-sm hover:text-emerald-500"
+              className="text-muted-foreground text-sm hover:text-emerald-500 dark:text-slate-400 dark:hover:text-emerald-400"
             >
               Fale Conosco
             </Link>

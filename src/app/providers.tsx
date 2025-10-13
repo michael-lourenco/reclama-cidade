@@ -7,9 +7,15 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { SessionProvider } from "next-auth/react"
+import { useEffect, useState } from "react"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient()
+
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  if (!mounted) return null
 
   return (
     <SessionProvider>
@@ -20,7 +26,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster position="top-center" />
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              duration: 3000,
+              className: "max-w-md",
+            }}
+          />
           <CookieConsent />
           <SidebarProvider defaultOpen={false}>
             <AppSidebar />
