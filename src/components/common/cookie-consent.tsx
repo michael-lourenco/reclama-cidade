@@ -60,16 +60,8 @@ export default function CookieConsent() {
         .
       </p>
       <div className="mt-2 flex space-x-2 md:mt-0">
-        <Button
-          onClick={handleAccept}
-          variant="default"
-        >
-          Aceitar
-        </Button>
-        <Button
-          onClick={handleReject}
-          variant="outline"
-        >
+        <Button onClick={handleAccept}>Aceitar</Button>
+        <Button onClick={handleReject} variant="outline">
           Recusar
         </Button>
       </div>
