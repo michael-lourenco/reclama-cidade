@@ -1,3 +1,4 @@
+
 "use client"
 
 import type { Marker } from "@/components/marker/types/marker"
@@ -21,7 +22,7 @@ import {
 import {
   ProblemStatus,
   updateMarkerStatus,
-} from "@/services/firebase/FirebaseService"
+} from "@/services/supabase/SupabaseService"
 import {
   ChevronDown,
   ChevronUp,
@@ -37,13 +38,22 @@ interface RecentProblemsTableProps {
   markers: Marker[]
 }
 
+const convertToDate = (timestamp: any): Date => {
+  if (timestamp instanceof Date) {
+    return timestamp
+  }
+  if (timestamp && typeof timestamp === "object" && "seconds" in timestamp) {
+    return new Date(timestamp.seconds * 1000)
+  }
+  return new Date(timestamp)
+}
+
 export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
   const [sortField, setSortField] = useState<keyof Marker>("createdAt")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
 
-  // Filtrar marcadores com base no termo de pesquisa
   const filteredMarkers = markers.filter(
     (marker) =>
       marker.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -52,17 +62,10 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
         marker.currentStatus.toLowerCase().includes(searchTerm.toLowerCase())),
   )
 
-  // Ordenar marcadores
   const sortedMarkers = [...filteredMarkers].sort((a, b) => {
     if (sortField === "createdAt") {
-      const dateA =
-        a.createdAt instanceof Date
-          ? a.createdAt
-          : new Date(a.createdAt.toDate())
-      const dateB =
-        b.createdAt instanceof Date
-          ? b.createdAt
-          : new Date(b.createdAt.toDate())
+      const dateA = convertToDate(a.createdAt)
+      const dateB = convertToDate(b.createdAt)
 
       return sortDirection === "asc"
         ? dateA.getTime() - dateB.getTime()
@@ -77,7 +80,6 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
       : valueB.localeCompare(valueA)
   })
 
-  // Alternar a direção da ordenação
   const toggleSort = (field: keyof Marker) => {
     if (field === sortField) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc")
@@ -87,7 +89,6 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
     }
   }
 
-  // Renderizar ícone de ordenação
   const renderSortIcon = (field: keyof Marker) => {
     if (field !== sortField) return null
 
@@ -98,11 +99,10 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
     )
   }
 
-  // Formatar data
   const formatDate = (date: Date | any) => {
     if (!date) return "N/A"
 
-    const d = date instanceof Date ? date : new Date(date.toDate())
+    const d = convertToDate(date)
     return d.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
@@ -112,7 +112,6 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
     })
   }
 
-  // Obter cor do status
   const getStatusColor = (status: string) => {
     switch (status) {
       case ProblemStatus.REPORTED:
@@ -134,14 +133,12 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
     }
   }
 
-  // Atualizar status do problema
   const handleStatusUpdate = async (
     markerId: string,
     newStatus: ProblemStatus,
   ) => {
     try {
-      // Assumindo que temos o email do usuário atual
-      const userEmail = "admin@example.com" // Substituir pelo email real do usuário logado
+      const userEmail = "admin@example.com"
 
       await updateMarkerStatus(
         markerId,
@@ -150,7 +147,6 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
         userEmail,
       )
 
-      // Recarregar a página para atualizar os dados
       router.refresh()
     } catch (error) {
       console.error("Erro ao atualizar status:", error)
@@ -243,7 +239,6 @@ export function RecentProblemsTable({ markers }: RecentProblemsTableProps) {
                           Editar
                         </DropdownMenuItem>
 
-                        {/* Opções de status */}
                         {marker.currentStatus !==
                           ProblemStatus.UNDER_ANALYSIS && (
                           <DropdownMenuItem

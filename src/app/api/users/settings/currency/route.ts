@@ -1,31 +1,27 @@
-// app/api/users/settings/currency/route.ts
 
 import { NextResponse } from "next/server";
-import { dbFirestore, updateUserCurrency } from "@/services/firebase/FirebaseService";
-import { verify } from "jsonwebtoken";
-import { validateAuth, isAdmin } from "@/lib/auth/api-auth";
+import { updateUserCurrency } from "@/services/supabase/SupabaseService";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 
-// PUT - Atualizar moeda do usuário
 export async function PUT(request: Request) {
   try {
-    // Validar autenticação
-    const auth = await validateAuth(request);
-    if (!auth.valid) {
-      return NextResponse.json({ error: auth.error }, { status: 401 });
+    const supabase = createRouteHandlerClient({ cookies });
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Obter dados do corpo da requisição
     const { currency } = await request.json();
     
-    // Verificar se a moeda foi fornecida
     if (!currency || !currency.value) {
       return NextResponse.json({ 
         error: 'Dados incompletos. Objeto currency com propriedade value é obrigatório' 
       }, { status: 400 });
     }
     
-    // Atualizar moeda do usuário
-    await updateUserCurrency(auth.user.email, currency, dbFirestore);
+    await updateUserCurrency(session.user.email!, currency.value);
     
     return NextResponse.json({
       success: true,

@@ -1,6 +1,6 @@
 import type { Marker } from "@/components/marker/types/marker"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ProblemStatus } from "@/services/firebase/FirebaseService"
+import { ProblemStatus } from "@/services/supabase/SupabaseService"
 import { AlertTriangle, CheckCircle, Clock, Users } from "lucide-react"
 
 interface DashboardStatsProps {
@@ -8,33 +8,27 @@ interface DashboardStatsProps {
 }
 
 export function DashboardStats({ markers }: DashboardStatsProps) {
-  // Total de problemas reportados
   const totalProblems = markers.length
 
-  // Problemas resolvidos
   const resolvedProblems = markers.filter(
     (marker) => marker.currentStatus === ProblemStatus.RESOLVED,
   ).length
 
-  // Problemas em andamento
   const inProgressProblems = markers.filter(
     (marker) => marker.currentStatus === ProblemStatus.IN_PROGRESS,
   ).length
 
-  // Problemas pendentes (reportados ou em análise)
   const pendingProblems = markers.filter(
     (marker) =>
       marker.currentStatus === ProblemStatus.REPORTED ||
       marker.currentStatus === ProblemStatus.UNDER_ANALYSIS,
   ).length
 
-  // Total de likes
   const totalLikes = markers.reduce(
     (sum, marker) => sum + (marker.likedBy?.length || 0),
     0,
   )
 
-  // Usuários únicos que reportaram problemas
   const uniqueUsers = new Set(markers.map((marker) => marker.userEmail)).size
 
   return (

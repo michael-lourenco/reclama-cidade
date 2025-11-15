@@ -1,7 +1,5 @@
-// app/api/markers/remove-by-email/route.ts
-
 import { NextResponse } from "next/server";
-import { dbFirestore, removeMarkersByEmail } from "@/services/firebase/FirebaseService";
+import { removeMarkersByEmail } from "@/services/supabase/SupabaseService";
 import { verify } from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || process.env.NEXT_PUBLIC_NEXTAUTH_SECRET || "seu_segredo_temporario";
@@ -54,7 +52,7 @@ export async function DELETE(request: Request) {
         }, { status: 403 });
       }
       
-      const result = await removeMarkersByEmail(dbFirestore, targetEmail);
+      const result = await removeMarkersByEmail(targetEmail);
       
       return NextResponse.json({
         success: true,

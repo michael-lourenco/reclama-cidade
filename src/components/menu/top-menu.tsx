@@ -1,8 +1,10 @@
 "use client"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { AlertTriangle, Cloud, Mail, Menu, X } from "lucide-react"
 import Link from "next/link"
 import { SwitchTheme } from "../common/switch-theme"
+import { LoginModal } from "../common/login-modal"
 
 interface TopMenuProps {
   menuOpen: boolean
@@ -33,6 +35,8 @@ const listMenu = [
 ]
 
 const TopMenu = ({ menuOpen, toggleMenu }: TopMenuProps) => {
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+
   return (
     <>
       {/* Toggle Menu Button */}
@@ -78,10 +82,23 @@ const TopMenu = ({ menuOpen, toggleMenu }: TopMenuProps) => {
               <li className="p-2">
                 <SwitchTheme />
               </li>
+              <li className="p-2">
+                <Button
+                  onClick={() => setIsLoginModalOpen(true)}
+                  className="w-full"
+                >
+                  Login
+                </Button>
+              </li>
             </ul>
           </div>
         </div>
       )}
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </>
   )
 }

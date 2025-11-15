@@ -1,6 +1,5 @@
-
 import { NextResponse } from "next/server";
-import { dbFirestore, removeAnonymousMarkers } from "@/services/firebase/FirebaseService";
+import { removeAnonymousMarkers } from "@/services/supabase/SupabaseService";
 import { verify } from "jsonwebtoken";
 
 
@@ -44,7 +43,7 @@ export async function DELETE(request: Request) {
         }, { status: 403 });
       }
       
-      const result = await removeAnonymousMarkers(dbFirestore);
+      const result = await removeAnonymousMarkers();
       
       return NextResponse.json({
         success: true,

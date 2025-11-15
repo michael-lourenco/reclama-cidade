@@ -1,7 +1,7 @@
 "use client"
 
 import type { Marker } from "@/components/marker/types/marker"
-import { ProblemStatus } from "@/services/firebase/FirebaseService"
+import { ProblemStatus } from "@/services/supabase/SupabaseService"
 import { useEffect, useState } from "react"
 import { 
   BarChart, 
@@ -29,7 +29,6 @@ export function StatusTransitionChart({ markers }: StatusTransitionChartProps) {
   const [data, setData] = useState<StatusNode[]>([])
   
   useEffect(() => {
-    // Definir cores para cada status
     const colors = {
       [ProblemStatus.REPORTED]: "#8884d8",
       [ProblemStatus.UNDER_ANALYSIS]: "#83a6ed",

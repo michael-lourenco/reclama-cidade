@@ -1,3 +1,4 @@
+
 "use client"
 
 import { AppSidebar } from "@/components/common/app-sidebar"
@@ -6,7 +7,6 @@ import { ThemeProvider } from "@/components/common/theme-provider"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { SessionProvider } from "next-auth/react"
 import { useEffect, useState } from "react"
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -18,7 +18,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
   if (!mounted) return null
 
   return (
-    <SessionProvider>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider
           attribute="class"
@@ -40,6 +39,5 @@ export function Providers({ children }: { children: React.ReactNode }) {
           </SidebarProvider>
         </ThemeProvider>
       </QueryClientProvider>
-    </SessionProvider>
   )
 }

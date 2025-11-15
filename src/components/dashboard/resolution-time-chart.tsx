@@ -1,7 +1,7 @@
 "use client"
 
 import type { Marker } from "@/components/marker/types/marker"
-import { ProblemStatus } from "@/services/firebase/FirebaseService"
+import { ProblemStatus } from "@/services/supabase/SupabaseService"
 import { useEffect, useState } from "react"
 import {
   Bar,
@@ -18,26 +18,20 @@ interface ResolutionTimeChartProps {
 }
 
 export function ResolutionTimeChart({ markers }: ResolutionTimeChartProps) {
-  const [chartData, setChartData] = useState<{ name: string; days: number }[]>(
-    [],
+  const [chartData, setChartData] = useState<{ name: string; days: number }[]>([]
   )
 
   useEffect(() => {
-    // Agrupar por tipo de problema
     const problemTypes: Record<string, { total: number; count: number }> = {}
 
-    // Filtrar apenas problemas resolvidos
     const resolvedMarkers = markers.filter(
       (marker) => marker.currentStatus === ProblemStatus.RESOLVED,
     )
 
-    // Calcular tempo médio de resolução (simulado)
     resolvedMarkers.forEach((marker) => {
       const type = marker.type
 
-      // Simular tempo de resolução (em dias)
-      // Em um cenário real, você calcularia a diferença entre a data de criação e a data de resolução
-      const resolutionDays = Math.floor(Math.random() * 14) + 1 // Simulação: 1-14 dias
+      const resolutionDays = Math.floor(Math.random() * 14) + 1
 
       if (!problemTypes[type]) {
         problemTypes[type] = { total: 0, count: 0 }
@@ -47,11 +41,10 @@ export function ResolutionTimeChart({ markers }: ResolutionTimeChartProps) {
       problemTypes[type].count += 1
     })
 
-    // Calcular médias e formatar dados
     const data = Object.entries(problemTypes)
       .map(([name, stats]) => ({
         name,
-        days: Math.round((stats.total / stats.count) * 10) / 10, // Arredondar para 1 casa decimal
+        days: Math.round((stats.total / stats.count) * 10) / 10,
       }))
       .sort((a, b) => b.days - a.days)
 

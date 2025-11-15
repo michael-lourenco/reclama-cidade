@@ -18,7 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { dbFirestore, getMarkers } from "@/services/firebase/FirebaseService"
+import { getMarkers } from "@/services/supabase/SupabaseService"
 import { useEffect, useState } from "react"
 
 export default function DashboardContent() {
@@ -29,14 +29,12 @@ export default function DashboardContent() {
     const fetchMarkers = async () => {
       try {
         setIsLoading(true)
-        const markersData = await getMarkers(dbFirestore)
+        const markersData = await getMarkers()
 
-        // Convert Firestore timestamps to Date objects
+        // Convert timestamps to Date objects
         const processedMarkers = markersData.map((marker: any) => ({
           ...marker,
-          createdAt: marker.createdAt?.toDate
-            ? marker.createdAt.toDate()
-            : new Date(marker.createdAt),
+          createdAt: new Date(marker.createdAt),
         }))
 
         setMarkers(processedMarkers)
@@ -49,7 +47,6 @@ export default function DashboardContent() {
 
     fetchMarkers()
 
-    // Set up a refresh interval (every 5 minutes)
     const intervalId = setInterval(fetchMarkers, 5 * 60 * 1000)
 
     return () => clearInterval(intervalId)

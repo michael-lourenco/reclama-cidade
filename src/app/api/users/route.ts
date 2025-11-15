@@ -1,20 +1,19 @@
-// app/api/users/route.ts
 
 import { NextResponse } from "next/server";
-import { dbFirestore, fetchUserData } from "@/services/firebase/FirebaseService";
-import { verify } from "jsonwebtoken";
-import { validateAuth, isAdmin } from "@/lib/auth/api-auth";
+import { fetchUserData } from "@/services/supabase/SupabaseService";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 
-// GET - Obter dados do usuário atual
 export async function GET(request: Request) {
   try {
-    // Validar autenticação
-    const auth = await validateAuth(request);
-    if (!auth.valid) {
-      return NextResponse.json({ error: auth.error }, { status: 401 });
+    const supabase = createRouteHandlerClient({ cookies });
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userData = await fetchUserData(dbFirestore, auth.user.email);
+    const userData = await fetchUserData(session.user.email!);
     
     if (!userData) {
       return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 });

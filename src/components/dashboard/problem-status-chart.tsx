@@ -1,7 +1,7 @@
 "use client"
 
 import type { Marker } from "@/components/marker/types/marker"
-import { ProblemStatus } from "@/services/firebase/FirebaseService"
+import { ProblemStatus } from "@/services/supabase/SupabaseService"
 import { useEffect, useState } from "react"
 import {
   Cell,
@@ -17,8 +17,7 @@ interface ProblemStatusChartProps {
 }
 
 export function ProblemStatusChart({ markers }: ProblemStatusChartProps) {
-  const [chartData, setChartData] = useState<{ name: string; value: number }[]>(
-    [],
+  const [chartData, setChartData] = useState<{ name: string; value: number }[]>([]
   )
 
   const formatPercent = (value: unknown): string => {
@@ -27,7 +26,6 @@ export function ProblemStatusChart({ markers }: ProblemStatusChartProps) {
   }
 
   useEffect(() => {
-    // Contagem de status
     const statusCounts: Record<string, number> = {}
 
     markers.forEach((marker) => {
@@ -35,7 +33,6 @@ export function ProblemStatusChart({ markers }: ProblemStatusChartProps) {
       statusCounts[status] = (statusCounts[status] || 0) + 1
     })
 
-    // Converter para o formato do gráfico
     const data = Object.entries(statusCounts).map(([name, value]) => ({
       name,
       value,
@@ -44,7 +41,6 @@ export function ProblemStatusChart({ markers }: ProblemStatusChartProps) {
     setChartData(data)
   }, [markers])
 
-  // Cores para cada status
   const COLORS = {
     [ProblemStatus.REPORTED]: "#ff8c00",
     [ProblemStatus.UNDER_ANALYSIS]: "#8884d8",

@@ -1,24 +1,20 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
-import { UserData } from "@/services/auth/NextAuthenticationService"
+import { User } from "@supabase/supabase-js"
 import React, { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 interface UserStatisticsProps {
-  user: UserData | null
-  handleLogin: () => void
-  handleLogout: () => void
+  user: User | null
 }
 
 export const UserStatistics: React.FC<UserStatisticsProps> = ({ user }) => {
-  const localStorageUser =
-    localStorage.getItem("user") != null ? localStorage.getItem("user") : {}
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
   useEffect(() => {
-    if (user?.photoURL) {
+    if (user?.user_metadata.avatar_url) {
       try {
-        const cleanPhotoUrl = user.photoURL.split("=")[0]
+        const cleanPhotoUrl = user.user_metadata.avatar_url.split("=")[0]
         setAvatarUrl(`${cleanPhotoUrl}=s150`)
       } catch (error) {
         toast.error("Erro ao carregar avatar do usuário.")
@@ -31,7 +27,7 @@ export const UserStatistics: React.FC<UserStatisticsProps> = ({ user }) => {
 
   return (
     <>
-      {user || (localStorageUser && localStorage.getItem("user") != null) ? (
+      {user && (
         <div className="bg-background rounded-xl p-6 shadow-none">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
             <Card className="bg-background border-none md:col-span-1">
@@ -44,13 +40,13 @@ export const UserStatistics: React.FC<UserStatisticsProps> = ({ user }) => {
                       className="object-cover"
                     />
                     <AvatarFallback className="bg-background">
-                      {user?.displayName?.charAt(0) || "MP"}
+                      {user?.user_metadata.name?.charAt(0) || "MP"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="bg-chart-2 border-background absolute right-0 -bottom-2 h-4 w-4 rounded-full border-2"></div>
                 </div>
                 <CardTitle className="text-primary mt-4 text-xl">
-                  {user?.displayName}
+                  {user?.user_metadata.name}
                 </CardTitle>
                 <p className="text-primary text-sm">User Profile</p>
               </CardHeader>
@@ -78,8 +74,6 @@ export const UserStatistics: React.FC<UserStatisticsProps> = ({ user }) => {
             </div>
           </div>
         </div>
-      ) : (
-        <></>
       )}
     </>
   )

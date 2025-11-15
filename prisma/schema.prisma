@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      =  "postgresql://postgres.zzygygsgafycqxhyfvmr:MrCh3aTs234260r@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+}
+
+model Marker {
+  id            String         @id @default(uuid())
+  lat           Float
+  lng           Float
+  type          String
+  createdAt     DateTime       @default(now())
+  userEmail     String
+  currentStatus ProblemStatus  @default(REPORTED)
+  likedBy       String[]
+  resolvedBy    String[]
+  User          User           @relation(fields: [userEmail], references: [email])
+  statusChanges StatusChange[]
+}
+
+model StatusChange {
+  id        String        @id @default(uuid())
+  markerId  String
+  status    ProblemStatus
+  timestamp DateTime      @default(now())
+  comment   String?
+  updatedBy String
+  marker    Marker        @relation(fields: [markerId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                String  @id
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  User              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  Account       Account[]
+  Marker        Marker[]
+  Session       Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum ProblemStatus {
+  REPORTED
+  UNDER_ANALYSIS
+  VERIFIED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  REOPENED
+}

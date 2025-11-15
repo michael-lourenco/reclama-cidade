@@ -1,19 +1,20 @@
 import { NextResponse } from "next/server"
-import { dbFirestore } from "@/services/firebase/FirebaseService"
-import { verify } from "jsonwebtoken"
-import { updateUserCredits } from "@/services/firebase/FirebaseService" // Make sure this import is correct
-import { validateAuth, isAdmin } from "@/lib/auth/api-auth"
+import { updateUserCredits } from "@/services/supabase/SupabaseService"
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
+import { cookies } from "next/headers"
+
+const ADMIN_EMAILS = ['admin@exemplo.com', 'kontempler@gmail.com'];
 
 export async function PUT(request: Request) {
   try {
-    // Validar autenticação
-    const auth = await validateAuth(request)
-    if (!auth.valid) {
-      return NextResponse.json({ error: auth.error }, { status: 401 })
+    const supabase = createRouteHandlerClient({ cookies });
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Verificar se é administrador
-    if (!isAdmin(auth.user.email)) {
+    if (!ADMIN_EMAILS.includes(session.user.email!)) {
       return NextResponse.json(
         {
           error: "Permissão negada: Apenas administradores podem atualizar créditos",
@@ -22,10 +23,8 @@ export async function PUT(request: Request) {
       )
     }
 
-    // Obter dados do corpo da requisição
     const { email, credits } = await request.json()
 
-    // Verificar se os dados necessários foram fornecidos
     if (!email || credits === undefined) {
       return NextResponse.json(
         {
@@ -35,8 +34,7 @@ export async function PUT(request: Request) {
       )
     }
 
-    // Atualizar créditos do usuário - note the correct parameter order
-    await updateUserCredits(email, credits, dbFirestore)
+    await updateUserCredits(email, credits)
 
     return NextResponse.json({
       success: true,

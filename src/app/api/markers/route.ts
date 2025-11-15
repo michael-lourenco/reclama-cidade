@@ -1,14 +1,12 @@
-// app/api/markers/route.ts
-
 import { NextResponse } from "next/server";
-import { dbFirestore, addMarker, getMarkers, ProblemStatus, addStatusChange } from "@/services/firebase/FirebaseService";
+import { addMarker, getMarkers, ProblemStatus, addStatusChange } from "@/services/supabase/SupabaseService";
 import type { Marker } from "@/components/marker/types/marker";
-import { validateAuth } from "@/lib/auth/api-auth";
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
-// GET - Obter todos os marcadores
 export async function GET() {
   try {
-    const markers = await getMarkers(dbFirestore);
+    const markers = await getMarkers();
     return NextResponse.json(markers);
   } catch (error) {
     console.error("Erro ao obter marcadores:", error);
@@ -19,13 +17,13 @@ export async function GET() {
   }
 }
 
-// POST - Adicionar um novo marcador
 export async function POST(request: Request) {
   try {
+    const supabase = createRouteHandlerClient({ cookies });
+    const { data: { session } } = await supabase.auth.getSession();
 
-    const auth = await validateAuth(request);
-    if (!auth.valid) {
-      return NextResponse.json({ error: auth.error }, { status: 401 });
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const markerData = await request.json() as Marker;
@@ -36,7 +34,7 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
     
-    markerData.userEmail = auth.user.email;
+    markerData.userEmail = session.user.email!;
     
     markerData.createdAt = new Date();
     
@@ -45,13 +43,13 @@ export async function POST(request: Request) {
     
     markerData.currentStatus = ProblemStatus.REPORTED;
     
-    await addMarker(dbFirestore, markerData);
+    await addMarker(markerData);
     
     await addStatusChange(
       markerData.id,
       ProblemStatus.REPORTED,
       "Problema reportado inicialmente",
-      auth.user.email
+      session.user.email!
     );
     
     return NextResponse.json({
